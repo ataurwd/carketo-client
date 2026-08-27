@@ -1,20 +1,24 @@
 export type ListingType = 'sale' | 'rent' | 'both';
 export type CarCondition = 'new' | 'used' | 'certified';
-export type CarStatus = 'draft' | 'pending' | 'published' | 'rejected' | 'sold' | 'archived';
+export type CarStatus = 'draft' | 'pending' | 'published' | 'rejected' | 'sold' | 'rented' | 'maintenance' | 'archived';
 
 export interface ICarSpecs {
   doors: number;
   passengers: number;
-  transmission: 'Automatic' | 'Manual' | 'Semi-Automatic';
+  transmission: 'Automatic' | 'Manual' | 'Dual-Clutch' | 'Semi-Automatic' | string;
   age?: number;
-  year: number;
+  year?: number;
   luggage: number;
   airCondition: boolean;
   mileage: number;
   fuelType: string;
   bodyType: string;
   engineSize?: string;
+  engineCapacity?: string;
+  horsepower?: number;
   horsePower?: number;
+  acceleration0to100?: number;
+  topSpeed?: number;
 }
 
 export interface ICar {
@@ -25,11 +29,12 @@ export interface ICar {
   brand: string;
   model: string;
   year: number;
-  condition: CarCondition;
+  condition?: CarCondition;
   listingType: ListingType;
   price?: number;
   salePrice?: number;
   rentalPrice?: number;
+  rentalDeposit?: number;
   location: string;
   description: string;
   specs: ICarSpecs;
@@ -38,7 +43,9 @@ export interface ICar {
   images: string[];
   coverImage: string;
   status: CarStatus;
-  provider: {
+  rating?: number;
+  totalReviews?: number;
+  provider?: {
     id: string;
     name: string;
     avatar?: string;
@@ -46,8 +53,9 @@ export interface ICar {
     totalReviews: number;
     phone?: string;
   };
-  createdAt: string;
-  updatedAt: string;
+  providerId?: any;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface ICarFilters {
