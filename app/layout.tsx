@@ -6,7 +6,7 @@ import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 
 export const metadata: Metadata = {
-  title: 'NOVARIDE | Luxury & Everyday Car Rental and Marketplace',
+  title: 'CARKETO | Luxury & Everyday Car Rental and Marketplace',
   description:
     'Experience seamless car rental and direct car purchasing. Verified vehicle condition, instant bookings, transparent pricing, and 24/7 roadside assistance.',
 };

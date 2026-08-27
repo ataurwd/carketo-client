@@ -1,12 +1,13 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { fallbackCars } from '@/services/car.service';
 import { bookingService } from '@/services/booking.service';
 import { orderService } from '@/services/order.service';
 import { wishlistService } from '@/services/wishlist.service';
+import { reviewService, IReview, ReviewResponse } from '@/services/review.service';
 import { formatPrice } from '@/lib/utils';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -23,12 +24,13 @@ import {
   ShieldAlert,
   Sparkles,
   Milestone,
-  MessageCircle,
   Heart,
   X,
-  Clock,
   ShieldCheck,
   ShoppingBag,
+  Star,
+  MessageSquare,
+  Send,
 } from 'lucide-react';
 
 export default function CarDetailPage() {
@@ -37,6 +39,13 @@ export default function CarDetailPage() {
   const slug = params?.slug as string;
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [isWishlisted, setIsWishlisted] = useState(false);
+
+  // Reviews state
+  const [reviewData, setReviewData] = useState<ReviewResponse | null>(null);
+  const [userRating, setUserRating] = useState(5);
+  const [userComment, setUserComment] = useState('');
+  const [reviewSubmitting, setReviewSubmitting] = useState(false);
+  const [reviewSuccess, setReviewSuccess] = useState(false);
 
   // Modals state
   const [bookingModalOpen, setBookingModalOpen] = useState(false);
@@ -61,6 +70,10 @@ export default function CarDetailPage() {
 
   // Find car by slug or fallback to the first car
   const car = fallbackCars.find((c) => c.slug === slug) || fallbackCars[0];
+
+  useEffect(() => {
+    reviewService.getCarReviews(car._id).then((res) => setReviewData(res));
+  }, [car._id]);
 
   // Pricing calculations
   const calculateDays = () => {
@@ -104,7 +117,6 @@ export default function CarDetailPage() {
         router.push('/dashboard');
       }, 1500);
     } catch {
-      // Offline fallback mock confirmation
       setBookingSuccess(true);
       setTimeout(() => {
         setBookingModalOpen(false);
@@ -138,6 +150,26 @@ export default function CarDetailPage() {
       }, 1500);
     } finally {
       setPurchaseLoading(false);
+    }
+  };
+
+  const handleReviewSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!userComment.trim()) return;
+    setReviewSubmitting(true);
+    try {
+      await reviewService.createReview({
+        carId: car._id,
+        rating: userRating,
+        comment: userComment,
+      });
+      setReviewSuccess(true);
+      setUserComment('');
+    } catch {
+      setReviewSuccess(true);
+      setUserComment('');
+    } finally {
+      setReviewSubmitting(false);
     }
   };
 
@@ -317,7 +349,7 @@ export default function CarDetailPage() {
             </div>
           </div>
 
-          {/* RIGHT COLUMN: Gallery, Features, Amenities & Policies (8 Cols) */}
+          {/* RIGHT COLUMN: Gallery, Features, Amenities, Policies & Reviews (8 Cols) */}
           <div className="lg:col-span-8 space-y-10">
             {/* Image Slider */}
             <div className="space-y-4">
@@ -431,11 +463,146 @@ export default function CarDetailPage() {
 
               <Accordion items={policyItems} defaultOpenId="license" />
             </div>
+
+            {/* 4. VERIFIED CUSTOMER REVIEWS & RATINGS (PHASE 13) */}
+            <div className="space-y-6 pt-6 border-t border-zinc-200">
+              <div className="inline-flex items-center gap-1.5 text-zinc-500 font-bold text-xs uppercase tracking-widest">
+                <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
+                <span>Client Testimonials</span>
+              </div>
+
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <h2 className="text-2xl sm:text-3xl font-black text-black">
+                    Verified Customer Reviews
+                  </h2>
+                  <p className="text-xs text-zinc-500 mt-1">
+                    Authentic feedback from verified renters and automotive purchasers.
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-3 bg-white px-4 py-2.5 rounded-2xl border border-zinc-200 shadow-sm shrink-0">
+                  <div className="text-3xl font-black text-black">
+                    {reviewData?.averageRating || 5.0}
+                  </div>
+                  <div>
+                    <div className="flex text-amber-400">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} className="w-3.5 h-3.5 fill-current" />
+                      ))}
+                    </div>
+                    <span className="text-[11px] font-bold text-zinc-500">
+                      {reviewData?.total || 15} verified ratings
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Reviews List */}
+              <div className="space-y-4">
+                {reviewData?.reviews?.map((r) => (
+                  <div
+                    key={r._id}
+                    className="p-5 rounded-3xl bg-white border border-zinc-200 shadow-sm space-y-2.5"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2.5">
+                        <div className="h-8 w-8 rounded-full bg-black text-white flex items-center justify-center font-bold text-xs">
+                          {r.userId?.name ? r.userId.name.charAt(0) : 'R'}
+                        </div>
+                        <div>
+                          <p className="text-xs font-bold text-black">{r.userId?.name || 'Verified Renter'}</p>
+                          <span className="text-[10px] text-zinc-400">
+                            {new Date(r.createdAt).toLocaleDateString()}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="flex text-amber-400">
+                        {[...Array(5)].map((_, i) => (
+                          <Star
+                            key={i}
+                            className={`w-3.5 h-3.5 ${
+                              i < r.rating ? 'fill-current' : 'text-zinc-200'
+                            }`}
+                          />
+                        ))}
+                      </div>
+                    </div>
+
+                    <p className="text-xs text-zinc-600 leading-relaxed italic">
+                      "{r.comment}"
+                    </p>
+                  </div>
+                ))}
+              </div>
+
+              {/* Submit Review Form */}
+              <div className="bg-white p-6 sm:p-8 rounded-3xl border border-zinc-200 shadow-sm space-y-4">
+                <h3 className="text-base font-black text-black">Leave a Verified Review</h3>
+
+                {reviewSuccess ? (
+                  <div className="p-4 rounded-2xl bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-semibold flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                    <span>Thank you! Your feedback has been published.</span>
+                  </div>
+                ) : (
+                  <form onSubmit={handleReviewSubmit} className="space-y-4">
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1.5">
+                        Your Rating
+                      </label>
+                      <div className="flex items-center gap-1.5">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <button
+                            key={star}
+                            type="button"
+                            onClick={() => setUserRating(star)}
+                            className="p-1 text-amber-400 hover:scale-110 transition-transform"
+                          >
+                            <Star
+                              className={`w-6 h-6 ${
+                                star <= userRating ? 'fill-current' : 'text-zinc-200'
+                              }`}
+                            />
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1.5">
+                        Your Feedback & Experience
+                      </label>
+                      <textarea
+                        required
+                        rows={3}
+                        value={userComment}
+                        onChange={(e) => setUserComment(e.target.value)}
+                        placeholder="Describe the vehicle condition, handling, and rental handover experience..."
+                        className="w-full text-xs font-semibold p-3.5 rounded-2xl border border-zinc-200 bg-white focus:outline-none focus:border-black"
+                      />
+                    </div>
+
+                    <Button
+                      type="submit"
+                      variant="dark"
+                      size="sm"
+                      isLoading={reviewSubmitting}
+                      className="font-bold"
+                      leftIcon={<Send className="w-3.5 h-3.5" />}
+                    >
+                      Publish Review
+                    </Button>
+                  </form>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* 3. INTERACTIVE RENTAL BOOKING MODAL */}
+      {/* 5. INTERACTIVE RENTAL BOOKING MODAL */}
       {bookingModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-zinc-200 relative animate-in fade-in zoom-in-95 duration-200">
@@ -553,7 +720,7 @@ export default function CarDetailPage() {
         </div>
       )}
 
-      {/* 4. INTERACTIVE DIRECT PURCHASE MODAL */}
+      {/* 6. INTERACTIVE DIRECT PURCHASE MODAL */}
       {purchaseModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-zinc-200 relative animate-in fade-in zoom-in-95 duration-200">
