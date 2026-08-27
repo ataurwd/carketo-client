@@ -1,5 +1,5 @@
 export const SITE_CONFIG = {
-  name: 'NOVARIDE',
+  name: 'carketo',
   tagline: 'Premium Car Rental & Marketplace',
   description: 'Experience the ease and convenience of renting or buying top-tier vehicles.',
   apiUrl: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1',

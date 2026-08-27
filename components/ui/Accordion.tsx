@@ -43,29 +43,29 @@ export const Accordion: React.FC<AccordionProps> = ({
           <div
             key={item.id}
             className={cn(
-              'rounded-xl border transition-all duration-200 overflow-hidden',
+              'rounded-2xl border transition-all duration-200 overflow-hidden',
               isOpen
-                ? 'bg-brand text-white border-brand shadow-md'
-                : 'bg-white text-slate-900 border-slate-200 hover:border-slate-300'
+                ? 'bg-black text-white border-black shadow-lg'
+                : 'bg-white text-zinc-900 border-zinc-200 hover:border-zinc-300'
             )}
           >
             <button
               type="button"
               onClick={() => toggleItem(item.id)}
-              className="flex w-full items-center justify-between px-6 py-4 text-left font-semibold text-sm transition-colors"
+              className="flex w-full items-center justify-between px-6 py-4 text-left font-bold text-sm transition-colors"
             >
               <span>{item.title}</span>
               <span
                 className={cn(
                   'ml-4 flex h-6 w-6 shrink-0 items-center justify-center rounded-full transition-transform',
-                  isOpen ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
+                  isOpen ? 'bg-zinc-800 text-white' : 'bg-zinc-100 text-zinc-700'
                 )}
               >
                 {isOpen ? <Minus className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
               </span>
             </button>
             {isOpen && (
-              <div className="border-t border-white/10 px-6 py-4 text-xs sm:text-sm text-white/90 leading-relaxed">
+              <div className="border-t border-zinc-800 px-6 py-4 text-xs sm:text-sm text-zinc-300 leading-relaxed">
                 {item.content}
               </div>
             )}
