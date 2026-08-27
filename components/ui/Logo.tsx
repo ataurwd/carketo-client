@@ -14,7 +14,7 @@ export const Logo: React.FC<LogoProps> = ({
   ...props
 }) => {
   const isWhite = variant === 'white';
-  const fillColor = isWhite ? '#FFFFFF' : '#000000';
+  const logoSrc = isWhite ? '/logo-white.png' : '/logo-black.png';
 
   const heights = {
     sm: 'h-6',
@@ -25,27 +25,11 @@ export const Logo: React.FC<LogoProps> = ({
 
   return (
     <div className={cn('inline-flex items-center select-none', className)} {...props}>
-      <svg
-        className={cn('w-auto transition-all', heights[size])}
-        viewBox="0 0 460 100"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <text
-          x="0"
-          y="78"
-          fill={fillColor}
-          style={{
-            fontFamily:
-              "'Plus Jakarta Sans', 'Inter', 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-            fontWeight: 900,
-            fontSize: '84px',
-            letterSpacing: '-0.04em',
-          }}
-        >
-          carketo
-        </text>
-      </svg>
+      <img
+        src={logoSrc}
+        alt="Carketo"
+        className={cn('w-auto object-contain transition-all', heights[size])}
+      />
     </div>
   );
 };

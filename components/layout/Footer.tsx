@@ -37,13 +37,8 @@ export const Footer: React.FC = () => {
                 </Link>
               </li>
               <li>
-                <Link href="/legal" className="hover:text-white transition-colors">
-                  Legal Notice
-                </Link>
-              </li>
-              <li>
-                <Link href="/accessibility" className="hover:text-white transition-colors">
-                  Accessibility
+                <Link href="/faq" className="hover:text-white transition-colors">
+                  Frequently Asked Questions
                 </Link>
               </li>
             </ul>
@@ -52,27 +47,27 @@ export const Footer: React.FC = () => {
           {/* Quick Links */}
           <div>
             <h4 className="text-sm font-bold uppercase tracking-wider text-zinc-200 mb-4">
-              Quick Links
+              Explore Fleet
             </h4>
             <ul className="space-y-2.5 text-sm text-zinc-400">
               <li>
-                <Link href="/" className="hover:text-white transition-colors">
-                  Home
+                <Link href="/rent" className="hover:text-white transition-colors">
+                  Rent a Car
                 </Link>
               </li>
               <li>
-                <Link href="/about" className="hover:text-white transition-colors">
-                  About Us
+                <Link href="/buy" className="hover:text-white transition-colors">
+                  Buy a Car
                 </Link>
               </li>
               <li>
-                <Link href="/cars" className="hover:text-white transition-colors">
-                  Car Fleet
+                <Link href="/sell" className="hover:text-white transition-colors">
+                  Sell Your Car
                 </Link>
               </li>
               <li>
-                <Link href="/#services" className="hover:text-white transition-colors">
-                  Services
+                <Link href="/contact" className="hover:text-white transition-colors">
+                  Contact Support
                 </Link>
               </li>
             </ul>

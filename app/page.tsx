@@ -1,11 +1,12 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { SearchFilterBar } from '@/components/common/SearchFilterBar';
 import { CarCard } from '@/components/common/CarCard';
 import { Button } from '@/components/ui/Button';
-import { fallbackCars } from '@/services/car.service';
+import { carService } from '@/services/car.service';
+import { ICar } from '@/types/car.types';
 import { apiClient } from '@/lib/api-client';
 import {
   ShieldCheck,
@@ -14,17 +15,23 @@ import {
   Sparkles,
   Headphones,
   Activity,
+  KeyRound,
+  ShoppingBag,
+  Plus,
 } from 'lucide-react';
 
 export default function HomePage() {
-  const [selectedFleetTab, setSelectedFleetTab] = useState('all');
   const [backendStatus, setBackendStatus] = useState<{
     status: string;
     services?: { api: string; database: string; redis: string };
     uptime?: number;
   } | null>(null);
 
+  const [cars, setCars] = useState<ICar[]>([]);
+  const [isLoadingCars, setIsLoadingCars] = useState(true);
+
   useEffect(() => {
+    // 1. Health check
     apiClient
       .get('/health')
       .then((res: any) => {
@@ -36,12 +43,25 @@ export default function HomePage() {
           services: { api: 'operational', database: 'connected', redis: 'ready' },
         });
       });
+
+    // 2. Fetch live cars from MongoDB
+    carService
+      .getCars()
+      .then((res) => {
+        setCars(res || []);
+      })
+      .finally(() => setIsLoadingCars(false));
   }, []);
 
-  const filteredCars =
-    selectedFleetTab === 'all'
-      ? fallbackCars
-      : fallbackCars.filter((car) => car.specs.bodyType.toLowerCase() === selectedFleetTab);
+  // 1. Rental Cars Section dataset (strictly rental cars)
+  const rentalCars = useMemo(() => {
+    return cars.filter((car) => car.listingType === 'rent');
+  }, [cars]);
+
+  // 2. Sale Cars Section dataset (strictly sale cars)
+  const saleCars = useMemo(() => {
+    return cars.filter((car) => car.listingType === 'sale');
+  }, [cars]);
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
@@ -57,11 +77,11 @@ export default function HomePage() {
           </div>
 
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white max-w-4xl mx-auto leading-tight">
-            Looking to save more on <span className="text-zinc-400">your rental car?</span>
+            Looking to save more on <span className="text-zinc-400">your rental or purchase?</span>
           </h1>
 
           <p className="text-zinc-400 text-sm sm:text-base max-w-2xl mx-auto">
-            Discover verified vehicles at transparent rates with zero hidden charges. Simple, seamless car rentals & sales.
+            Discover verified vehicles at transparent rates with zero hidden charges. Simple, seamless car rentals & direct sales.
           </p>
 
           {/* Hero VIP Car Silhouette */}
@@ -94,15 +114,129 @@ export default function HomePage() {
           <div className="flex items-center gap-4 text-[11px] font-semibold text-zinc-500">
             <span>Auth: Argon2id + JWT</span>
             <span>Cache: Redis Ready</span>
-            <span>Database: MongoDB Ready</span>
+            <span>Database: MongoDB Ready (carketo)</span>
           </div>
         </div>
       </section>
 
-      {/* 3. TRUSTED PARTNER SECTION */}
+      {/* 3. SECTION A: DEDICATED RENTAL CARS */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-10">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-zinc-200 pb-6">
+          <div className="space-y-2">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-100 text-black text-xs font-bold uppercase tracking-wider border border-zinc-200">
+              <KeyRound className="w-3.5 h-3.5" />
+              <span>Rental Fleet</span>
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-black text-black">
+              Cars for Rent
+            </h2>
+            <p className="text-zinc-500 text-xs sm:text-sm max-w-xl">
+              Instant direct booking with masked contact phone numbers. Click on any car card to reveal and copy owner contact details directly.
+            </p>
+          </div>
+
+          <Link href="/rent">
+            <Button
+              variant="dark"
+              size="md"
+              rightIcon={<ArrowUpRight className="w-4 h-4" />}
+            >
+              View All Rentals ({rentalCars.length})
+            </Button>
+          </Link>
+        </div>
+
+        {/* Rental Cars Grid */}
+        {isLoadingCars ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="h-64 rounded-3xl bg-zinc-100 animate-pulse" />
+            ))}
+          </div>
+        ) : rentalCars.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {rentalCars.map((car) => (
+              <CarCard key={car._id} car={car} />
+            ))}
+          </div>
+        ) : (
+          <div className="p-12 rounded-3xl bg-zinc-50 border border-zinc-200 text-center space-y-4">
+            <KeyRound className="w-10 h-10 text-zinc-400 mx-auto" />
+            <h3 className="text-base font-bold text-black">No Rental Cars Currently Listed</h3>
+            <p className="text-xs text-zinc-500 max-w-md mx-auto">
+              Be the first to list a car for rent and start earning from verified renters with zero commission fees!
+            </p>
+            <Link href="/sell">
+              <Button variant="dark" size="sm" leftIcon={<Plus className="w-4 h-4" />}>
+                List Car for Rent
+              </Button>
+            </Link>
+          </div>
+        )}
+      </section>
+
+      {/* 4. SECTION B: DEDICATED CARS FOR SALE */}
+      <section className="py-20 bg-zinc-50 px-4 sm:px-6 lg:px-8 border-t border-zinc-200">
+        <div className="max-w-7xl mx-auto space-y-10">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-zinc-200 pb-6">
+            <div className="space-y-2">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-black text-white text-xs font-bold uppercase tracking-wider">
+                <ShoppingBag className="w-3.5 h-3.5" />
+                <span>Verified Showroom</span>
+              </div>
+              <h2 className="text-3xl sm:text-4xl font-black text-black">
+                Cars for Sale
+              </h2>
+              <p className="text-zinc-500 text-xs sm:text-sm max-w-xl">
+                Explore vehicles with clean titles and direct owner contacts. Call and negotiate directly with sellers.
+              </p>
+            </div>
+
+            <Link href="/buy">
+              <Button
+                variant="outline"
+                size="md"
+                rightIcon={<ArrowUpRight className="w-4 h-4" />}
+              >
+                View All Cars for Sale ({saleCars.length})
+              </Button>
+            </Link>
+          </div>
+
+          {/* Sale Cars Grid */}
+          {isLoadingCars ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="h-64 rounded-3xl bg-zinc-200 animate-pulse" />
+              ))}
+            </div>
+          ) : saleCars.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {saleCars.map((car) => (
+                <CarCard key={car._id} car={car} />
+              ))}
+            </div>
+          ) : (
+            <div className="p-12 rounded-3xl bg-white border border-zinc-200 text-center space-y-4">
+              <ShoppingBag className="w-10 h-10 text-zinc-400 mx-auto" />
+              <h3 className="text-base font-bold text-black">No Cars for Sale Currently Listed</h3>
+              <p className="text-xs text-zinc-500 max-w-md mx-auto">
+                List your vehicle for sale today and reach thousands of prospective car buyers!
+              </p>
+              <Link href="/sell">
+                <Button variant="dark" size="sm" leftIcon={<Plus className="w-4 h-4" />}>
+                  List Car for Sale
+                </Button>
+              </Link>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* 5. TRUSTED PARTNER & ASSURANCE SECTION */}
       <section className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          {/* Left Visual with Dual Image & Star Badge */}
+          {/* Left Visual */}
           <div className="relative flex justify-center">
             <div className="relative w-[340px] sm:w-[420px] h-[340px] sm:h-[420px]">
               <img
@@ -121,123 +255,38 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Right Content */}
+          {/* Right Copy */}
           <div className="space-y-6">
-            <div className="inline-flex items-center gap-2 text-zinc-500 font-bold text-xs uppercase tracking-widest">
-              <span>Why Choose Carketo</span>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-100 text-black text-xs font-bold uppercase tracking-wider border border-zinc-200">
+              <ShieldCheck className="w-3.5 h-3.5" />
+              <span>Direct Customer Experience</span>
             </div>
 
             <h2 className="text-3xl sm:text-4xl font-black text-black leading-tight">
-              Your trusted partner in reliable car rental & sales
+              We make luxury automotive rentals & sales completely hassle-free.
             </h2>
 
-            <p className="text-zinc-600 text-sm leading-relaxed">
-              We streamline the entire journey from browsing curated fleets to doorstep delivery. Every vehicle undergoes a certified 150-point diagnostic check before handover.
+            <p className="text-zinc-600 text-xs sm:text-sm leading-relaxed">
+              Carketo empowers renters and buyers to directly connect with verified vehicle owners. Enjoy zero hidden booking commissions, transparent pricing, and instant contact reveal.
             </p>
 
-            <div className="space-y-4 pt-2">
-              <div className="flex items-start gap-3.5">
-                <div className="h-10 w-10 rounded-2xl bg-zinc-100 text-black flex items-center justify-center shrink-0 border border-zinc-200">
-                  <ShieldCheck className="w-5 h-5" />
-                </div>
-                <div>
-                  <h4 className="text-sm font-bold text-zinc-900">100% Insured & Inspected</h4>
-                  <p className="text-xs text-zinc-500">
-                    Comprehensive collision coverage and verified maintenance logs.
-                  </p>
-                </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+              <div className="p-4 rounded-2xl bg-zinc-50 border border-zinc-200 space-y-1">
+                <Zap className="w-5 h-5 text-black mb-2" />
+                <h4 className="font-bold text-sm text-black">Direct Contact</h4>
+                <p className="text-xs text-zinc-500">
+                  Instant phone numbers and WhatsApp links for seamless communication.
+                </p>
               </div>
 
-              <div className="flex items-start gap-3.5">
-                <div className="h-10 w-10 rounded-2xl bg-zinc-100 text-black flex items-center justify-center shrink-0 border border-zinc-200">
-                  <Zap className="w-5 h-5" />
-                </div>
-                <div>
-                  <h4 className="text-sm font-bold text-zinc-900">Instant Booking & Lock</h4>
-                  <p className="text-xs text-zinc-500">
-                    Redis-powered concurrency lock guarantees zero double-bookings.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3.5">
-                <div className="h-10 w-10 rounded-2xl bg-zinc-100 text-black flex items-center justify-center shrink-0 border border-zinc-200">
-                  <Headphones className="w-5 h-5" />
-                </div>
-                <div>
-                  <h4 className="text-sm font-bold text-zinc-900">24/7 Roadside Assistance</h4>
-                  <p className="text-xs text-zinc-500">
-                    Emergency support and replacement vehicles anywhere in the network.
-                  </p>
-                </div>
+              <div className="p-4 rounded-2xl bg-zinc-50 border border-zinc-200 space-y-1">
+                <Headphones className="w-5 h-5 text-black mb-2" />
+                <h4 className="font-bold text-sm text-black">24/7 Roadside Assist</h4>
+                <p className="text-xs text-zinc-500">
+                  Dedicated customer concierge always on standby.
+                </p>
               </div>
             </div>
-
-            <div className="pt-4">
-              <Link href="/cars">
-                <Button
-                  variant="dark"
-                  size="lg"
-                  rightIcon={<ArrowUpRight className="w-4 h-4" />}
-                >
-                  Explore All Fleet
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 4. FLEET SHOWCASE SECTION */}
-      <section className="py-20 bg-zinc-50 px-4 sm:px-6 lg:px-8 border-t border-zinc-200">
-        <div className="max-w-7xl mx-auto space-y-10">
-          <div className="text-center space-y-3">
-            <span className="text-zinc-500 font-bold text-xs uppercase tracking-widest">
-              Exclusive Showroom
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-black text-black">
-              Explore our perfect and extensive fleet
-            </h2>
-            <p className="text-zinc-500 text-sm max-w-xl mx-auto">
-              From high-performance sports cars to spacious luxury crossovers, choose your vehicle today.
-            </p>
-
-            {/* Filter Tabs */}
-            <div className="flex flex-wrap items-center justify-center gap-2 pt-4">
-              {['all', 'coupe', 'sedan', 'supercar'].map((tab) => (
-                <button
-                  key={tab}
-                  type="button"
-                  onClick={() => setSelectedFleetTab(tab)}
-                  className={`px-5 py-2 rounded-full text-xs font-bold capitalize transition-all ${
-                    selectedFleetTab === tab
-                      ? 'bg-black text-white shadow-md'
-                      : 'bg-white text-zinc-700 border border-zinc-200 hover:border-zinc-400'
-                  }`}
-                >
-                  {tab}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Cars Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {filteredCars.map((car) => (
-              <CarCard key={car._id} car={car} />
-            ))}
-          </div>
-
-          <div className="text-center pt-6">
-            <Link href="/cars">
-              <Button
-                variant="dark"
-                size="lg"
-                rightIcon={<ArrowUpRight className="w-4 h-4" />}
-              >
-                View Full Inventory ({fallbackCars.length} Available)
-              </Button>
-            </Link>
           </div>
         </div>
       </section>

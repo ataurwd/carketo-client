@@ -8,11 +8,9 @@ export const SITE_CONFIG = {
 
 export const NAV_LINKS = [
   { label: 'Home', href: '/' },
-  { label: 'About Us', href: '/about' },
-  { label: 'Service', href: '/#services' },
-  { label: 'Cars', href: '/cars' },
-  { label: 'Rent', href: '/cars?type=rent' },
-  { label: 'Sell', href: '/cars?type=sale' },
+  { label: 'Rent Car', href: '/rent' },
+  { label: 'Buy Car', href: '/buy' },
+  { label: 'Sell Car', href: '/sell' },
   { label: 'Contact Us', href: '/contact' },
 ];
 

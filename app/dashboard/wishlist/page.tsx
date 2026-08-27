@@ -3,7 +3,6 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { wishlistService } from '@/services/wishlist.service';
-import { fallbackCars } from '@/services/car.service';
 import { ICar } from '@/types/car.types';
 import { CarCard } from '@/components/common/CarCard';
 import { Button } from '@/components/ui/Button';
@@ -17,7 +16,7 @@ export default function WishlistPage() {
     wishlistService
       .getWishlist()
       .then((res) => {
-        setCars(res && res.length > 0 ? res : fallbackCars.slice(0, 2));
+        setCars(res || []);
       })
       .finally(() => setIsLoading(false));
   }, []);

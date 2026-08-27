@@ -37,7 +37,16 @@ export interface ICar {
   rentalDeposit?: number;
   location: string;
   description: string;
-  specs: ICarSpecs;
+  contactPhone?: string;
+  bodyType?: string;
+  fuelType?: string;
+  transmission?: string;
+  seats?: number;
+  doors?: number;
+  luggage?: number;
+  mileage?: number;
+  airCondition?: boolean;
+  specs?: ICarSpecs;
   features: string[];
   amenities: string[];
   images: string[];

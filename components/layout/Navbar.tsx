@@ -88,12 +88,12 @@ export const Navbar: React.FC = () => {
                   </div>
 
                   <Link
-                    href={user.role === 'provider' ? '/provider' : user.role === 'admin' ? '/admin' : '/dashboard'}
+                    href={user.role === 'admin' ? '/admin' : '/dashboard'}
                     onClick={() => setUserDropdownOpen(false)}
                     className="flex items-center gap-2 px-4 py-2 text-xs font-semibold text-zinc-700 hover:bg-zinc-100 hover:text-black"
                   >
                     <LayoutDashboard className="w-4 h-4" />
-                    <span>Dashboard</span>
+                    <span>{user.role === 'admin' ? 'Admin Panel' : 'User Dashboard'}</span>
                   </Link>
 
                   <button
