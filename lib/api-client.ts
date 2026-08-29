@@ -27,8 +27,19 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response) => response.data,
   (error) => {
-    const message =
-      error.response?.data?.message || error.message || 'Something went wrong';
-    return Promise.reject(new Error(message));
+    const errorData = error.response?.data;
+    let message = errorData?.message || error.message || 'Something went wrong';
+
+    if (errorData?.errors && Array.isArray(errorData.errors) && errorData.errors.length > 0) {
+      const fieldList = errorData.errors
+        .map((e: any) => (e.field ? `${e.field}: ${e.message}` : e.message))
+        .join(' • ');
+      message = `${errorData.message || 'Validation failed'}: ${fieldList}`;
+    }
+
+    const customError: any = new Error(message);
+    customError.errors = errorData?.errors;
+    customError.statusCode = error.response?.status;
+    return Promise.reject(customError);
   }
 );

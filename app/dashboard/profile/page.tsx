@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuthStore } from '@/store/auth.store';
 import { userService } from '@/services/user.service';
+import { uploadService } from '@/services/upload.service';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { ArrowLeft, User as UserIcon, Lock, Phone, Mail, CheckCircle2, AlertCircle } from 'lucide-react';
@@ -112,6 +113,41 @@ export default function UserProfilePage() {
             )}
 
             <form onSubmit={handleUpdateProfile} className="space-y-4">
+              {/* Avatar Selector */}
+              <div className="flex items-center gap-4 pb-2">
+                <div className="relative h-16 w-16 rounded-full bg-zinc-100 border border-zinc-200 overflow-hidden flex items-center justify-center text-zinc-500 shrink-0">
+                  {user?.avatar ? (
+                    <img src={user.avatar} alt={name} className="h-full w-full object-cover" />
+                  ) : (
+                    <UserIcon className="w-8 h-8" />
+                  )}
+                </div>
+                <div>
+                  <label className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-zinc-200 text-xs font-bold text-zinc-700 hover:bg-zinc-50 hover:text-black cursor-pointer shadow-sm transition-all">
+                    <span>Change Avatar</span>
+                    <input
+                      type="file"
+                      accept="image/jpeg, image/png, image/webp"
+                      className="hidden"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        try {
+                          const res = await uploadService.uploadFileToR2(file, 'avatars');
+                          const updated = await userService.updateProfile({ avatar: res.publicUrl });
+                          const token = localStorage.getItem('access_token') || '';
+                          setAuth(updated, token);
+                          setProfileMsg({ type: 'success', text: 'Avatar updated successfully.' });
+                        } catch (err: any) {
+                          setProfileMsg({ type: 'error', text: err.message || 'Avatar upload failed.' });
+                        }
+                      }}
+                    />
+                  </label>
+                  <p className="text-[10px] text-zinc-400 mt-1">JPEG, PNG, WebP (Max 2MB)</p>
+                </div>
+              </div>
+
               <Input
                 label="Full Name"
                 value={name}

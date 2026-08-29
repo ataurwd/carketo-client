@@ -25,12 +25,20 @@ import {
   Lock,
   Sparkles,
   Check,
+  Loader2,
 } from 'lucide-react';
+import { uploadService } from '@/services/upload.service';
 
 interface UploadedPhoto {
+  file: File;
   name: string;
   size: number;
-  dataUrl: string;
+  previewUrl: string;
+  r2Url?: string;
+  r2Key?: string;
+  isUploading?: boolean;
+  uploadProgress?: number;
+  error?: string;
 }
 
 const PRESET_AMENITIES = [
@@ -110,97 +118,136 @@ export default function CreateCarPage() {
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [success, setSuccess] = useState('');
 
-  const toggleAmenity = (name: string) => {
-    if (selectedAmenities.includes(name)) {
-      setSelectedAmenities(selectedAmenities.filter((a) => a !== name));
-    } else {
-      setSelectedAmenities([...selectedAmenities, name]);
-    }
+  const toggleAmenity = (amenity: string) => {
+    setSelectedAmenities((prev) =>
+      prev.includes(amenity) ? prev.filter((a) => a !== amenity) : [...prev, amenity]
+    );
   };
 
   const handleAddCustomAmenity = () => {
     const trimmed = customAmenityInput.trim();
     if (!trimmed) return;
     if (!selectedAmenities.includes(trimmed)) {
-      setSelectedAmenities([...selectedAmenities, trimmed]);
+      setSelectedAmenities((prev) => [...prev, trimmed]);
     }
     setCustomAmenityInput('');
   };
 
-  const handleRemoveAmenity = (name: string) => {
-    setSelectedAmenities(selectedAmenities.filter((a) => a !== name));
+  const handleRemoveAmenity = (amenity: string) => {
+    setSelectedAmenities((prev) => prev.filter((a) => a !== amenity));
   };
 
-  // File Upload Handler (Max 3 files, Max 5MB each)
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Upload handlers
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
-    const maxAllowed = 3;
-    const maxSize = 5 * 1024 * 1024; // 5 MB
-
-    if (uploadedPhotos.length + files.length > maxAllowed) {
-      setError(`You can upload a maximum of ${maxAllowed} images at a time for each vehicle listing.`);
+    const availableSlots = 3 - uploadedPhotos.length;
+    if (availableSlots <= 0) {
+      setError('You can upload a maximum of 3 photos.');
       return;
     }
 
-    const newPhotos: UploadedPhoto[] = [];
-    const filesArray = Array.from(files);
-
-    for (const file of filesArray) {
-      if (file.size > maxSize) {
-        setError(`File "${file.name}" exceeds the 5MB maximum size limit (${(file.size / (1024 * 1024)).toFixed(2)} MB). Please select photos under 5MB.`);
-        return;
-      }
-
-      if (!file.type.startsWith('image/')) {
-        setError(`File "${file.name}" is not a valid image file. Please upload JPEG, PNG, or WebP.`);
-        return;
-      }
-
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        if (event.target?.result) {
-          setUploadedPhotos((prev) => {
-            if (prev.length >= maxAllowed) return prev;
-            return [
-              ...prev,
-              {
-                name: file.name,
-                size: file.size,
-                dataUrl: event.target!.result as string,
-              },
-            ];
-          });
-        }
-      };
-      reader.readAsDataURL(file);
-    }
-
+    const filesToUpload = Array.from(files).slice(0, availableSlots);
     setError('');
-    e.target.value = '';
+
+    // Pre-create local photo items
+    const newPhotos: UploadedPhoto[] = filesToUpload.map((file) => ({
+      file,
+      previewUrl: URL.createObjectURL(file),
+      name: file.name,
+      size: file.size,
+      isUploading: true,
+      uploadProgress: 10,
+    }));
+
+    setUploadedPhotos((prev) => [...prev, ...newPhotos]);
+
+    // Process each upload to R2
+    for (let i = 0; i < filesToUpload.length; i++) {
+      const file = filesToUpload[i];
+      const startIdx = uploadedPhotos.length + i;
+
+      try {
+        const result = await uploadService.uploadFileToR2(file, 'cars', (progress) => {
+          setUploadedPhotos((current) =>
+            current.map((p, idx) =>
+              idx === startIdx ? { ...p, uploadProgress: progress } : p
+            )
+          );
+        });
+
+        // Mark complete with live public R2 URL
+        setUploadedPhotos((current) =>
+          current.map((p, idx) =>
+            idx === startIdx
+              ? {
+                  ...p,
+                  isUploading: false,
+                  r2Url: result.publicUrl,
+                  r2Key: result.key,
+                  uploadProgress: 100,
+                }
+              : p
+          )
+        );
+      } catch (err: any) {
+        console.error('Photo upload failed:', err);
+        setUploadedPhotos((current) =>
+          current.map((p, idx) =>
+            idx === startIdx
+              ? {
+                  ...p,
+                  isUploading: false,
+                  uploadProgress: 0,
+                }
+              : p
+          )
+        );
+        setError(`Failed to upload "${file.name}": ${err.message || 'Storage error'}`);
+      }
+    }
   };
 
-  const handleRemovePhoto = (index: number) => {
-    setUploadedPhotos((prev) => prev.filter((_, i) => i !== index));
+  const handleRemovePhoto = async (index: number) => {
+    const photoToRemove = uploadedPhotos[index];
+    if (photoToRemove?.r2Key) {
+      uploadService.deleteFile(photoToRemove.r2Key).catch(() => {});
+    }
+    setUploadedPhotos((prev) => prev.filter((_, idx) => idx !== index));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
     setError('');
+    setFieldErrors({});
     setSuccess('');
 
+    // Pre-submission check
     if (uploadedPhotos.length === 0) {
-      setError('Please upload at least 1 image for the vehicle listing.');
-      setIsLoading(false);
+      setError('Please upload at least 1 vehicle photo (up to 3).');
+      setFieldErrors({ photos: 'At least 1 vehicle photo is required' });
       return;
     }
 
-    const images = uploadedPhotos.map((p) => p.dataUrl);
-    const coverImage = images[0];
+    const pendingUploads = uploadedPhotos.some((p) => p.isUploading);
+    if (pendingUploads) {
+      setError('Please wait for all photos to finish uploading before submitting.');
+      return;
+    }
+
+    setIsLoading(true);
+
+    const coverImage =
+      uploadedPhotos[0]?.r2Url ||
+      uploadedPhotos[0]?.previewUrl ||
+      'https://images.unsplash.com/photo-1617814076367-b759c7d7e738?q=80&w=1200';
+    const images = uploadedPhotos
+      .map((p) => p.r2Url || p.previewUrl)
+      .filter(Boolean);
 
     const payload = {
       title,
@@ -210,7 +257,7 @@ export default function CreateCarPage() {
       listingType,
       contactPhone: contactPhone || '01712-345678',
       rentalPrice: listingType === 'rent' ? Number(rentalPrice) : undefined,
-      rentalDeposit: listingType === 'rent' ? Number(rentalDeposit) : undefined,
+      rentalDeposit: undefined,
       salePrice: listingType === 'sale' ? Number(salePrice) : undefined,
       location,
       bodyType,
@@ -244,6 +291,17 @@ export default function CreateCarPage() {
         router.push('/provider/cars');
       }, 1200);
     } catch (err: any) {
+      if (err.errors && Array.isArray(err.errors)) {
+        const errorMap: Record<string, string> = {};
+        err.errors.forEach((item: any) => {
+          if (item.field) {
+            const cleanKey = item.field.replace('body.', '').replace('specs.', '');
+            errorMap[cleanKey] = item.message;
+            errorMap[item.field] = item.message;
+          }
+        });
+        setFieldErrors(errorMap);
+      }
       setError(err.message || 'Failed to publish vehicle listing.');
     } finally {
       setIsLoading(false);
@@ -278,9 +336,27 @@ export default function CreateCarPage() {
         </div>
 
         {error && (
-          <div className="flex items-center gap-2 p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold">
-            <AlertCircle className="w-4 h-4 shrink-0" />
-            <span>{error}</span>
+          <div className="p-4 sm:p-5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 space-y-2.5">
+            <div className="flex items-center gap-2 text-xs font-bold text-rose-700">
+              <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
+              <span>Please review and resolve the following errors:</span>
+            </div>
+            {Object.keys(fieldErrors).length > 0 ? (
+              <ul className="list-disc list-inside space-y-1 pl-1 text-[12px] text-rose-700 font-medium">
+                {Object.entries(fieldErrors)
+                  .filter(([k]) => !k.includes('.'))
+                  .map(([field, msg]) => (
+                    <li key={field}>
+                      <span className="font-bold capitalize text-rose-800">
+                        {field.replace(/([A-Z])/g, ' $1')}:
+                      </span>{' '}
+                      {msg}
+                    </li>
+                  ))}
+              </ul>
+            ) : (
+              <p className="text-xs text-rose-700 font-medium pl-6">{error}</p>
+            )}
           </div>
         )}
 
@@ -305,7 +381,11 @@ export default function CreateCarPage() {
                 placeholder="e.g. 2024 Porsche 911 GT3 RS Coupe"
                 required
                 value={title}
-                onChange={(e) => setTitle(e.target.value)}
+                onChange={(e) => {
+                  setTitle(e.target.value);
+                  setFieldErrors((p) => ({ ...p, title: '' }));
+                }}
+                error={fieldErrors['title']}
               />
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -315,8 +395,13 @@ export default function CreateCarPage() {
                   </label>
                   <select
                     value={brand}
-                    onChange={(e) => setBrand(e.target.value)}
-                    className="w-full text-xs font-semibold px-3 py-2.5 rounded-xl border border-zinc-200 bg-white focus:outline-none focus:border-black"
+                    onChange={(e) => {
+                      setBrand(e.target.value);
+                      setFieldErrors((p) => ({ ...p, brand: '' }));
+                    }}
+                    className={`w-full text-xs font-semibold px-3 py-2.5 rounded-xl border ${
+                      fieldErrors['brand'] ? 'border-rose-500' : 'border-zinc-200'
+                    } bg-white focus:outline-none focus:border-black`}
                   >
                     {POPULAR_BRANDS.map((b) => (
                       <option key={b} value={b}>
@@ -324,6 +409,9 @@ export default function CreateCarPage() {
                       </option>
                     ))}
                   </select>
+                  {fieldErrors['brand'] && (
+                    <p className="text-[11px] font-bold text-rose-600 mt-1">{fieldErrors['brand']}</p>
+                  )}
                 </div>
 
                 <Input
@@ -331,15 +419,25 @@ export default function CreateCarPage() {
                   placeholder="e.g. 911 GT3"
                   required
                   value={model}
-                  onChange={(e) => setModel(e.target.value)}
+                  onChange={(e) => {
+                    setModel(e.target.value);
+                    setFieldErrors((p) => ({ ...p, model: '' }));
+                  }}
+                  error={fieldErrors['model']}
                 />
 
                 <Input
                   label="Manufacturing Year"
                   type="number"
+                  min={1900}
+                  max={new Date().getFullYear() + 2}
                   required
                   value={year}
-                  onChange={(e) => setYear(Number(e.target.value))}
+                  onChange={(e) => {
+                    setYear(Number(e.target.value));
+                    setFieldErrors((p) => ({ ...p, year: '' }));
+                  }}
+                  error={fieldErrors['year']}
                 />
               </div>
 
@@ -366,14 +464,39 @@ export default function CreateCarPage() {
                   placeholder="e.g. New York, JFK Airport Hub"
                   required
                   value={location}
-                  onChange={(e) => setLocation(e.target.value)}
+                  onChange={(e) => {
+                    setLocation(e.target.value);
+                    setFieldErrors((p) => ({ ...p, location: '' }));
+                  }}
                   leftIcon={<MapPin className="w-4 h-4 text-black" />}
+                  error={fieldErrors['location']}
                 />
               </div>
             </div>
           </div>
 
-          {/* Section 2: Listing Type & Pricing */}
+          {/* Section 2: Description & Highlights */}
+          <div className="bg-white p-6 sm:p-8 rounded-3xl border border-zinc-200 shadow-sm space-y-6">
+            <div className="flex items-center gap-2 border-b border-zinc-100 pb-3">
+              <Sparkles className="w-5 h-5 text-black" />
+              <h2 className="text-base font-black text-black">Description & Highlights</h2>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700">
+                Detailed Vehicle Description
+              </label>
+              <textarea
+                rows={4}
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Highlight unique features, vehicle condition, service history, and inspection details..."
+                className="w-full text-xs font-semibold p-4 rounded-2xl border border-zinc-200 bg-white focus:outline-none focus:border-black leading-relaxed"
+              />
+            </div>
+          </div>
+
+          {/* Section 3: Listing Type & Pricing */}
           <div className="bg-white p-6 sm:p-8 rounded-3xl border border-zinc-200 shadow-sm space-y-6">
             <div className="flex items-center gap-2 border-b border-zinc-100 pb-3">
               <DollarSign className="w-5 h-5 text-black" />
@@ -386,7 +509,10 @@ export default function CreateCarPage() {
                 <button
                   key={t}
                   type="button"
-                  onClick={() => setListingType(t)}
+                  onClick={() => {
+                    setListingType(t);
+                    setFieldErrors({});
+                  }}
                   className={`py-3 rounded-xl text-xs font-black capitalize transition-all ${
                     listingType === t
                       ? 'bg-black text-white shadow-sm'
@@ -399,22 +525,18 @@ export default function CreateCarPage() {
             </div>
 
             {listingType === 'rent' ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
                 <Input
                   label="Daily Rental Rate ($ / Day)"
                   type="number"
                   required
                   value={rentalPrice}
-                  onChange={(e) => setRentalPrice(Number(e.target.value))}
+                  onChange={(e) => {
+                    setRentalPrice(e.target.value === '' ? '' : Number(e.target.value));
+                    setFieldErrors((p) => ({ ...p, rentalPrice: '' }));
+                  }}
                   placeholder="e.g. 299"
-                />
-                <Input
-                  label="Security Deposit ($)"
-                  type="number"
-                  required
-                  value={rentalDeposit}
-                  onChange={(e) => setRentalDeposit(Number(e.target.value))}
-                  placeholder="e.g. 1000"
+                  error={fieldErrors['rentalPrice']}
                 />
               </div>
             ) : (
@@ -424,8 +546,12 @@ export default function CreateCarPage() {
                   type="number"
                   required
                   value={salePrice}
-                  onChange={(e) => setSalePrice(Number(e.target.value))}
+                  onChange={(e) => {
+                    setSalePrice(e.target.value === '' ? '' : Number(e.target.value));
+                    setFieldErrors((p) => ({ ...p, salePrice: '' }));
+                  }}
                   placeholder="e.g. 85000"
+                  error={fieldErrors['salePrice']}
                 />
               </div>
             )}
@@ -441,11 +567,18 @@ export default function CreateCarPage() {
                 </span>
               </div>
               <Input
+                type="tel"
                 placeholder="01712345678"
                 required
                 value={contactPhone}
-                onChange={(e) => setContactPhone(e.target.value)}
+                onChange={(e) => {
+                  // Real-time input filter: only allow digits, spaces, hyphens, plus, and parentheses
+                  const cleanVal = e.target.value.replace(/[^\d\s\-()+]/g, '');
+                  setContactPhone(cleanVal);
+                  setFieldErrors((p) => ({ ...p, contactPhone: '' }));
+                }}
                 leftIcon={<Phone className="w-4 h-4 text-black" />}
+                error={fieldErrors['contactPhone']}
               />
               <p className="text-[11px] text-zinc-500">
                 {listingType === 'rent'
@@ -455,7 +588,7 @@ export default function CreateCarPage() {
             </div>
           </div>
 
-          {/* Section 3: Technical Specifications (ONLY FOR CARS FOR SALE) */}
+          {/* Section 4: Technical Specifications (ONLY FOR CARS FOR SALE) */}
           {listingType === 'sale' && (
             <div className="bg-white p-6 sm:p-8 rounded-3xl border border-zinc-200 shadow-sm space-y-6 animate-fade-in">
               <div className="flex items-center gap-2 border-b border-zinc-100 pb-3">
@@ -528,117 +661,119 @@ export default function CreateCarPage() {
             </div>
           )}
 
-          {/* Section 4: Vehicle Features & Amenities (Checkmark Selector + Custom Option Input) */}
-          <div className="bg-white p-6 sm:p-8 rounded-3xl border border-zinc-200 shadow-sm space-y-6">
-            <div className="flex items-center justify-between border-b border-zinc-100 pb-3">
-              <div className="flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-black" />
-                <div>
-                  <h2 className="text-base font-black text-black">Features & Amenities Options</h2>
-                  <p className="text-xs text-zinc-400">
-                    Select equipment options and add custom features to display on the vehicle page.
-                  </p>
+          {/* Section 5: Vehicle Features & Amenities (Checkmark Selector + Custom Option Input) - ONLY FOR SALE LISTINGS */}
+          {listingType === 'sale' && (
+            <div className="bg-white p-6 sm:p-8 rounded-3xl border border-zinc-200 shadow-sm space-y-6">
+              <div className="flex items-center justify-between border-b border-zinc-100 pb-3">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-black" />
+                  <div>
+                    <h2 className="text-base font-black text-black">Features & Amenities Options</h2>
+                    <p className="text-xs text-zinc-400">
+                      Select equipment options and add custom features to display on the vehicle page.
+                    </p>
+                  </div>
                 </div>
+                <span className="text-xs font-bold px-3 py-1 rounded-full bg-zinc-100 text-zinc-800 border border-zinc-200">
+                  {selectedAmenities.length} Selected
+                </span>
               </div>
-              <span className="text-xs font-bold px-3 py-1 rounded-full bg-zinc-100 text-zinc-800 border border-zinc-200">
-                {selectedAmenities.length} Selected
-              </span>
-            </div>
 
-            {/* Predefined Features Checkmark Options */}
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-zinc-600 mb-3">
-                Standard Equipment & Packages (Click to toggle)
-              </label>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
-                {PRESET_AMENITIES.map((amenity) => {
-                  const isChecked = selectedAmenities.includes(amenity);
-                  return (
-                    <button
-                      key={amenity}
-                      type="button"
-                      onClick={() => toggleAmenity(amenity)}
-                      className={`flex items-center gap-2.5 p-3 rounded-2xl border text-xs font-bold transition-all text-left ${
-                        isChecked
-                          ? 'bg-black text-white border-black shadow-sm'
-                          : 'bg-zinc-50/70 hover:bg-zinc-100 text-zinc-700 border-zinc-200'
-                      }`}
-                    >
-                      <div
-                        className={`h-4 w-4 rounded-md flex items-center justify-center border transition-colors ${
-                          isChecked ? 'bg-white border-white text-black' : 'border-zinc-300 bg-white'
+              {/* Predefined Features Checkmark Options */}
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-zinc-600 mb-3">
+                  Standard Equipment & Packages (Click to toggle)
+                </label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
+                  {PRESET_AMENITIES.map((amenity) => {
+                    const isChecked = selectedAmenities.includes(amenity);
+                    return (
+                      <button
+                        key={amenity}
+                        type="button"
+                        onClick={() => toggleAmenity(amenity)}
+                        className={`flex items-center gap-2.5 p-3 rounded-2xl border text-xs font-bold transition-all text-left ${
+                          isChecked
+                            ? 'bg-black text-white border-black shadow-sm'
+                            : 'bg-zinc-50/70 hover:bg-zinc-100 text-zinc-700 border-zinc-200'
                         }`}
                       >
-                        {isChecked && <Check className="w-3 h-3 stroke-[3]" />}
-                      </div>
-                      <span className="truncate">{amenity}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Custom Feature Input */}
-            <div className="space-y-2 pt-2 border-t border-zinc-100">
-              <label className="block text-xs font-bold uppercase tracking-wider text-zinc-600">
-                Add Custom Feature / Aftermarket Option
-              </label>
-              <div className="flex items-center gap-2">
-                <input
-                  type="text"
-                  placeholder="e.g. Carbon Ceramic Brakes, Custom Exhaust, Panoramic Sunroof, Sport Suspension..."
-                  value={customAmenityInput}
-                  onChange={(e) => setCustomAmenityInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault();
-                      handleAddCustomAmenity();
-                    }
-                  }}
-                  className="flex-1 px-4 py-2.5 rounded-2xl border border-zinc-200 text-xs font-semibold focus:outline-none focus:border-black"
-                />
-                <Button
-                  type="button"
-                  variant="dark"
-                  size="sm"
-                  onClick={handleAddCustomAmenity}
-                  leftIcon={<Plus className="w-3.5 h-3.5" />}
-                >
-                  Add Feature
-                </Button>
-              </div>
-            </div>
-
-            {/* Selected Custom Features Chips */}
-            {selectedAmenities.filter((a) => !PRESET_AMENITIES.includes(a)).length > 0 && (
-              <div className="space-y-2 pt-2">
-                <label className="block text-[11px] font-bold text-zinc-400 uppercase">
-                  Custom Added Features:
-                </label>
-                <div className="flex flex-wrap items-center gap-2">
-                  {selectedAmenities
-                    .filter((a) => !PRESET_AMENITIES.includes(a))
-                    .map((customA) => (
-                      <span
-                        key={customA}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-900 text-white text-xs font-bold"
-                      >
-                        <span>{customA}</span>
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveAmenity(customA)}
-                          className="text-zinc-400 hover:text-white"
+                        <div
+                          className={`h-4 w-4 rounded-md flex items-center justify-center border transition-colors ${
+                            isChecked ? 'bg-white border-white text-black' : 'border-zinc-300 bg-white'
+                          }`}
                         >
-                          <X className="w-3 h-3" />
-                        </button>
-                      </span>
-                    ))}
+                          {isChecked && <Check className="w-3 h-3 stroke-[3]" />}
+                        </div>
+                        <span className="truncate">{amenity}</span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
-            )}
-          </div>
 
-          {/* Section 5: Vehicle Imagery (Up to 3 Photos, Max 5MB Each) */}
+              {/* Custom Feature Input */}
+              <div className="space-y-2 pt-2 border-t border-zinc-100">
+                <label className="block text-xs font-bold uppercase tracking-wider text-zinc-600">
+                  Add Custom Feature / Aftermarket Option
+                </label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    placeholder="e.g. Carbon Ceramic Brakes, Custom Exhaust, Panoramic Sunroof, Sport Suspension..."
+                    value={customAmenityInput}
+                    onChange={(e) => setCustomAmenityInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleAddCustomAmenity();
+                      }
+                    }}
+                    className="flex-1 px-4 py-2.5 rounded-2xl border border-zinc-200 text-xs font-semibold focus:outline-none focus:border-black"
+                  />
+                  <Button
+                    type="button"
+                    variant="dark"
+                    size="sm"
+                    onClick={handleAddCustomAmenity}
+                    leftIcon={<Plus className="w-3.5 h-3.5" />}
+                  >
+                    Add Feature
+                  </Button>
+                </div>
+              </div>
+
+              {/* Selected Custom Features Chips */}
+              {selectedAmenities.filter((a) => !PRESET_AMENITIES.includes(a)).length > 0 && (
+                <div className="space-y-2 pt-2">
+                  <label className="block text-[11px] font-bold text-zinc-400 uppercase">
+                    Custom Added Features:
+                  </label>
+                  <div className="flex flex-wrap items-center gap-2">
+                    {selectedAmenities
+                      .filter((a) => !PRESET_AMENITIES.includes(a))
+                      .map((customA) => (
+                        <span
+                          key={customA}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-900 text-white text-xs font-bold"
+                        >
+                          <span>{customA}</span>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveAmenity(customA)}
+                            className="text-zinc-400 hover:text-white"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        </span>
+                      ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Section 6: Vehicle Imagery (Up to 3 Photos, Max 5MB Each) */}
           <div className="bg-white p-6 sm:p-8 rounded-3xl border border-zinc-200 shadow-sm space-y-6">
             <div className="flex items-center justify-between border-b border-zinc-100 pb-3">
               <div className="flex items-center gap-2">
@@ -682,23 +817,53 @@ export default function CreateCarPage() {
                   >
                     <div className="relative aspect-[16/10] rounded-xl overflow-hidden bg-zinc-200 border border-zinc-100">
                       <img
-                        src={photo.dataUrl}
+                        src={photo.r2Url || photo.previewUrl}
                         alt={photo.name}
                         className="h-full w-full object-cover"
                       />
+
+                      {/* Uploading Overlay */}
+                      {photo.isUploading && (
+                        <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] flex flex-col items-center justify-center p-3 text-white space-y-2">
+                          <Loader2 className="w-5 h-5 animate-spin text-white" />
+                          <div className="w-full bg-white/20 rounded-full h-1.5 overflow-hidden">
+                            <div
+                              className="bg-white h-full transition-all duration-300 rounded-full"
+                              style={{ width: `${photo.uploadProgress || 10}%` }}
+                            />
+                          </div>
+                          <span className="text-[10px] font-black uppercase tracking-wider">
+                            Uploading to R2 {photo.uploadProgress}%
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Remove Button */}
                       <button
                         type="button"
                         onClick={() => handleRemovePhoto(idx)}
-                        className="absolute top-2 right-2 p-1.5 rounded-full bg-black/70 hover:bg-rose-600 text-white backdrop-blur transition-colors"
+                        disabled={photo.isUploading}
+                        className="absolute top-2 right-2 p-1.5 rounded-full bg-black/70 hover:bg-rose-600 text-white backdrop-blur transition-colors disabled:opacity-50"
                         title="Remove photo"
                       >
                         <X className="w-3.5 h-3.5" />
                       </button>
 
+                      {/* Cover Badge */}
                       {idx === 0 && (
                         <div className="absolute bottom-2 left-2">
                           <span className="px-2 py-0.5 rounded-full bg-black text-white text-[9px] font-black uppercase tracking-wider">
                             Cover Image
+                          </span>
+                        </div>
+                      )}
+
+                      {/* R2 Synced Badge */}
+                      {!photo.isUploading && photo.r2Url && (
+                        <div className="absolute bottom-2 right-2">
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-600 text-white text-[9px] font-bold shadow-sm">
+                            <CheckCircle2 className="w-2.5 h-2.5" />
+                            <span>R2</span>
                           </span>
                         </div>
                       )}
@@ -716,25 +881,7 @@ export default function CreateCarPage() {
             )}
           </div>
 
-          {/* Section 6: Additional Details */}
-          <div className="bg-white p-6 sm:p-8 rounded-3xl border border-zinc-200 shadow-sm space-y-6">
-            <h2 className="text-base font-black text-black border-b border-zinc-100 pb-3">
-              Description & Highlights
-            </h2>
 
-            <div className="space-y-1.5">
-              <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700">
-                Detailed Vehicle Description
-              </label>
-              <textarea
-                rows={4}
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Highlight unique features, vehicle condition, service history, and inspection details..."
-                className="w-full text-xs font-semibold p-4 rounded-2xl border border-zinc-200 bg-white focus:outline-none focus:border-black leading-relaxed"
-              />
-            </div>
-          </div>
 
           {/* Submit Action */}
           <div className="flex items-center justify-end gap-4 pt-4">

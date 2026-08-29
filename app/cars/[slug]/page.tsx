@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { carService } from '@/services/car.service';
@@ -38,6 +38,183 @@ import {
   MapPin,
   Car as CarIcon,
 } from 'lucide-react';
+
+/** Auto-sliding image carousel with touch/mouse swipe and arrow navigation */
+function ImageSlider({ images, title }: { images: string[]; title: string }) {
+  const [current, setCurrent] = useState(0);
+  const total = images.length;
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const touchStartX = useRef<number | null>(null);
+  const mouseStartX = useRef<number | null>(null);
+  const isDragging = useRef(false);
+
+  const goTo = useCallback((idx: number) => {
+    setCurrent((idx + total) % total);
+  }, [total]);
+
+  const startAutoSlide = useCallback(() => {
+    if (total <= 1) return;
+    timerRef.current = setInterval(() => {
+      setCurrent(c => (c + 1) % total);
+    }, 4000);
+  }, [total]);
+
+  const stopAutoSlide = useCallback(() => {
+    if (timerRef.current) clearInterval(timerRef.current);
+  }, []);
+
+  useEffect(() => {
+    startAutoSlide();
+    return () => stopAutoSlide();
+  }, [startAutoSlide, stopAutoSlide]);
+
+  // Touch handlers
+  const onTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    stopAutoSlide();
+  };
+  const onTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null) return;
+    const diff = touchStartX.current - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 40) goTo(current + (diff > 0 ? 1 : -1));
+    touchStartX.current = null;
+    startAutoSlide();
+  };
+
+  // Mouse drag handlers
+  const onMouseDown = (e: React.MouseEvent) => {
+    mouseStartX.current = e.clientX;
+    isDragging.current = true;
+    stopAutoSlide();
+  };
+  const onMouseUp = (e: React.MouseEvent) => {
+    if (!isDragging.current || mouseStartX.current === null) return;
+    const diff = mouseStartX.current - e.clientX;
+    if (Math.abs(diff) > 40) goTo(current + (diff > 0 ? 1 : -1));
+    mouseStartX.current = null;
+    isDragging.current = false;
+    startAutoSlide();
+  };
+  const onMouseLeave = () => {
+    if (isDragging.current) {
+      isDragging.current = false;
+      mouseStartX.current = null;
+    }
+    startAutoSlide();
+  };
+
+  if (!images || images.length === 0) return null;
+
+  return (
+    <div className="space-y-3">
+      {/* Main Slide */}
+      <div
+        className="relative overflow-hidden rounded-3xl bg-zinc-900 aspect-[16/10] shadow-xl border border-zinc-200 cursor-grab active:cursor-grabbing select-none"
+        onMouseEnter={stopAutoSlide}
+        onMouseLeave={onMouseLeave}
+        onTouchStart={onTouchStart}
+        onTouchEnd={onTouchEnd}
+        onMouseDown={onMouseDown}
+        onMouseUp={onMouseUp}
+      >
+        {/* Images */}
+        {images.map((src, idx) => (
+          <div
+            key={idx}
+            className={`absolute inset-0 transition-opacity duration-500 ${
+              idx === current ? 'opacity-100 z-10' : 'opacity-0 z-0'
+            }`}
+          >
+            <img
+              src={src}
+              alt={`${title} — image ${idx + 1}`}
+              draggable={false}
+              className="w-full h-full object-cover"
+            />
+          </div>
+        ))}
+
+        {/* Left Arrow */}
+        {total > 1 && (
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); goTo(current - 1); stopAutoSlide(); startAutoSlide(); }}
+            className="absolute left-3 top-1/2 -translate-y-1/2 z-20 h-9 w-9 rounded-full bg-black/40 hover:bg-black/70 text-white flex items-center justify-center transition-all backdrop-blur-sm"
+            aria-label="Previous image"
+          >
+            <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          </button>
+        )}
+
+        {/* Right Arrow */}
+        {total > 1 && (
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); goTo(current + 1); stopAutoSlide(); startAutoSlide(); }}
+            className="absolute right-3 top-1/2 -translate-y-1/2 z-20 h-9 w-9 rounded-full bg-black/40 hover:bg-black/70 text-white flex items-center justify-center transition-all backdrop-blur-sm"
+            aria-label="Next image"
+          >
+            <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          </button>
+        )}
+
+        {/* Image counter badge */}
+        {total > 1 && (
+          <div className="absolute bottom-3 right-3 z-20 px-2.5 py-1 rounded-full bg-black/50 text-white text-[10px] font-bold backdrop-blur-sm">
+            {current + 1} / {total}
+          </div>
+        )}
+      </div>
+
+      {/* Dot Indicators */}
+      {total > 1 && (
+        <div className="flex items-center justify-center gap-2">
+          {images.map((_, idx) => (
+            <button
+              key={idx}
+              type="button"
+              onClick={() => { goTo(idx); stopAutoSlide(); startAutoSlide(); }}
+              className={`h-2.5 rounded-full transition-all duration-300 ${
+                current === idx ? 'w-8 bg-black' : 'w-2.5 bg-zinc-300 hover:bg-zinc-500'
+              }`}
+              aria-label={`Go to image ${idx + 1}`}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** Renders the seller's description with a Read more / Read less toggle for long text */
+function DescriptionBlock({ description }: { description: string }) {
+  const LIMIT = 280;
+  const isLong = description.length > LIMIT;
+  const [expanded, setExpanded] = useState(false);
+
+  const displayText = isLong && !expanded
+    ? description.slice(0, LIMIT).trimEnd() + '…'
+    : description;
+
+  return (
+    <div className="space-y-1.5">
+      <p
+        style={{ whiteSpace: 'pre-wrap' }}
+        className="text-zinc-600 text-xs sm:text-sm leading-relaxed"
+      >
+        {displayText}
+      </p>
+      {isLong && (
+        <button
+          onClick={() => setExpanded((p) => !p)}
+          className="text-xs font-bold text-black underline underline-offset-2 hover:opacity-60 transition-opacity"
+        >
+          {expanded ? 'Read less ↑' : 'Read more ↓'}
+        </button>
+      )}
+    </div>
+  );
+}
 
 export default function CarDetailPage() {
   const params = useParams();
@@ -441,32 +618,11 @@ export default function CarDetailPage() {
 
           {/* RIGHT COLUMN: Gallery, Features, Amenities & Reviews (8 Cols) */}
           <div className="lg:col-span-8 space-y-10">
-            {/* Image Slider (up to 3 photos) */}
-            <div className="space-y-4">
-              <div className="relative overflow-hidden rounded-3xl bg-zinc-900 aspect-[16/10] shadow-xl border border-zinc-200">
-                <img
-                  src={car.images[activeImageIndex] || car.coverImage}
-                  alt={car.title}
-                  className="w-full h-full object-cover transition-all duration-500"
-                />
-              </div>
-
-              {/* Slider Dots */}
-              <div className="flex items-center justify-center gap-2 pt-1">
-                {car.images.map((_, idx) => (
-                  <button
-                    key={idx}
-                    type="button"
-                    onClick={() => setActiveImageIndex(idx)}
-                    className={`h-2.5 rounded-full transition-all ${
-                      activeImageIndex === idx
-                        ? 'w-8 bg-black'
-                        : 'w-2.5 bg-zinc-300 hover:bg-zinc-400'
-                    }`}
-                  />
-                ))}
-              </div>
-            </div>
+            {/* Image Slider — auto-slide + touch/mouse swipe + arrows */}
+            <ImageSlider
+              images={car.images.length > 0 ? car.images : [car.coverImage].filter(Boolean)}
+              title={car.title}
+            />
 
             {/* Guarantees */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -502,9 +658,10 @@ export default function CarDetailPage() {
                 About this vehicle
               </h2>
 
-              <p className="text-zinc-600 text-xs sm:text-sm leading-relaxed">
-                {car.description}
-              </p>
+              {/* Seller Description */}
+              {car.description && (
+                <DescriptionBlock description={car.description} />
+              )}
 
               <div className="space-y-2.5 pt-2">
                 {((car.features && car.features.length > 0)
@@ -518,6 +675,7 @@ export default function CarDetailPage() {
                 ))}
               </div>
             </div>
+
 
             {/* Amenities Section */}
             <div className="space-y-4 pt-4 border-t border-zinc-200">
