@@ -1,10 +1,12 @@
 'use client';
 
-import React, { useState, useEffect, Suspense } from 'react';
+import React, { useState, useEffect, useCallback, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { CarCard } from '@/components/common/CarCard';
-import { carService } from '@/services/car.service';
+import { CarCardSkeleton } from '@/components/common/CarCardSkeleton';
+import { Pagination } from '@/components/common/Pagination';
+import { carService, IPagination } from '@/services/car.service';
 import { ICar } from '@/types/car.types';
 import { POPULAR_BRANDS, BODY_TYPES } from '@/lib/constants';
 import {
@@ -27,6 +29,7 @@ function CarsCatalogContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
+  const initialPage = Number(searchParams?.get('page')) || 1;
   const initialType = searchParams?.get('type') || 'all';
   const initialBrand = searchParams?.get('brand') || 'all';
   const initialBodyType = searchParams?.get('bodyType') || 'all';
@@ -39,6 +42,13 @@ function CarsCatalogContent() {
 
   const [cars, setCars] = useState<ICar[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [page, setPage] = useState<number>(initialPage);
+  const [pagination, setPagination] = useState<IPagination>({
+    total: 0,
+    page: initialPage,
+    limit: 12,
+    totalPages: 1,
+  });
 
   // Filter States
   const [typeFilter, setTypeFilter] = useState<string>(initialType);
@@ -54,18 +64,60 @@ function CarsCatalogContent() {
   // Expand filter accordion on mobile/desktop
   const [advancedFiltersOpen, setAdvancedFiltersOpen] = useState(false);
 
-  useEffect(() => {
-    carService
-      .getCars()
-      .then((res) => {
-        setCars(res || []);
-      })
-      .finally(() => setIsLoading(false));
-  }, []);
+  // Fetch cars directly from backend with all filter parameters and pagination
+  const fetchCars = useCallback(async () => {
+    setIsLoading(true);
+    const queryParams: Record<string, any> = {
+      page,
+      limit: 12,
+    };
+    if (typeFilter !== 'all') queryParams.listingType = typeFilter;
+    if (selectedBrand !== 'all') queryParams.brand = selectedBrand;
+    if (selectedBodyType !== 'all') queryParams.bodyType = selectedBodyType;
+    if (selectedTransmission !== 'all') queryParams.transmission = selectedTransmission;
+    if (selectedFuel !== 'all') queryParams.fuelType = selectedFuel;
+    if (minPrice) queryParams.minPrice = minPrice;
+    if (maxPrice) queryParams.maxPrice = maxPrice;
+    if (searchQuery.trim()) queryParams.search = searchQuery.trim();
+    if (sortBy !== 'newest') queryParams.sort = sortBy;
 
-  // Synchronize URL parameters
+    try {
+      const res = await carService.getCarsWithPagination(queryParams);
+      setCars(res.cars || []);
+      setPagination(
+        res.pagination || {
+          total: res.cars.length,
+          page,
+          limit: 12,
+          totalPages: Math.ceil(res.cars.length / 12) || 1,
+        }
+      );
+    } catch {
+      setCars([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [
+    page,
+    typeFilter,
+    selectedBrand,
+    selectedBodyType,
+    selectedTransmission,
+    selectedFuel,
+    minPrice,
+    maxPrice,
+    searchQuery,
+    sortBy,
+  ]);
+
+  useEffect(() => {
+    fetchCars();
+  }, [fetchCars]);
+
+  // Synchronize URL parameters with browser history
   useEffect(() => {
     const params = new URLSearchParams();
+    if (page > 1) params.set('page', String(page));
     if (typeFilter !== 'all') params.set('type', typeFilter);
     if (selectedBrand !== 'all') params.set('brand', selectedBrand);
     if (selectedBodyType !== 'all') params.set('bodyType', selectedBodyType);
@@ -79,6 +131,7 @@ function CarsCatalogContent() {
     const queryStr = params.toString();
     router.replace(queryStr ? `/cars?${queryStr}` : '/cars', { scroll: false });
   }, [
+    page,
     typeFilter,
     selectedBrand,
     selectedBodyType,
@@ -91,61 +144,7 @@ function CarsCatalogContent() {
     router,
   ]);
 
-  // Filtering & Sorting Logic
-  const filteredCars = cars
-    .filter((car) => {
-      // 1. Listing Type
-      if (typeFilter !== 'all' && car.listingType !== typeFilter) {
-        return false;
-      }
-      // 2. Brand
-      if (selectedBrand !== 'all' && car.brand.toLowerCase() !== selectedBrand.toLowerCase()) {
-        return false;
-      }
-      // 3. Body Type
-      const bType = car.specs?.bodyType || car.bodyType || '';
-      if (selectedBodyType !== 'all' && bType.toLowerCase() !== selectedBodyType.toLowerCase()) {
-        return false;
-      }
-      // 4. Transmission
-      const trans = car.specs?.transmission || car.transmission || '';
-      if (selectedTransmission !== 'all' && trans.toLowerCase() !== selectedTransmission.toLowerCase()) {
-        return false;
-      }
-      // 5. Fuel Type
-      const fuel = car.specs?.fuelType || car.fuelType || '';
-      if (selectedFuel !== 'all' && fuel.toLowerCase() !== selectedFuel.toLowerCase()) {
-        return false;
-      }
-      // 6. Price Range
-      const currentPrice =
-        car.listingType === 'rent' ? car.rentalPrice || 0 : car.salePrice || car.price || 0;
-      if (minPrice && currentPrice < Number(minPrice)) {
-        return false;
-      }
-      if (maxPrice && currentPrice > Number(maxPrice)) {
-        return false;
-      }
-      // 7. Search Query
-      if (searchQuery.trim()) {
-        const q = searchQuery.toLowerCase();
-        const matchTitle = car.title.toLowerCase().includes(q);
-        const matchBrand = car.brand.toLowerCase().includes(q);
-        const matchModel = car.model.toLowerCase().includes(q);
-        const matchLocation = car.location?.toLowerCase().includes(q) || false;
-        if (!matchTitle && !matchBrand && !matchModel && !matchLocation) return false;
-      }
-      return true;
-    })
-    .sort((a, b) => {
-      const priceA = a.listingType === 'rent' ? a.rentalPrice || 0 : a.salePrice || a.price || 0;
-      const priceB = b.listingType === 'rent' ? b.rentalPrice || 0 : b.salePrice || b.price || 0;
-
-      if (sortBy === 'price_asc') return priceA - priceB;
-      if (sortBy === 'price_desc') return priceB - priceA;
-      if (sortBy === 'rating') return (b.rating || 5) - (a.rating || 5);
-      return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
-    });
+  const filteredCars = cars;
 
   const activeFiltersCount =
     (typeFilter !== 'all' ? 1 : 0) +
@@ -215,7 +214,10 @@ function CarsCatalogContent() {
                 type="text"
                 placeholder="Search by title, brand, model, or city (e.g. BMW, Miami, Coupe)..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setPage(1);
+                }}
                 className="w-full pl-10 pr-4 py-2.5 rounded-2xl border border-zinc-200 text-xs font-semibold focus:outline-none focus:border-black"
               />
             </div>
@@ -229,7 +231,10 @@ function CarsCatalogContent() {
               ].map((tab) => (
                 <button
                   key={tab.key}
-                  onClick={() => setTypeFilter(tab.key)}
+                  onClick={() => {
+                    setTypeFilter(tab.key);
+                    setPage(1);
+                  }}
                   className={`flex-1 lg:flex-none px-4 py-2 rounded-xl transition-all ${
                     typeFilter === tab.key
                       ? 'bg-black text-white shadow-sm'
@@ -245,7 +250,10 @@ function CarsCatalogContent() {
             <div className="w-full lg:w-56">
               <select
                 value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
+                onChange={(e) => {
+                  setSortBy(e.target.value);
+                  setPage(1);
+                }}
                 className="w-full px-3 py-2.5 rounded-2xl border border-zinc-200 bg-white text-xs font-bold text-zinc-800 focus:outline-none focus:border-black cursor-pointer"
               >
                 <option value="newest">Sort: Newest First</option>
@@ -282,7 +290,10 @@ function CarsCatalogContent() {
                 <label className="block text-zinc-500 font-bold mb-1 text-[11px] uppercase">Brand</label>
                 <select
                   value={selectedBrand}
-                  onChange={(e) => setSelectedBrand(e.target.value)}
+                  onChange={(e) => {
+                    setSelectedBrand(e.target.value);
+                    setPage(1);
+                  }}
                   className="w-full px-3 py-2 rounded-xl border border-zinc-200 bg-white text-xs font-semibold text-zinc-800 focus:outline-none focus:border-black"
                 >
                   <option value="all">All Brands</option>
@@ -299,7 +310,10 @@ function CarsCatalogContent() {
                 <label className="block text-zinc-500 font-bold mb-1 text-[11px] uppercase">Body Type</label>
                 <select
                   value={selectedBodyType}
-                  onChange={(e) => setSelectedBodyType(e.target.value)}
+                  onChange={(e) => {
+                    setSelectedBodyType(e.target.value);
+                    setPage(1);
+                  }}
                   className="w-full px-3 py-2 rounded-xl border border-zinc-200 bg-white text-xs font-semibold text-zinc-800 focus:outline-none focus:border-black"
                 >
                   <option value="all">All Body Types</option>
@@ -316,7 +330,10 @@ function CarsCatalogContent() {
                 <label className="block text-zinc-500 font-bold mb-1 text-[11px] uppercase">Transmission</label>
                 <select
                   value={selectedTransmission}
-                  onChange={(e) => setSelectedTransmission(e.target.value)}
+                  onChange={(e) => {
+                    setSelectedTransmission(e.target.value);
+                    setPage(1);
+                  }}
                   className="w-full px-3 py-2 rounded-xl border border-zinc-200 bg-white text-xs font-semibold text-zinc-800 focus:outline-none focus:border-black"
                 >
                   <option value="all">All Transmissions</option>
@@ -330,7 +347,10 @@ function CarsCatalogContent() {
                 <label className="block text-zinc-500 font-bold mb-1 text-[11px] uppercase">Fuel Type</label>
                 <select
                   value={selectedFuel}
-                  onChange={(e) => setSelectedFuel(e.target.value)}
+                  onChange={(e) => {
+                    setSelectedFuel(e.target.value);
+                    setPage(1);
+                  }}
                   className="w-full px-3 py-2 rounded-xl border border-zinc-200 bg-white text-xs font-semibold text-zinc-800 focus:outline-none focus:border-black"
                 >
                   <option value="all">All Fuel Types</option>
@@ -349,16 +369,22 @@ function CarsCatalogContent() {
                     type="number"
                     placeholder="Min"
                     value={minPrice}
-                    onChange={(e) => setMinPrice(e.target.value)}
-                    className="w-full px-2.5 py-2 rounded-xl border border-zinc-200 text-xs font-bold focus:outline-none focus:border-black"
+                    onChange={(e) => {
+                      setMinPrice(e.target.value);
+                      setPage(1);
+                    }}
+                    className="w-full px-2.5 py-2 rounded-xl border border-zinc-200 text-xs font-semibold text-zinc-800 focus:outline-none focus:border-black"
                   />
                   <span className="text-zinc-400 font-bold">-</span>
                   <input
                     type="number"
                     placeholder="Max"
                     value={maxPrice}
-                    onChange={(e) => setMaxPrice(e.target.value)}
-                    className="w-full px-2.5 py-2 rounded-xl border border-zinc-200 text-xs font-bold focus:outline-none focus:border-black"
+                    onChange={(e) => {
+                      setMaxPrice(e.target.value);
+                      setPage(1);
+                    }}
+                    className="w-full px-2.5 py-2 rounded-xl border border-zinc-200 text-xs font-semibold text-zinc-800 focus:outline-none focus:border-black"
                   />
                 </div>
               </div>
@@ -444,21 +470,28 @@ function CarsCatalogContent() {
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[1, 2, 3, 4, 5, 6].map((i) => (
-              <div
-                key={i}
-                className="bg-white rounded-3xl border border-zinc-200 p-4 h-96 animate-pulse space-y-4 shadow-sm"
-              >
-                <div className="h-48 bg-zinc-100 rounded-2xl" />
-                <div className="h-4 bg-zinc-100 rounded w-2/3" />
-                <div className="h-4 bg-zinc-100 rounded w-1/3" />
-              </div>
+              <CarCardSkeleton key={i} />
             ))}
           </div>
         ) : filteredCars.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredCars.map((car) => (
-              <CarCard key={car._id} car={car} />
-            ))}
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredCars.map((car) => (
+                <CarCard key={car._id} car={car} />
+              ))}
+            </div>
+
+            {/* Pagination Widget */}
+            <Pagination
+              currentPage={pagination.page}
+              totalPages={pagination.totalPages}
+              totalItems={pagination.total}
+              limit={pagination.limit}
+              onPageChange={(newPage) => {
+                setPage(newPage);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+            />
           </div>
         ) : (
           <div className="p-16 bg-white rounded-3xl border border-zinc-200 text-center space-y-4 shadow-sm">

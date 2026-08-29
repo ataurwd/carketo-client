@@ -1,63 +1,93 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, Suspense } from 'react';
 import Link from 'next/link';
-import { carService } from '@/services/car.service';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { carService, IPagination } from '@/services/car.service';
 import { ICar } from '@/types/car.types';
 import { CarCard } from '@/components/common/CarCard';
+import { CarCardSkeleton } from '@/components/common/CarCardSkeleton';
+import { Pagination } from '@/components/common/Pagination';
 import { Button } from '@/components/ui/Button';
 import { POPULAR_BRANDS, BODY_TYPES, TRANSMISSION_TYPES } from '@/lib/constants';
 import { Search, KeyRound, CalendarCheck, ShieldCheck, Plus } from 'lucide-react';
 
-export default function RentCarPage() {
+function RentCarContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const initialPage = Number(searchParams?.get('page')) || 1;
+  const initialSearch = searchParams?.get('q') || '';
+  const initialBrand = searchParams?.get('brand') || 'All';
+  const initialBodyType = searchParams?.get('bodyType') || 'All';
+  const initialTransmission = searchParams?.get('transmission') || 'All';
+  const initialMaxPrice = Number(searchParams?.get('maxPrice')) || 2000;
+
   const [cars, setCars] = useState<ICar[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [page, setPage] = useState<number>(initialPage);
+  const [pagination, setPagination] = useState<IPagination>({
+    total: 0,
+    page: initialPage,
+    limit: 12,
+    totalPages: 1,
+  });
 
-  const [search, setSearch] = useState('');
-  const [selectedBrand, setSelectedBrand] = useState('All');
-  const [selectedBodyType, setSelectedBodyType] = useState('All');
-  const [selectedTransmission, setSelectedTransmission] = useState('All');
-  const [priceRange, setPriceRange] = useState<number>(2000);
+  const [search, setSearch] = useState(initialSearch);
+  const [selectedBrand, setSelectedBrand] = useState(initialBrand);
+  const [selectedBodyType, setSelectedBodyType] = useState(initialBodyType);
+  const [selectedTransmission, setSelectedTransmission] = useState(initialTransmission);
+  const [priceRange, setPriceRange] = useState<number>(initialMaxPrice);
+
+  // Fetch paginated rental cars from backend
+  const fetchRentalCars = useCallback(async () => {
+    setIsLoading(true);
+    const queryParams: Record<string, any> = {
+      listingType: 'rent',
+      page,
+      limit: 12,
+    };
+    if (selectedBrand !== 'All') queryParams.brand = selectedBrand;
+    if (selectedBodyType !== 'All') queryParams.bodyType = selectedBodyType;
+    if (selectedTransmission !== 'All') queryParams.transmission = selectedTransmission;
+    if (priceRange < 2000) queryParams.maxPrice = priceRange;
+    if (search.trim()) queryParams.search = search.trim();
+
+    try {
+      const res = await carService.getCarsWithPagination(queryParams);
+      setCars(res.cars || []);
+      setPagination(
+        res.pagination || {
+          total: res.cars.length,
+          page,
+          limit: 12,
+          totalPages: Math.ceil(res.cars.length / 12) || 1,
+        }
+      );
+    } catch {
+      setCars([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [page, selectedBrand, selectedBodyType, selectedTransmission, priceRange, search]);
 
   useEffect(() => {
-    carService
-      .getCars({ listingType: 'rent' })
-      .then((res) => {
-        setCars(res || []);
-      })
-      .finally(() => setIsLoading(false));
-  }, []);
+    fetchRentalCars();
+  }, [fetchRentalCars]);
 
-  // Filter only cars available for rental
-  const rentalCars = useMemo(() => {
-    return cars
-      .filter((car) => car.listingType === 'rent')
-      .filter((car) => {
-        if (selectedBrand !== 'All' && car.brand.toLowerCase() !== selectedBrand.toLowerCase()) {
-          return false;
-        }
-        const bType = car.specs?.bodyType || car.bodyType || '';
-        if (selectedBodyType !== 'All' && bType.toLowerCase() !== selectedBodyType.toLowerCase()) {
-          return false;
-        }
-        const trans = car.specs?.transmission || car.transmission || '';
-        if (selectedTransmission !== 'All' && trans.toLowerCase() !== selectedTransmission.toLowerCase()) {
-          return false;
-        }
-        if (car.rentalPrice && car.rentalPrice > priceRange) {
-          return false;
-        }
-        if (search.trim()) {
-          const q = search.toLowerCase();
-          return (
-            car.title.toLowerCase().includes(q) ||
-            car.brand.toLowerCase().includes(q) ||
-            car.model.toLowerCase().includes(q)
-          );
-        }
-        return true;
-      });
-  }, [cars, search, selectedBrand, selectedBodyType, selectedTransmission, priceRange]);
+  // Synchronize URL parameters
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (page > 1) params.set('page', String(page));
+    if (selectedBrand !== 'All') params.set('brand', selectedBrand);
+    if (selectedBodyType !== 'All') params.set('bodyType', selectedBodyType);
+    if (selectedTransmission !== 'All') params.set('transmission', selectedTransmission);
+    if (priceRange < 2000) params.set('maxPrice', String(priceRange));
+    if (search.trim()) params.set('q', search.trim());
+
+    const queryStr = params.toString();
+    router.replace(queryStr ? `/rent?${queryStr}` : '/rent', { scroll: false });
+  }, [page, selectedBrand, selectedBodyType, selectedTransmission, priceRange, search, router]);
 
   return (
     <div className="min-h-screen bg-zinc-50 py-10 px-4 sm:px-6 lg:px-8">
@@ -99,7 +129,10 @@ export default function RentCarPage() {
                 type="text"
                 placeholder="Search by vehicle title, make, or model..."
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  setPage(1);
+                }}
                 className="w-full pl-10 pr-4 py-2.5 rounded-2xl border border-zinc-200 text-xs font-semibold text-zinc-800 placeholder-zinc-400 focus:outline-none focus:border-black transition-colors"
               />
             </div>
@@ -108,7 +141,10 @@ export default function RentCarPage() {
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 w-full lg:w-auto">
               <select
                 value={selectedBrand}
-                onChange={(e) => setSelectedBrand(e.target.value)}
+                onChange={(e) => {
+                  setSelectedBrand(e.target.value);
+                  setPage(1);
+                }}
                 className="px-3 py-2.5 rounded-2xl border border-zinc-200 bg-white text-xs font-semibold text-zinc-700 focus:outline-none focus:border-black"
               >
                 <option value="All">All Makes</option>
@@ -121,7 +157,10 @@ export default function RentCarPage() {
 
               <select
                 value={selectedBodyType}
-                onChange={(e) => setSelectedBodyType(e.target.value)}
+                onChange={(e) => {
+                  setSelectedBodyType(e.target.value);
+                  setPage(1);
+                }}
                 className="px-3 py-2.5 rounded-2xl border border-zinc-200 bg-white text-xs font-semibold text-zinc-700 focus:outline-none focus:border-black"
               >
                 <option value="All">All Body Types</option>
@@ -134,7 +173,10 @@ export default function RentCarPage() {
 
               <select
                 value={selectedTransmission}
-                onChange={(e) => setSelectedTransmission(e.target.value)}
+                onChange={(e) => {
+                  setSelectedTransmission(e.target.value);
+                  setPage(1);
+                }}
                 className="px-3 py-2.5 rounded-2xl border border-zinc-200 bg-white text-xs font-semibold text-zinc-700 focus:outline-none focus:border-black col-span-2 sm:col-span-1"
               >
                 <option value="All">All Transmissions</option>
@@ -159,13 +201,16 @@ export default function RentCarPage() {
                 max={2000}
                 step={25}
                 value={priceRange}
-                onChange={(e) => setPriceRange(Number(e.target.value))}
+                onChange={(e) => {
+                  setPriceRange(Number(e.target.value));
+                  setPage(1);
+                }}
                 className="w-full sm:w-48 accent-black cursor-pointer"
               />
             </div>
 
             <span className="text-zinc-500 font-semibold self-start sm:self-auto">
-              Showing <span className="font-bold text-black">{rentalCars.length}</span> rental vehicles
+              Showing <span className="font-bold text-black">{pagination.total}</span> rental vehicles
             </span>
           </div>
         </div>
@@ -174,14 +219,28 @@ export default function RentCarPage() {
         {isLoading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {[1, 2, 3, 4, 5, 6].map((i) => (
-              <div key={i} className="h-72 rounded-3xl bg-zinc-200 animate-pulse" />
+              <CarCardSkeleton key={i} />
             ))}
           </div>
-        ) : rentalCars.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {rentalCars.map((car) => (
-              <CarCard key={car._id} car={car} />
-            ))}
+        ) : cars.length > 0 ? (
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {cars.map((car) => (
+                <CarCard key={car._id} car={car} />
+              ))}
+            </div>
+
+            {/* Pagination */}
+            <Pagination
+              currentPage={pagination.page}
+              totalPages={pagination.totalPages}
+              totalItems={pagination.total}
+              limit={pagination.limit}
+              onPageChange={(newPage) => {
+                setPage(newPage);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+            />
           </div>
         ) : (
           <div className="p-16 bg-white rounded-3xl border border-zinc-200 text-center space-y-4 shadow-sm">
@@ -199,5 +258,19 @@ export default function RentCarPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function RentCarPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-zinc-50">
+          <div className="h-10 w-10 border-4 border-black border-t-transparent rounded-full animate-spin" />
+        </div>
+      }
+    >
+      <RentCarContent />
+    </Suspense>
   );
 }

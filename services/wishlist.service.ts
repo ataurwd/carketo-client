@@ -15,4 +15,13 @@ export const wishlistService = {
       return [];
     }
   },
+
+  async checkWishlist(carId: string): Promise<{ isWishlisted: boolean }> {
+    try {
+      const res: any = await apiClient.get(`/wishlist/check/${carId}`);
+      return res.data;
+    } catch {
+      return { isWishlisted: false };
+    }
+  },
 };

@@ -1,6 +1,13 @@
 import { apiClient } from '@/lib/api-client';
 import { ICar } from '@/types/car.types';
 
+export interface IPagination {
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
 export const carService = {
   async getCars(params?: Record<string, any>): Promise<ICar[]> {
     try {
@@ -8,6 +15,27 @@ export const carService = {
       return Array.isArray(res.data) ? res.data : [];
     } catch {
       return [];
+    }
+  },
+
+  async getCarsWithPagination(
+    params?: Record<string, any>
+  ): Promise<{ cars: ICar[]; pagination: IPagination }> {
+    try {
+      const res: any = await apiClient.get('/cars', { params });
+      const cars = Array.isArray(res.data) ? res.data : [];
+      const pagination: IPagination = res.meta || {
+        total: cars.length,
+        page: Number(params?.page) || 1,
+        limit: Number(params?.limit) || 12,
+        totalPages: Math.ceil(cars.length / (Number(params?.limit) || 12)) || 1,
+      };
+      return { cars, pagination };
+    } catch {
+      return {
+        cars: [],
+        pagination: { total: 0, page: 1, limit: 12, totalPages: 1 },
+      };
     }
   },
 

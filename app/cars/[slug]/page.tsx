@@ -88,6 +88,19 @@ export default function CarDetailPage() {
     }
   }, [car?._id]);
 
+  useEffect(() => {
+    if (car?._id && user) {
+      wishlistService
+        .checkWishlist(car._id)
+        .then((res) => {
+          setIsWishlisted(Boolean(res?.isWishlisted));
+        })
+        .catch(() => {});
+    } else {
+      setIsWishlisted(false);
+    }
+  }, [car?._id, user]);
+
   const handlePhoneClick = () => {
     if (!user) {
       setLoginPromptOpen(true);
@@ -103,12 +116,18 @@ export default function CarDetailPage() {
   };
 
   const handleToggleWishlist = async () => {
+    if (!user) {
+      setLoginPromptOpen(true);
+      return;
+    }
     if (!car?._id) return;
-    setIsWishlisted(!isWishlisted);
+    const previous = isWishlisted;
+    setIsWishlisted(!previous);
     try {
-      await wishlistService.toggle(car._id);
+      const res = await wishlistService.toggle(car._id);
+      setIsWishlisted(res.isWishlisted);
     } catch {
-      // optimistic toggle
+      setIsWishlisted(previous);
     }
   };
 
@@ -277,14 +296,20 @@ export default function CarDetailPage() {
                 <button
                   type="button"
                   onClick={handleToggleWishlist}
-                  className={`h-11 w-11 rounded-full border flex items-center justify-center transition-colors shrink-0 ${
+                  className={`h-11 w-11 rounded-full border flex items-center justify-center transition-all duration-200 shrink-0 ${
                     isWishlisted
-                      ? 'bg-rose-50 border-rose-200 text-rose-600'
-                      : 'border-zinc-200 text-zinc-400 hover:text-black hover:border-black'
+                      ? 'bg-rose-50 border-rose-200 text-rose-600 shadow-sm ring-4 ring-rose-50'
+                      : 'bg-white border-zinc-200 text-zinc-400 hover:text-rose-600 hover:border-rose-200'
                   }`}
-                  title="Save to Wishlist"
+                  title={isWishlisted ? 'Remove from Saved Wishlist' : 'Save to Wishlist'}
                 >
-                  <Heart className={`w-5 h-5 ${isWishlisted ? 'fill-current' : ''}`} />
+                  <Heart
+                    className={`w-5 h-5 transition-all duration-200 ${
+                      isWishlisted
+                        ? 'fill-rose-600 text-rose-600 stroke-rose-600'
+                        : 'text-zinc-400 stroke-[2]'
+                    }`}
+                  />
                 </button>
               </div>
 

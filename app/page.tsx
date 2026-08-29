@@ -4,6 +4,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { SearchFilterBar } from '@/components/common/SearchFilterBar';
 import { CarCard } from '@/components/common/CarCard';
+import { CarCardSkeleton } from '@/components/common/CarCardSkeleton';
 import { Button } from '@/components/ui/Button';
 import { carService } from '@/services/car.service';
 import { ICar } from '@/types/car.types';
@@ -73,7 +74,7 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto text-center relative z-10 space-y-6">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300 text-xs font-bold uppercase tracking-widest">
             <Sparkles className="w-3.5 h-3.5 text-zinc-400" />
-            <span>Premium Fleet Collection</span>
+            <span>Premium Fleet Collection ..</span>
           </div>
 
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white max-w-4xl mx-auto leading-tight">
@@ -97,59 +98,61 @@ export default function HomePage() {
 
 
       {/* 3. SECTION A: DEDICATED RENTAL CARS */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-10">
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-zinc-200 pb-6">
-          <div className="space-y-2">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-100 text-black text-xs font-bold uppercase tracking-wider border border-zinc-200">
-              <KeyRound className="w-3.5 h-3.5" />
-              <span>Rental Fleet</span>
+      <section className="py-20 bg-zinc-50 px-4 sm:px-6 lg:px-8 border-t border-zinc-200">
+        <div className="max-w-7xl mx-auto space-y-10">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-zinc-200 pb-6">
+            <div className="space-y-2">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-black text-white text-xs font-bold uppercase tracking-wider">
+                <ShoppingBag className="w-3.5 h-3.5" />
+                <span>Cars for Rent</span>
+              </div>
+              <h2 className="text-3xl sm:text-4xl font-black text-black">
+                Cars for Rent
+              </h2>
+              <p className="text-zinc-500 text-xs sm:text-sm max-w-xl">
+                Browse a diverse selection of vehicles available for rent. Find the perfect car for your needs at competitive daily or weekly rates. Each listing includes detailed specifications, verified owner information, and transparent pricing.
+              </p>
             </div>
-            <h2 className="text-3xl sm:text-4xl font-black text-black">
-              Cars for Rent
-            </h2>
-            <p className="text-zinc-500 text-xs sm:text-sm max-w-xl">
-              Instant direct booking with masked contact phone numbers. Click on any car card to reveal and copy owner contact details directly.
-            </p>
-          </div>
 
-          <Link href="/rent">
-            <Button
-              variant="dark"
-              size="md"
-              rightIcon={<ArrowUpRight className="w-4 h-4" />}
-            >
-              View All Rentals ({rentalCars.length})
-            </Button>
-          </Link>
-        </div>
-
-        {/* Rental Cars Grid */}
-        {isLoadingCars ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="h-64 rounded-3xl bg-zinc-100 animate-pulse" />
-            ))}
-          </div>
-        ) : rentalCars.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {rentalCars.map((car) => (
-              <CarCard key={car._id} car={car} />
-            ))}
-          </div>
-        ) : (
-          <div className="p-12 rounded-3xl bg-zinc-50 border border-zinc-200 text-center space-y-4">
-            <KeyRound className="w-10 h-10 text-zinc-400 mx-auto" />
-            <h3 className="text-base font-bold text-black">No Rental Cars Currently Listed</h3>
-            <p className="text-xs text-zinc-500 max-w-md mx-auto">
-              Be the first to list a car for rent and start earning from verified renters with zero commission fees!
-            </p>
-            <Link href="/sell">
-              <Button variant="dark" size="sm" leftIcon={<Plus className="w-4 h-4" />}>
-                List Car for Rent
+            <Link href="/rent">
+              <Button
+                variant="outline"
+                size="md"
+                rightIcon={<ArrowUpRight className="w-4 h-4" />}
+              >
+                View All Rentals {rentalCars.length > 0 ? `(${rentalCars.length})` : ''}
               </Button>
             </Link>
           </div>
-        )}
+
+          {/* Rental Cars Grid */}
+          {isLoadingCars ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+              {[1, 2, 3].map((i) => (
+                <CarCardSkeleton key={i} />
+              ))}
+            </div>
+          ) : rentalCars.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+              {rentalCars.map((car) => (
+                <CarCard key={car._id} car={car} />
+              ))}
+            </div>
+          ) : (
+            <div className="p-12 rounded-3xl bg-white border border-zinc-200 text-center space-y-4">
+              <ShoppingBag className="w-10 h-10 text-zinc-400 mx-auto" />
+              <h3 className="text-base font-bold text-black">No Cars for Sale Currently Listed</h3>
+              <p className="text-xs text-zinc-500 max-w-md mx-auto">
+                List your vehicle for sale today and reach thousands of prospective car buyers!
+              </p>
+              <Link href="/sell">
+                <Button variant="dark" size="sm" leftIcon={<Plus className="w-4 h-4" />}>
+                  List Car for Sale
+                </Button>
+              </Link>
+            </div>
+          )}
+        </div>
       </section>
 
       {/* 4. SECTION B: DEDICATED CARS FOR SALE */}
@@ -175,20 +178,20 @@ export default function HomePage() {
                 size="md"
                 rightIcon={<ArrowUpRight className="w-4 h-4" />}
               >
-                View All Cars for Sale ({saleCars.length})
+                View All Cars for Sale {saleCars.length > 0 ? `(${saleCars.length})` : ''}
               </Button>
             </Link>
           </div>
 
           {/* Sale Cars Grid */}
           {isLoadingCars ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="h-64 rounded-3xl bg-zinc-200 animate-pulse" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+              {[1, 2, 3].map((i) => (
+                <CarCardSkeleton key={i} />
               ))}
             </div>
           ) : saleCars.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
               {saleCars.map((car) => (
                 <CarCard key={car._id} car={car} />
               ))}
@@ -209,6 +212,8 @@ export default function HomePage() {
           )}
         </div>
       </section>
+
+
 
       {/* 5. TRUSTED PARTNER & ASSURANCE SECTION */}
       <section className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
