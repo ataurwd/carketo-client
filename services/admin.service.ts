@@ -1,5 +1,20 @@
 import { apiClient } from '@/lib/api-client';
 
+export interface TimeSeriesPoint {
+  date?: string;
+  month?: string;
+  label: string;
+  users: number;
+  cars: number;
+  inquiries: number;
+}
+
+export interface BrandBreakdown {
+  brand: string;
+  count: number;
+  percentage: number;
+}
+
 export interface AdminStatsData {
   metrics: {
     totalRevenue: number;
@@ -14,7 +29,16 @@ export interface AdminStatsData {
     totalReviews: number;
     completedPaymentsCount: number;
   };
-  recentBookings: any[];
+  analytics?: {
+    daily: TimeSeriesPoint[];
+    monthly: TimeSeriesPoint[];
+    topBrands: BrandBreakdown[];
+    listingBreakdown: {
+      rent: number;
+      sale: number;
+    };
+  };
+  recentBookings?: any[];
   recentUsers: any[];
   recentCars: any[];
   recentInquiries: any[];
