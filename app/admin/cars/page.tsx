@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { adminService } from '@/services/admin.service';
+import { confirmDialog, showToast } from '@/lib/alert';
 import { ICar } from '@/types/car.types';
 import { formatPrice } from '@/lib/utils';
 import { Button } from '@/components/ui/Button';
@@ -59,12 +60,22 @@ export default function AdminCarsPage() {
   };
 
   const handleDeleteCar = async (carId: string) => {
-    if (!confirm('Are you sure you want to permanently delete this vehicle listing as Administrator?')) return;
+    const isConfirmed = await confirmDialog({
+      title: 'Permanently Delete Listing?',
+      text: 'Are you sure you want to permanently delete this vehicle listing as Administrator? This action cannot be undone.',
+      confirmButtonText: 'Yes, Delete Listing',
+      cancelButtonText: 'Cancel',
+      icon: 'warning',
+      isDestructive: true,
+    });
+    if (!isConfirmed) return;
+
     try {
       await adminService.deleteCarAdmin(carId);
       setCars(cars.filter((c) => c._id !== carId));
+      showToast('Vehicle listing deleted successfully', 'success');
     } catch {
-      setCars(cars.filter((c) => c._id !== carId));
+      showToast('Failed to delete vehicle listing', 'error');
     }
   };
 

@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { adminService } from '@/services/admin.service';
+import { confirmDialog, showToast } from '@/lib/alert';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import {
@@ -49,16 +50,24 @@ export default function AdminUsersPage() {
   };
 
   const handleRoleChange = async (userId: string, newRole: string) => {
-    if (!confirm(`Are you sure you want to change this user's role to ${newRole.toUpperCase()}?`)) return;
+    const isConfirmed = await confirmDialog({
+      title: 'Change User Role?',
+      text: `Are you sure you want to change this user's role to ${newRole.toUpperCase()}?`,
+      confirmButtonText: `Yes, Make ${newRole.toUpperCase()}`,
+      cancelButtonText: 'Cancel',
+      icon: 'question',
+      isDestructive: false,
+    });
+    if (!isConfirmed) return;
+
     try {
       await adminService.updateUserRole(userId, newRole);
       setUsers(
         users.map((u) => (u._id === userId ? { ...u, role: newRole } : u))
       );
+      showToast(`User role updated to ${newRole.toUpperCase()}`, 'success');
     } catch {
-      setUsers(
-        users.map((u) => (u._id === userId ? { ...u, role: newRole } : u))
-      );
+      showToast('Failed to update user role', 'error');
     }
   };
 

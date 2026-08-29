@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { carService } from '@/services/car.service';
+import { confirmDialog, showToast } from '@/lib/alert';
 import { ICar } from '@/types/car.types';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
@@ -118,12 +119,22 @@ export default function ProviderCarsPage() {
   };
 
   const handleDelete = async (carId: string) => {
-    if (!confirm('Are you sure you want to archive this vehicle listing?')) return;
+    const isConfirmed = await confirmDialog({
+      title: 'Archive Listing?',
+      text: 'Are you sure you want to archive this vehicle listing? It will no longer be publicly visible to buyers.',
+      confirmButtonText: 'Yes, Archive',
+      cancelButtonText: 'Cancel',
+      icon: 'warning',
+      isDestructive: true,
+    });
+    if (!isConfirmed) return;
+
     try {
       await carService.deleteCar(carId);
       setCars(cars.filter((c) => c._id !== carId));
+      showToast('Vehicle listing archived successfully', 'success');
     } catch {
-      setCars(cars.filter((c) => c._id !== carId));
+      showToast('Failed to archive listing', 'error');
     }
   };
 

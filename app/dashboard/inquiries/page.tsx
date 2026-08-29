@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { inquiryService, IInquiry } from '@/services/inquiry.service';
+import { confirmDialog, showToast } from '@/lib/alert';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import {
@@ -42,12 +43,22 @@ export default function UserInquiriesPage() {
   };
 
   const handleDelete = async (inquiryId: string) => {
-    if (!confirm('Are you sure you want to delete this inquiry?')) return;
+    const isConfirmed = await confirmDialog({
+      title: 'Delete Inquiry?',
+      text: 'Are you sure you want to delete this customer inquiry from your dashboard?',
+      confirmButtonText: 'Yes, Delete',
+      cancelButtonText: 'Cancel',
+      icon: 'warning',
+      isDestructive: true,
+    });
+    if (!isConfirmed) return;
+
     try {
       await inquiryService.deleteInquiry(inquiryId);
       setInquiries(inquiries.filter((inq) => inq._id !== inquiryId));
+      showToast('Inquiry deleted successfully', 'success');
     } catch {
-      setInquiries(inquiries.filter((inq) => inq._id !== inquiryId));
+      showToast('Failed to delete inquiry', 'error');
     }
   };
 

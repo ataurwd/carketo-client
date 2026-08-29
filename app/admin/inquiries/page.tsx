@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { adminService } from '@/services/admin.service';
+import { confirmDialog, showToast } from '@/lib/alert';
 import { IInquiry } from '@/services/inquiry.service';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
@@ -35,12 +36,22 @@ export default function AdminInquiriesPage() {
   }, []);
 
   const handleDelete = async (inquiryId: string) => {
-    if (!confirm('Are you sure you want to delete this inquiry record as Administrator?')) return;
+    const isConfirmed = await confirmDialog({
+      title: 'Delete Inquiry Record?',
+      text: 'Are you sure you want to delete this customer inquiry record? This action cannot be undone.',
+      confirmButtonText: 'Yes, Delete',
+      cancelButtonText: 'Cancel',
+      icon: 'warning',
+      isDestructive: true,
+    });
+    if (!isConfirmed) return;
+
     try {
       await adminService.deleteInquiryAdmin(inquiryId);
       setInquiries(inquiries.filter((inq) => inq._id !== inquiryId));
+      showToast('Inquiry deleted successfully', 'success');
     } catch {
-      setInquiries(inquiries.filter((inq) => inq._id !== inquiryId));
+      showToast('Failed to delete inquiry', 'error');
     }
   };
 

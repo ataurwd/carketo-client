@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { adminService } from '@/services/admin.service';
+import { confirmDialog, showToast } from '@/lib/alert';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import {
@@ -31,12 +32,22 @@ export default function AdminReviewsPage() {
   }, []);
 
   const handleDelete = async (reviewId: string) => {
-    if (!confirm('Are you sure you want to permanently delete this customer review?')) return;
+    const isConfirmed = await confirmDialog({
+      title: 'Permanently Delete Review?',
+      text: 'Are you sure you want to permanently delete this customer review? This will update average rating calculations.',
+      confirmButtonText: 'Yes, Delete',
+      cancelButtonText: 'Cancel',
+      icon: 'warning',
+      isDestructive: true,
+    });
+    if (!isConfirmed) return;
+
     try {
       await adminService.deleteReviewAdmin(reviewId);
       setReviews(reviews.filter((r) => r._id !== reviewId));
+      showToast('Customer review deleted successfully', 'success');
     } catch {
-      setReviews(reviews.filter((r) => r._id !== reviewId));
+      showToast('Failed to delete review', 'error');
     }
   };
 
