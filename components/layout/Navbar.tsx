@@ -193,19 +193,42 @@ export const Navbar: React.FC = () => {
                     setUserDropdownOpen(!userDropdownOpen);
                     setNotificationsOpen(false);
                   }}
-                  className="flex items-center gap-2 p-1.5 pl-3 pr-2 rounded-full border border-zinc-300 bg-white hover:border-black transition-all"
+                  className="flex items-center gap-2 p-1 pl-3 pr-1 rounded-full border border-zinc-300 bg-white hover:border-black transition-all"
                 >
-                  <span className="text-xs font-bold text-black">{user.name}</span>
-                  <div className="h-7 w-7 rounded-full bg-black text-white flex items-center justify-center text-xs font-black">
-                    {user.name.charAt(0).toUpperCase()}
-                  </div>
+                  <span className="text-xs font-bold text-black max-w-[120px] truncate">{user.name}</span>
+                  {user.avatar ? (
+                    <img
+                      src={user.avatar}
+                      alt={user.name}
+                      referrerPolicy="no-referrer"
+                      className="h-7 w-7 rounded-full object-cover border border-zinc-200"
+                    />
+                  ) : (
+                    <div className="h-7 w-7 rounded-full bg-black text-white flex items-center justify-center text-xs font-black">
+                      {user.name.charAt(0).toUpperCase()}
+                    </div>
+                  )}
                 </button>
 
                 {userDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-52 rounded-2xl bg-white border border-zinc-200 shadow-xl py-2 z-50">
-                    <div className="px-4 py-2 border-b border-zinc-100">
-                      <p className="text-xs font-bold text-black truncate">{user.name}</p>
-                      <p className="text-[10px] text-zinc-400 truncate">{user.email}</p>
+                  <div className="absolute right-0 mt-2 w-56 rounded-2xl bg-white border border-zinc-200 shadow-xl py-2 z-50">
+                    <div className="px-4 py-2.5 border-b border-zinc-100 flex items-center gap-2.5">
+                      {user.avatar ? (
+                        <img
+                          src={user.avatar}
+                          alt={user.name}
+                          referrerPolicy="no-referrer"
+                          className="h-8 w-8 rounded-full object-cover border border-zinc-200 shrink-0"
+                        />
+                      ) : (
+                        <div className="h-8 w-8 rounded-full bg-black text-white flex items-center justify-center text-xs font-black shrink-0">
+                          {user.name.charAt(0).toUpperCase()}
+                        </div>
+                      )}
+                      <div className="min-w-0">
+                        <p className="text-xs font-bold text-black truncate">{user.name}</p>
+                        <p className="text-[10px] text-zinc-400 truncate">{user.email}</p>
+                      </div>
                     </div>
 
                     {user.role === 'admin' ? (

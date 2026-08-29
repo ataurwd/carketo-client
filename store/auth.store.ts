@@ -50,6 +50,7 @@ export const useAuthStore = create<AuthStore>()(
         if (state) {
           if (state.token && typeof window !== 'undefined') {
             localStorage.setItem('access_token', state.token);
+            document.cookie = `access_token=${state.token}; path=/; max-age=604800; SameSite=Lax`;
           }
           state.isInitialized = true;
         }

@@ -67,7 +67,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     <div className="min-h-screen bg-zinc-100 flex flex-col md:flex-row font-sans">
       {/* MOBILE TOP BAR */}
       <div className="md:hidden bg-zinc-900 text-white px-4 py-3 flex items-center justify-between sticky top-0 z-50 border-b border-zinc-800">
-        <Link href="/admin" className="flex items-center gap-2">
+        <Link href="/" className="flex items-center gap-2" title="Back to Home">
           <Logo variant="white" size="sm" />
           <span className="px-2 py-0.5 rounded text-[10px] font-extrabold uppercase bg-rose-500/20 text-rose-400 border border-rose-500/30">
             Admin
@@ -90,7 +90,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         {/* Top Header */}
         <div className="p-6 space-y-6">
           <div className="flex items-center justify-between">
-            <Link href="/admin" className="flex items-center gap-2.5 hover:opacity-90 transition-opacity">
+            <Link href="/" className="flex items-center gap-2.5 hover:opacity-90 transition-opacity" title="Back to Home">
               <Logo variant="white" size="md" />
               <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-rose-500 text-white">
                 Admin
@@ -137,9 +137,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
           <div className="p-3 rounded-2xl bg-zinc-800/80 border border-zinc-700/60 flex items-center justify-between">
             <div className="flex items-center gap-2.5 overflow-hidden">
-              <div className="h-8 w-8 rounded-xl bg-rose-500 text-white flex items-center justify-center font-black text-xs shrink-0">
-                {user?.name ? user.name.charAt(0).toUpperCase() : 'A'}
-              </div>
+              {user?.avatar ? (
+                <img
+                  src={user.avatar}
+                  alt={user?.name || 'Admin'}
+                  referrerPolicy="no-referrer"
+                  className="h-8 w-8 rounded-xl object-cover border border-zinc-700 shrink-0"
+                />
+              ) : (
+                <div className="h-8 w-8 rounded-xl bg-rose-500 text-white flex items-center justify-center font-black text-xs shrink-0">
+                  {user?.name ? user.name.charAt(0).toUpperCase() : 'A'}
+                </div>
+              )}
               <div className="truncate">
                 <p className="text-xs font-bold text-white truncate">{user?.name || 'Administrator'}</p>
                 <p className="text-[10px] text-zinc-400 truncate">{user?.email}</p>

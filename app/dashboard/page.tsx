@@ -41,9 +41,18 @@ export default function UserDashboardPage() {
         {/* Header greeting */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 sm:p-8 rounded-3xl border border-zinc-200 shadow-sm">
           <div className="flex items-center gap-4">
-            <div className="h-14 w-14 rounded-2xl bg-black text-white flex items-center justify-center text-xl font-black shadow-md">
-              {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
-            </div>
+            {user?.avatar ? (
+              <img
+                src={user.avatar}
+                alt={user?.name || 'User'}
+                referrerPolicy="no-referrer"
+                className="h-14 w-14 rounded-2xl object-cover shadow-md border border-zinc-200"
+              />
+            ) : (
+              <div className="h-14 w-14 rounded-2xl bg-black text-white flex items-center justify-center text-xl font-black shadow-md">
+                {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
+              </div>
+            )}
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-xl sm:text-2xl font-black text-black">

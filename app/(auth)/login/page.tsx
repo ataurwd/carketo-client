@@ -23,16 +23,80 @@ function LoginFormContent() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  // Automatically redirect if already logged in
+  // Handle OAuth callback and redirect if already logged in
   useEffect(() => {
-    if (isInitialized && isAuthenticated && user) {
-      const targetUrl =
-        searchParams.get('redirect') ||
-        searchParams.get('from') ||
-        (user.role === 'admin' ? '/admin' : '/dashboard');
-      router.replace(targetUrl);
+    const oauthSuccess = searchParams.get('oauth_success');
+    const oauthToken = searchParams.get('oauth_token');
+    const oauthError = searchParams.get('error');
+
+    if (oauthError) {
+      setError(decodeURIComponent(oauthError));
+      return;
     }
-  }, [isInitialized, isAuthenticated, user, searchParams, router]);
+
+    if (oauthSuccess === 'true' && oauthToken) {
+      setIsLoading(true);
+      // Temporarily store token so getMe can authenticate
+      localStorage.setItem('access_token', oauthToken);
+      document.cookie = `access_token=${oauthToken}; path=/; max-age=604800; SameSite=Lax`;
+
+      authService
+        .getMe()
+        .then((userData) => {
+          if (userData) {
+            setAuth(userData, oauthToken);
+            setSuccess('Signed in with Google successfully! Redirecting...');
+            const rawTarget = searchParams.get('redirect') || searchParams.get('from');
+            const targetUrl =
+              rawTarget && !rawTarget.startsWith('/login')
+                ? rawTarget
+                : userData.role === 'admin'
+                ? '/admin'
+                : '/dashboard';
+
+            setTimeout(() => {
+              window.location.href = targetUrl;
+            }, 500);
+          } else {
+            setError('Failed to fetch user profile. Please try logging in again.');
+          }
+        })
+        .catch(() => {
+          setError('Google authentication failed. Please try again.');
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
+      return;
+    }
+
+    // Only redirect if user has fully initialized session and valid token
+    if (isInitialized && isAuthenticated && user) {
+      const storedToken = localStorage.getItem('access_token');
+      if (storedToken) {
+        document.cookie = `access_token=${storedToken}; path=/; max-age=604800; SameSite=Lax`;
+        const rawTarget = searchParams.get('redirect') || searchParams.get('from');
+        
+        let targetUrl =
+          rawTarget && !rawTarget.startsWith('/login')
+            ? rawTarget
+            : user.role === 'admin'
+            ? '/admin'
+            : '/dashboard';
+
+        if (targetUrl.startsWith('/admin') && user.role !== 'admin') {
+          targetUrl = '/dashboard';
+        }
+
+        router.replace(targetUrl);
+      }
+    }
+  }, [isInitialized, isAuthenticated, user, searchParams, router, setAuth]);
+
+  const handleGoogleSignIn = () => {
+    setError('');
+    window.location.href = authService.getGoogleAuthUrl();
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -147,9 +211,7 @@ function LoginFormContent() {
       {/* Google OAuth Button */}
       <button
         type="button"
-        onClick={() => {
-          setError('Google OAuth is configured and ready for live Client ID.');
-        }}
+        onClick={handleGoogleSignIn}
         className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-full border border-zinc-300 bg-white hover:bg-zinc-50 text-xs sm:text-sm font-bold text-black shadow-sm transition-all"
       >
         <svg className="w-4 h-4" viewBox="0 0 24 24">
