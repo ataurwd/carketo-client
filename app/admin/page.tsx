@@ -201,33 +201,33 @@ export default function AdminOverviewPage() {
           </div>
         </div>
 
-        {/* Card 4: Reviews & Ratings */}
+        {/* Card 4: Coupons & Discounts */}
         <div className="bg-white p-6 rounded-3xl border border-zinc-200 shadow-sm space-y-4 hover:border-zinc-300 transition-all">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold tracking-wider text-zinc-500 uppercase">
-              Vehicle Reviews
+              Promotions & Coupons
             </span>
             <div className="h-9 w-9 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center border border-amber-100">
-              <Star className="w-4 h-4" />
+              <Tag className="w-4 h-4" />
             </div>
           </div>
 
           <div>
             <p className="text-3xl sm:text-4xl font-black text-black tracking-tight">
-              {metrics.totalReviews}
+              Active
             </p>
             <p className="text-[11px] text-zinc-500 font-semibold mt-1">
-              Verified community feedbacks
+              Seasonal discounts & promo codes
             </p>
           </div>
 
           <div className="pt-2 border-t border-zinc-100 flex items-center justify-between text-xs">
-            <span className="text-zinc-500 font-medium">Moderation:</span>
+            <span className="text-zinc-500 font-medium">Coupon codes:</span>
             <Link
-              href="/admin/reviews"
+              href="/admin/coupons"
               className="font-bold text-amber-600 hover:underline inline-flex items-center gap-1"
             >
-              <span>Manage reviews</span>
+              <span>Manage coupons</span>
               <ArrowRight className="w-3 h-3" />
             </Link>
           </div>

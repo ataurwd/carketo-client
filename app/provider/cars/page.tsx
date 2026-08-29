@@ -319,10 +319,10 @@ export default function ProviderCarsPage() {
               <form onSubmit={handleSaveEdit} className="space-y-4 text-xs font-semibold">
                 <div>
                   <label className="block text-zinc-700 font-bold mb-1">
-                    {editingCar.listingType === 'rent' ? 'Daily Rental Rate ($/day)' : 'Total Sale Price ($)'}
+                    {editingCar.listingType === 'rent' ? 'Daily Rental Rate (৳/day)' : 'Total Sale Price (৳)'}
                   </label>
                   <div className="relative">
-                    <DollarSign className="w-4 h-4 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                    <span className="text-zinc-500 font-black absolute left-3 top-1/2 -translate-y-1/2 text-sm">৳</span>
                     <input
                       type="number"
                       required

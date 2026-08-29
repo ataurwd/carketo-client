@@ -363,7 +363,7 @@ function CarsCatalogContent() {
 
               {/* Price Range */}
               <div>
-                <label className="block text-zinc-500 font-bold mb-1 text-[11px] uppercase">Price Range ($)</label>
+                <label className="block text-zinc-500 font-bold mb-1 text-[11px] uppercase">Price Range (৳)</label>
                 <div className="flex items-center gap-2">
                   <input
                     type="number"

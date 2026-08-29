@@ -107,12 +107,12 @@ export default function AdminCouponsPage() {
                   className="w-full text-xs font-semibold px-3 py-2.5 rounded-xl border border-zinc-200 bg-white focus:outline-none focus:border-black"
                 >
                   <option value="percentage">Percentage Discount (%)</option>
-                  <option value="fixed">Fixed Dollar Amount ($)</option>
+                  <option value="fixed">Fixed Taka Amount (৳)</option>
                 </select>
               </div>
 
               <Input
-                label={discountType === 'percentage' ? 'Discount Percentage (%)' : 'Discount Amount ($)'}
+                label={discountType === 'percentage' ? 'Discount Percentage (%)' : 'Discount Amount (৳)'}
                 type="number"
                 required
                 value={discountValue}

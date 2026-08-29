@@ -27,7 +27,6 @@ const navItems = [
   { label: 'Fleet Cars', href: '/admin/cars', icon: Car },
   { label: 'Users', href: '/admin/users', icon: Users },
   { label: 'Inquiries', href: '/admin/inquiries', icon: MessageSquare },
-  { label: 'Reviews', href: '/admin/reviews', icon: Star },
   { label: 'Coupons', href: '/admin/coupons', icon: Ticket },
   { label: 'Settings', href: '/admin/settings', icon: Settings },
   { label: 'System Health', href: '/admin/health', icon: Activity },

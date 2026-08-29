@@ -116,7 +116,7 @@ export default function CreateCarPage() {
 
   // 3. Vehicle Overview Details
   const [title, setTitle] = useState('');
-  const [brand, setBrand] = useState('Porsche');
+  const [brand, setBrand] = useState('Toyota');
   const [model, setModel] = useState('');
   const [year, setYear] = useState<number>(2024);
   const [condition, setCondition] = useState<'new' | 'used' | 'certified'>('used');
@@ -897,7 +897,7 @@ export default function CreateCarPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {listingType === 'rent' ? (
                 <Input
-                  label="Daily Rental Rate ($ / Day)"
+                  label="Daily Rental Rate (৳ / Day)"
                   type="number"
                   required
                   value={rentalPrice}
@@ -905,12 +905,12 @@ export default function CreateCarPage() {
                     setRentalPrice(e.target.value === '' ? '' : Number(e.target.value));
                     setFieldErrors((p) => ({ ...p, rentalPrice: '' }));
                   }}
-                  placeholder="e.g. 299"
+                  placeholder="e.g. 5000"
                   error={fieldErrors['rentalPrice']}
                 />
               ) : (
                 <Input
-                  label="Total Outright Sale Price ($)"
+                  label="Total Outright Sale Price (৳)"
                   type="number"
                   required
                   value={salePrice}
@@ -918,7 +918,7 @@ export default function CreateCarPage() {
                     setSalePrice(e.target.value === '' ? '' : Number(e.target.value));
                     setFieldErrors((p) => ({ ...p, salePrice: '' }));
                   }}
-                  placeholder="e.g. 85000"
+                  placeholder="e.g. 3500000"
                   error={fieldErrors['salePrice']}
                 />
               )}

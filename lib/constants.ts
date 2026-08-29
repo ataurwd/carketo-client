@@ -3,7 +3,7 @@ export const SITE_CONFIG = {
   tagline: 'Premium Car Rental & Marketplace',
   description: 'Experience the ease and convenience of renting or buying top-tier vehicles.',
   apiUrl: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1',
-  currency: '$',
+  currency: '৳',
 };
 
 export const NAV_LINKS = [
@@ -30,12 +30,34 @@ export const FUEL_TYPES = ['Petrol', 'Diesel', 'Hybrid', 'Electric', 'Plug-in Hy
 export const TRANSMISSION_TYPES = ['Automatic', 'Manual', 'Semi-Automatic'];
 
 export const POPULAR_BRANDS = [
+  'Toyota',
+  'Honda',
+  'Nissan',
+  'Mitsubishi',
+  'Hyundai',
+  'Kia',
   'BMW',
   'Mercedes-Benz',
   'Audi',
   'Porsche',
-  'Toyota',
   'Ford',
+  'Land Rover',
+  'Lexus',
+  'Mazda',
+  'Suzuki',
+  'MG',
+  'Haval',
   'Tesla',
+  'Volkswagen',
+  'Volvo',
   'Lamborghini',
+  'Ferrari',
+  'Jeep',
+  'Subaru',
+  'Chevrolet',
+  'Peugeot',
+  'Proton',
+  'Tata',
+  'Mahindra',
+  'Other Brand',
 ];

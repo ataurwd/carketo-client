@@ -112,14 +112,14 @@ export default function UserDashboardPage() {
           </Link>
 
           <Link
-            href="/dashboard/reviews"
+            href="/dashboard/inquiries"
             className="p-5 rounded-3xl bg-white border border-zinc-200 hover:border-black hover:shadow-md transition-all space-y-2 group"
           >
             <div className="h-10 w-10 rounded-2xl bg-zinc-100 flex items-center justify-center text-black group-hover:bg-black group-hover:text-white transition-colors">
-              <Star className="w-5 h-5" />
+              <ShoppingBag className="w-5 h-5" />
             </div>
-            <h4 className="font-extrabold text-sm text-black">My Reviews</h4>
-            <p className="text-[11px] text-zinc-400">Ratings & feedback</p>
+            <h4 className="font-extrabold text-sm text-black">My Inquiries</h4>
+            <p className="text-[11px] text-zinc-400">Direct seller messages</p>
           </Link>
 
           <Link

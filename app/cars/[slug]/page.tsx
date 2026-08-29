@@ -6,13 +6,13 @@ import { useParams, useRouter } from 'next/navigation';
 import { carService } from '@/services/car.service';
 import { ICar } from '@/types/car.types';
 import { wishlistService } from '@/services/wishlist.service';
-import { reviewService, ReviewResponse } from '@/services/review.service';
 import { inquiryService } from '@/services/inquiry.service';
 import { useAuthStore } from '@/store/auth.store';
 import { formatPrice } from '@/lib/utils';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Accordion } from '@/components/ui/Accordion';
+import { CarCard } from '@/components/common/CarCard';
 import {
   DoorClosed,
   Users,
@@ -37,6 +37,7 @@ import {
   Lock,
   MapPin,
   Car as CarIcon,
+  ShoppingBag,
 } from 'lucide-react';
 
 /** Auto-sliding image carousel with touch/mouse swipe and arrow navigation */
@@ -235,16 +236,11 @@ export default function CarDetailPage() {
   const [inquiryMessage, setInquiryMessage] = useState('');
   const [inquirySubmitted, setInquirySubmitted] = useState(false);
 
-  // Reviews state
-  const [reviewData, setReviewData] = useState<ReviewResponse | null>(null);
-  const [userRating, setUserRating] = useState(5);
-  const [userComment, setUserComment] = useState('');
-  const [reviewSubmitting, setReviewSubmitting] = useState(false);
-  const [reviewSuccess, setReviewSuccess] = useState(false);
-
   // Live Car state from MongoDB
   const [car, setCar] = useState<ICar | null>(null);
   const [isLoadingCar, setIsLoadingCar] = useState(true);
+  const [relatedCars, setRelatedCars] = useState<ICar[]>([]);
+  const [isLoadingRelated, setIsLoadingRelated] = useState(true);
 
   useEffect(() => {
     if (slug) {
@@ -255,15 +251,28 @@ export default function CarDetailPage() {
     }
   }, [slug]);
 
+  // Fetch related cars with same listingType (Sale or Rent)
+  useEffect(() => {
+    if (car?._id) {
+      setIsLoadingRelated(true);
+      carService
+        .getCars({ listingType: car.listingType })
+        .then((res) => {
+          const filtered = (res || []).filter((c) => c._id !== car._id);
+          setRelatedCars(filtered.slice(0, 6));
+        })
+        .catch(() => {
+          setRelatedCars([]);
+        })
+        .finally(() => {
+          setIsLoadingRelated(false);
+        });
+    }
+  }, [car?._id, car?.listingType]);
+
   const isRental = car?.listingType === 'rent';
   const rawPhone = car?.contactPhone || '01712-345678';
   const maskedPhone = '017 ••••••••';
-
-  useEffect(() => {
-    if (car?._id) {
-      reviewService.getCarReviews(car._id).then((res) => setReviewData(res));
-    }
-  }, [car?._id]);
 
   useEffect(() => {
     if (car?._id && user) {
@@ -305,26 +314,6 @@ export default function CarDetailPage() {
       setIsWishlisted(res.isWishlisted);
     } catch {
       setIsWishlisted(previous);
-    }
-  };
-
-  const handleReviewSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!userComment.trim() || !car?._id) return;
-    setReviewSubmitting(true);
-    try {
-      await reviewService.createReview({
-        carId: car._id,
-        rating: userRating,
-        comment: userComment,
-      });
-      setReviewSuccess(true);
-      const updated = await reviewService.getCarReviews(car._id);
-      setReviewData(updated);
-    } catch {
-      setReviewSuccess(true);
-    } finally {
-      setReviewSubmitting(false);
     }
   };
 
@@ -690,18 +679,6 @@ export default function CarDetailPage() {
               {car.description && (
                 <DescriptionBlock description={car.description} />
               )}
-
-              <div className="space-y-2.5 pt-2">
-                {((car.features && car.features.length > 0)
-                  ? car.features
-                  : ['Leather Upholstery', 'GPS Navigation', 'Premium Sound System', 'Backup Camera']
-                ).map((feature, idx) => (
-                  <div key={idx} className="flex items-center gap-2.5 text-xs sm:text-sm font-semibold text-zinc-800">
-                    <CheckCircle2 className="w-4 h-4 text-black shrink-0" />
-                    <span>{feature}</span>
-                  </div>
-                ))}
-              </div>
             </div>
 
 
@@ -828,105 +805,50 @@ export default function CarDetailPage() {
 
               <Accordion items={policyItems} defaultOpenId="contact" />
             </div>
-
-            {/* Reviews Section */}
-            <div className="space-y-6 pt-6 border-t border-zinc-200">
-              <div className="inline-flex items-center gap-1.5 text-zinc-500 font-bold text-xs uppercase tracking-widest">
-                <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
-                <span>Customer Feedback</span>
-              </div>
-
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                  <h2 className="text-2xl sm:text-3xl font-black text-black">
-                    Verified Reviews
-                  </h2>
-                  <p className="text-xs text-zinc-500 mt-1">
-                    Authentic feedback from verified users.
-                  </p>
-                </div>
-
-                <div className="flex items-center gap-3 bg-white px-4 py-2.5 rounded-2xl border border-zinc-200 shadow-sm shrink-0">
-                  <div className="text-3xl font-black text-black">
-                    {reviewData?.averageRating || 5.0}
-                  </div>
-                  <div>
-                    <div className="flex text-amber-400">
-                      {[...Array(5)].map((_, i) => (
-                        <Star key={i} className="w-3.5 h-3.5 fill-current" />
-                      ))}
-                    </div>
-                    <span className="text-[11px] font-bold text-zinc-500">
-                      {reviewData?.total || 15} ratings
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Submit Review */}
-              <div className="bg-white p-6 sm:p-8 rounded-3xl border border-zinc-200 shadow-sm space-y-4">
-                <h3 className="text-base font-black text-black">Leave a Review</h3>
-
-                {reviewSuccess ? (
-                  <div className="p-4 rounded-2xl bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-semibold flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                    <span>Thank you! Your feedback has been published.</span>
-                  </div>
-                ) : (
-                  <form onSubmit={handleReviewSubmit} className="space-y-4">
-                    <div>
-                      <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1.5">
-                        Your Rating
-                      </label>
-                      <div className="flex items-center gap-1.5">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <button
-                            key={star}
-                            type="button"
-                            onClick={() => setUserRating(star)}
-                            className="p-1 text-amber-400 hover:scale-110 transition-transform"
-                          >
-                            <Star
-                              className={`w-6 h-6 ${
-                                star <= userRating ? 'fill-current' : 'text-zinc-200'
-                              }`}
-                            />
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1.5">
-                        Your Feedback
-                      </label>
-                      <textarea
-                        required
-                        rows={3}
-                        value={userComment}
-                        onChange={(e) => setUserComment(e.target.value)}
-                        placeholder="Describe the vehicle condition, handling, and owner communication..."
-                        className="w-full text-xs font-semibold p-3.5 rounded-2xl border border-zinc-200 bg-white focus:outline-none focus:border-black"
-                      />
-                    </div>
-
-                    <Button
-                      type="submit"
-                      variant="dark"
-                      size="sm"
-                      isLoading={reviewSubmitting}
-                      className="font-bold"
-                      leftIcon={<Send className="w-3.5 h-3.5" />}
-                    >
-                      Publish Review
-                    </Button>
-                  </form>
-                )}
-              </div>
-            </div>
           </div>
         </div>
       </div>
+
+      {/* 3. SIMILAR / RELATED VEHICLES SECTION (3 or 6 in 3-Column Grid) */}
+      {relatedCars.length > 0 && (
+        <section className="py-16 bg-white border-t border-zinc-200">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 space-y-8">
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-zinc-200 pb-6">
+              <div className="space-y-2">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-black text-white text-xs font-bold uppercase tracking-wider">
+                  <ShoppingBag className="w-3.5 h-3.5" />
+                  <span>{isRental ? 'More Rental Fleet' : 'Similar Vehicles For Sale'}</span>
+                </div>
+                <h2 className="text-2xl sm:text-3xl font-black text-black">
+                  {isRental ? 'Similar Rental Vehicles' : 'You Might Also Like'}
+                </h2>
+                <p className="text-zinc-500 text-xs sm:text-sm max-w-xl">
+                  {isRental
+                    ? 'Explore other verified cars available for rent at competitive rates with transparent pricing.'
+                    : 'Discover other verified cars for sale with direct owner contact and clear title verification.'}
+                </p>
+              </div>
+
+              <Link href={isRental ? '/rent' : '/buy'}>
+                <Button
+                  variant="outline"
+                  size="md"
+                  rightIcon={<ArrowUpRight className="w-4 h-4" />}
+                >
+                  {isRental ? 'View All Rentals' : 'View All Cars for Sale'}
+                </Button>
+              </Link>
+            </div>
+
+            {/* 3-Column Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+              {relatedCars.map((relatedCar) => (
+                <CarCard key={relatedCar._id} car={relatedCar} />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* LOGIN REQUIRED MODAL PROMPT */}
       {loginPromptOpen && (
