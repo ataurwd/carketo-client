@@ -15,25 +15,7 @@ export default function UserReviewsPage() {
     reviewService
       .getUserReviews()
       .then((res) => {
-        setReviews(
-          res && res.length > 0
-            ? res
-            : [
-                {
-                  _id: 'rev-usr-1',
-                  carId: {
-                    title: 'Porsche 911 Carrera 4S',
-                    slug: 'porsche-911-carrera-4s',
-                    coverImage:
-                      'https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?auto=format&fit=crop&w=400&q=80',
-                  },
-                  rating: 5,
-                  comment:
-                    'Unmatched stability in sport mode and perfect interior finishes. The reservation handover was quick.',
-                  createdAt: new Date().toISOString(),
-                },
-              ]
-        );
+        setReviews(res || []);
       })
       .finally(() => setIsLoading(false));
   }, []);

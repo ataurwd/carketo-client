@@ -4,52 +4,39 @@ export interface INotification {
   _id: string;
   title: string;
   message: string;
-  type: string;
+  type: 'booking' | 'order' | 'payment' | 'system' | 'review' | 'car_approval' | 'inquiry' | string;
   isRead: boolean;
   link?: string;
+  metadata?: Record<string, any>;
   createdAt: string;
 }
 
+export interface NotificationResponse {
+  notifications: INotification[];
+  total: number;
+  unreadCount: number;
+}
+
 export const notificationService = {
-  async getNotifications(): Promise<{ notifications: INotification[]; unreadCount: number }> {
-    try {
-      const res: any = await apiClient.get('/notifications');
-      return {
-        notifications: res.data || [],
-        unreadCount: res.meta?.unreadCount || 0,
-      };
-    } catch {
-      return {
-        notifications: [
-          {
-            _id: 'notif-1',
-            title: 'Reservation Confirmed',
-            message: 'Your rental reservation for Viper SXT Coupe has been confirmed.',
-            type: 'booking',
-            isRead: false,
-            createdAt: new Date().toISOString(),
-          },
-          {
-            _id: 'notif-2',
-            title: 'Welcome to Carketo',
-            message: 'Explore our luxury automotive fleet and schedule your next reservation.',
-            type: 'general',
-            isRead: true,
-            createdAt: new Date(Date.now() - 86400000).toISOString(),
-          },
-        ],
-        unreadCount: 1,
-      };
-    }
+  async getNotifications(page: number = 1, limit: number = 20): Promise<NotificationResponse> {
+    const res: any = await apiClient.get('/notifications', { params: { page, limit } });
+    return {
+      notifications: res.data || [],
+      total: res.meta?.total || (res.data ? res.data.length : 0),
+      unreadCount: res.meta?.unreadCount || 0,
+    };
   },
 
-  async markAsRead(id: string) {
+  async markAsRead(id: string): Promise<INotification> {
     const res: any = await apiClient.put(`/notifications/${id}/read`);
     return res.data;
   },
 
-  async markAllAsRead() {
-    const res: any = await apiClient.put('/notifications/read-all');
-    return res.data;
+  async markAllAsRead(): Promise<void> {
+    await apiClient.put('/notifications/read-all');
+  },
+
+  async deleteNotification(id: string): Promise<void> {
+    await apiClient.delete(`/notifications/${id}`);
   },
 };

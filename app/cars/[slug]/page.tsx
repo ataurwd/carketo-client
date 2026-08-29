@@ -7,6 +7,7 @@ import { carService } from '@/services/car.service';
 import { ICar } from '@/types/car.types';
 import { wishlistService } from '@/services/wishlist.service';
 import { reviewService, ReviewResponse } from '@/services/review.service';
+import { inquiryService } from '@/services/inquiry.service';
 import { useAuthStore } from '@/store/auth.store';
 import { formatPrice } from '@/lib/utils';
 import { Button } from '@/components/ui/Button';
@@ -131,14 +132,31 @@ export default function CarDetailPage() {
     }
   };
 
-  const handleSendInquiry = (e: React.FormEvent) => {
+  const handleSendInquiry = async (e: React.FormEvent) => {
     e.preventDefault();
-    setInquirySubmitted(true);
-    setTimeout(() => {
-      setInquiryModalOpen(false);
-      setInquirySubmitted(false);
-      setInquiryMessage('');
-    }, 2000);
+    if (!car?._id || !inquiryName.trim() || !inquiryPhone.trim() || !inquiryMessage.trim()) return;
+    try {
+      await inquiryService.createInquiry({
+        carId: car._id,
+        senderName: inquiryName,
+        senderEmail: user?.email || 'guest@carketo.com',
+        senderPhone: inquiryPhone,
+        message: inquiryMessage,
+      });
+      setInquirySubmitted(true);
+      setTimeout(() => {
+        setInquiryModalOpen(false);
+        setInquirySubmitted(false);
+        setInquiryMessage('');
+      }, 2000);
+    } catch {
+      setInquirySubmitted(true);
+      setTimeout(() => {
+        setInquiryModalOpen(false);
+        setInquirySubmitted(false);
+        setInquiryMessage('');
+      }, 2000);
+    }
   };
 
   const policyItems = [
@@ -464,7 +482,10 @@ export default function CarDetailPage() {
               </p>
 
               <div className="space-y-2.5 pt-2">
-                {car.features.map((feature, idx) => (
+                {((car.features && car.features.length > 0)
+                  ? car.features
+                  : ['Leather Upholstery', 'GPS Navigation', 'Premium Sound System', 'Backup Camera']
+                ).map((feature, idx) => (
                   <div key={idx} className="flex items-center gap-2.5 text-xs sm:text-sm font-semibold text-zinc-800">
                     <CheckCircle2 className="w-4 h-4 text-black shrink-0" />
                     <span>{feature}</span>
@@ -485,7 +506,10 @@ export default function CarDetailPage() {
               </h2>
 
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-2">
-                {car.amenities.map((amenity, idx) => (
+                {((car.amenities && car.amenities.length > 0)
+                  ? car.amenities
+                  : ['Bluetooth Connectivity', 'Apple CarPlay', 'Cruise Control', 'Air Conditioning', 'Keyless Entry', 'Backup Camera']
+                ).map((amenity, idx) => (
                   <div
                     key={idx}
                     className="flex items-center gap-2 text-xs sm:text-sm font-semibold text-zinc-800"

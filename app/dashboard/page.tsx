@@ -16,6 +16,11 @@ import {
   Clock,
   User as UserIcon,
   ShieldCheck,
+  Plus,
+  KeyRound,
+  List,
+  Bell,
+  Star,
 } from 'lucide-react';
 
 export default function UserDashboardPage() {
@@ -42,30 +47,82 @@ export default function UserDashboardPage() {
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-xl sm:text-2xl font-black text-black">
-                  Welcome back, {user?.name || 'Customer'}!
+                  Welcome back, {user?.name || 'Member'}!
                 </h1>
                 <Badge variant="dark" size="sm">
-                  Customer
+                  {user?.role === 'admin' ? 'Admin' : 'Member'}
                 </Badge>
               </div>
               <p className="text-xs sm:text-sm text-zinc-500 mt-0.5">
-                {user?.email || 'Manage your active rentals, purchases, and saved favorites.'}
+                {user?.email || 'Manage your active listings, rentals, and saved favorites.'}
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
-            <Link href="/dashboard/profile">
-              <Button variant="outline" size="sm" leftIcon={<UserIcon className="w-3.5 h-3.5" />}>
-                Profile Settings
+          <div className="flex flex-wrap items-center gap-3">
+            <Link href="/provider/cars/create">
+              <Button variant="dark" size="sm" leftIcon={<Plus className="w-3.5 h-3.5" />}>
+                List Car
               </Button>
             </Link>
-            <Link href="/cars">
-              <Button variant="dark" size="sm" rightIcon={<ArrowUpRight className="w-3.5 h-3.5" />}>
-                Browse Cars
+            <Link href="/provider/cars">
+              <Button variant="outline" size="sm" leftIcon={<Car className="w-3.5 h-3.5" />}>
+                My Fleet
+              </Button>
+            </Link>
+            <Link href="/dashboard/profile">
+              <Button variant="outline" size="sm" leftIcon={<UserIcon className="w-3.5 h-3.5" />}>
+                Profile
               </Button>
             </Link>
           </div>
+        </div>
+
+        {/* Quick Navigation Hub */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <Link
+            href="/provider/cars"
+            className="p-5 rounded-3xl bg-white border border-zinc-200 hover:border-black hover:shadow-md transition-all space-y-2 group"
+          >
+            <div className="h-10 w-10 rounded-2xl bg-zinc-100 flex items-center justify-center text-black group-hover:bg-black group-hover:text-white transition-colors">
+              <Car className="w-5 h-5" />
+            </div>
+            <h4 className="font-extrabold text-sm text-black">My Fleet</h4>
+            <p className="text-[11px] text-zinc-400">View and manage your cars</p>
+          </Link>
+
+          <Link
+            href="/dashboard/wishlist"
+            className="p-5 rounded-3xl bg-white border border-zinc-200 hover:border-black hover:shadow-md transition-all space-y-2 group"
+          >
+            <div className="h-10 w-10 rounded-2xl bg-zinc-100 flex items-center justify-center text-black group-hover:bg-black group-hover:text-white transition-colors">
+              <Heart className="w-5 h-5" />
+            </div>
+            <h4 className="font-extrabold text-sm text-black">Saved Wishlist</h4>
+            <p className="text-[11px] text-zinc-400">View favorite vehicles</p>
+          </Link>
+
+          <Link
+            href="/dashboard/reviews"
+            className="p-5 rounded-3xl bg-white border border-zinc-200 hover:border-black hover:shadow-md transition-all space-y-2 group"
+          >
+            <div className="h-10 w-10 rounded-2xl bg-zinc-100 flex items-center justify-center text-black group-hover:bg-black group-hover:text-white transition-colors">
+              <Star className="w-5 h-5" />
+            </div>
+            <h4 className="font-extrabold text-sm text-black">My Reviews</h4>
+            <p className="text-[11px] text-zinc-400">Ratings & feedback</p>
+          </Link>
+
+          <Link
+            href="/dashboard/notifications"
+            className="p-5 rounded-3xl bg-white border border-zinc-200 hover:border-black hover:shadow-md transition-all space-y-2 group"
+          >
+            <div className="h-10 w-10 rounded-2xl bg-zinc-100 flex items-center justify-center text-black group-hover:bg-black group-hover:text-white transition-colors">
+              <Bell className="w-5 h-5" />
+            </div>
+            <h4 className="font-extrabold text-sm text-black">Notifications</h4>
+            <p className="text-[11px] text-zinc-400">Alerts & messages</p>
+          </Link>
         </div>
 
         {/* Stats Grid */}
@@ -89,7 +146,7 @@ export default function UserDashboardPage() {
             <p className="text-2xl sm:text-3xl font-black text-black">
               {data?.stats?.activeRentals ?? 0}
             </p>
-            <span className="text-[11px] font-semibold text-zinc-500">Currently on the road</span>
+            <span className="text-[11px] font-semibold text-zinc-500">Currently active</span>
           </div>
 
           <div className="bg-white p-5 rounded-3xl border border-zinc-200 shadow-sm space-y-2">
@@ -119,11 +176,11 @@ export default function UserDashboardPage() {
         <div className="bg-white p-6 sm:p-8 rounded-3xl border border-zinc-200 shadow-sm space-y-6">
           <div className="flex items-center justify-between border-b border-zinc-100 pb-4">
             <div>
-              <h2 className="text-lg font-black text-black">Recent Reservations</h2>
-              <p className="text-xs text-zinc-500">Your latest vehicle rentals and booking statuses.</p>
+              <h2 className="text-lg font-black text-black">Recent Activity</h2>
+              <p className="text-xs text-zinc-500">Your latest vehicle rentals and inquiries.</p>
             </div>
             <Link href="/cars?type=rent" className="text-xs font-bold text-black hover:underline">
-              Rent Another Car →
+              Browse More Cars →
             </Link>
           </div>
 
@@ -161,12 +218,19 @@ export default function UserDashboardPage() {
           ) : (
             <div className="text-center py-12 text-zinc-400 space-y-3">
               <Car className="w-10 h-10 mx-auto text-zinc-300" />
-              <p className="text-xs font-medium">No bookings yet. Find and reserve your dream car today!</p>
-              <Link href="/cars">
-                <Button variant="dark" size="sm">
-                  Explore Fleet
-                </Button>
-              </Link>
+              <p className="text-xs font-medium">No active reservations yet. Find your dream car or list your own!</p>
+              <div className="flex items-center justify-center gap-3">
+                <Link href="/cars">
+                  <Button variant="dark" size="sm">
+                    Explore Fleet
+                  </Button>
+                </Link>
+                <Link href="/sell">
+                  <Button variant="outline" size="sm" leftIcon={<Plus className="w-3.5 h-3.5" />}>
+                    List Your Car
+                  </Button>
+                </Link>
+              </div>
             </div>
           )}
         </div>

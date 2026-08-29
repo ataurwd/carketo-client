@@ -1,9 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { Providers } from './providers';
-import { TopPromoBar } from '@/components/layout/TopPromoBar';
-import { Navbar } from '@/components/layout/Navbar';
-import { Footer } from '@/components/layout/Footer';
+import { AppShell } from '@/components/layout/AppShell';
 
 export const metadata: Metadata = {
   title: 'CARKETO | Luxury & Everyday Car Rental and Marketplace',
@@ -20,10 +18,7 @@ export default function RootLayout({
     <html lang="en" className="scroll-smooth">
       <body className="min-h-screen flex flex-col bg-white text-slate-900 font-sans">
         <Providers>
-          <TopPromoBar />
-          <Navbar />
-          <main className="flex-1">{children}</main>
-          <Footer />
+          <AppShell>{children}</AppShell>
         </Providers>
       </body>
     </html>

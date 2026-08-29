@@ -92,32 +92,9 @@ export default function HomePage() {
               className="w-full h-auto max-h-[380px] object-cover rounded-3xl shadow-2xl border border-zinc-800"
             />
           </div>
-
-          {/* Hero Search Box */}
-          <div className="pt-4">
-            <SearchFilterBar />
-          </div>
         </div>
       </section>
 
-      {/* 2. BACKEND API HEALTH STATUS BAR */}
-      <section className="bg-zinc-50 border-y border-zinc-200 py-3 px-4">
-        <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3 text-xs text-zinc-600">
-          <div className="flex items-center gap-2">
-            <Activity className="w-4 h-4 text-black animate-pulse" />
-            <span className="font-bold text-zinc-900">Backend Core Service:</span>
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-black text-white text-[11px] font-bold">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-ping" />
-              {backendStatus?.status === 'healthy' ? 'Active (API v1 Connected)' : 'Ready & Connected'}
-            </span>
-          </div>
-          <div className="flex items-center gap-4 text-[11px] font-semibold text-zinc-500">
-            <span>Auth: Argon2id + JWT</span>
-            <span>Cache: Redis Ready</span>
-            <span>Database: MongoDB Ready (carketo)</span>
-          </div>
-        </div>
-      </section>
 
       {/* 3. SECTION A: DEDICATED RENTAL CARS */}
       <section className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-10">

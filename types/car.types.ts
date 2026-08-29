@@ -52,6 +52,7 @@ export interface ICar {
   images: string[];
   coverImage: string;
   status: CarStatus;
+  isFeatured?: boolean;
   rating?: number;
   totalReviews?: number;
   provider?: {

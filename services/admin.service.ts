@@ -3,157 +3,173 @@ import { apiClient } from '@/lib/api-client';
 export interface AdminStatsData {
   metrics: {
     totalRevenue: number;
+    grossFleetValue: number;
     totalUsers: number;
-    totalProviders: number;
+    totalAdmins: number;
     totalCars: number;
     activeFleet: number;
-    totalBookings: number;
-    totalOrders: number;
+    totalRentals: number;
+    totalSales: number;
+    totalInquiries: number;
+    totalReviews: number;
     completedPaymentsCount: number;
   };
   recentBookings: any[];
   recentUsers: any[];
+  recentCars: any[];
+  recentInquiries: any[];
+}
+
+export interface ISettingsData {
+  _id?: string;
+  platformName: string;
+  supportEmail: string;
+  supportPhone: string;
+  headquartersAddress: string;
+  currency: string;
+  currencySymbol: string;
+  distanceUnit: string;
+  maxPhotosPerCar: number;
+  maxPhotoSizeMb: number;
+  autoApproveListings: boolean;
+  maintenanceMode: boolean;
+  maintenanceMessage?: string;
+  topAnnouncement: {
+    enabled: boolean;
+    text: string;
+    link: string;
+  };
+}
+
+export interface IHealthTelemetry {
+  timestamp: string;
+  uptimeSeconds: number;
+  database: {
+    status: string;
+    host: string;
+    name: string;
+  };
+  process: {
+    nodeVersion: string;
+    memoryRssMb: string;
+    memoryHeapUsedMb: string;
+    memoryHeapTotalMb: string;
+  };
+  services: {
+    api: string;
+    cache: string;
+    orchestration: string;
+  };
 }
 
 export const adminService = {
+  // ===================== OVERVIEW & TELEMETRY =====================
   async getStats(): Promise<AdminStatsData> {
-    try {
-      const res: any = await apiClient.get('/admin/stats');
-      return res.data;
-    } catch {
-      // Mock stats for preview
-      return {
-        metrics: {
-          totalRevenue: 284950,
-          totalUsers: 1420,
-          totalProviders: 38,
-          totalCars: 184,
-          activeFleet: 142,
-          totalBookings: 890,
-          totalOrders: 64,
-          completedPaymentsCount: 954,
-        },
-        recentBookings: [
-          {
-            _id: 'bk-adm-1',
-            carId: { title: 'Porsche 911 Carrera 4S', brand: 'Porsche' },
-            userId: { name: 'David Beckham', email: 'david@example.com' },
-            totalAmount: 1680,
-            status: 'confirmed',
-            createdAt: new Date().toISOString(),
-          },
-          {
-            _id: 'bk-adm-2',
-            carId: { title: 'Viper SXT Coupe', brand: 'Dodge' },
-            userId: { name: 'Elena Rostova', email: 'elena@example.com' },
-            totalAmount: 1316,
-            status: 'active',
-            createdAt: new Date().toISOString(),
-          },
-        ],
-        recentUsers: [
-          {
-            _id: 'usr-1',
-            name: 'Michael Chen',
-            email: 'michael@example.com',
-            role: 'provider',
-            status: 'active',
-            createdAt: new Date().toISOString(),
-          },
-          {
-            _id: 'usr-2',
-            name: 'Sophia Loren',
-            email: 'sophia@example.com',
-            role: 'user',
-            status: 'active',
-            createdAt: new Date().toISOString(),
-          },
-        ],
-      };
-    }
+    const res: any = await apiClient.get('/admin/stats');
+    return res.data;
   },
 
+  async getHealthTelemetry(): Promise<IHealthTelemetry> {
+    const res: any = await apiClient.get('/admin/health-telemetry');
+    return res.data;
+  },
+
+  async getAuditLogs(params?: any) {
+    const res: any = await apiClient.get('/admin/audit-logs', { params });
+    return res.data || [];
+  },
+
+  // ===================== USER MANAGEMENT & RBAC =====================
   async getUsers(params?: any) {
-    try {
-      const res: any = await apiClient.get('/admin/users', { params });
-      return res.data;
-    } catch {
-      return [
-        { _id: 'u-1', name: 'Alex Mercer', email: 'alex@example.com', role: 'admin', status: 'active' },
-        { _id: 'u-2', name: 'Apex Motors Dealership', email: 'info@apex.com', role: 'provider', status: 'active' },
-        { _id: 'u-3', name: 'Sarah Connor', email: 'sarah@example.com', role: 'user', status: 'active' },
-      ];
-    }
+    const res: any = await apiClient.get('/admin/users', { params });
+    return res.data || [];
   },
 
-  async updateUserStatus(userId: string, status: string) {
-    const res: any = await apiClient.put(`/admin/users/${userId}/status`, { status });
+  async updateUserStatus(userId: string, status: string, reason?: string) {
+    const res: any = await apiClient.put(`/admin/users/${userId}/status`, { status, reason });
     return res.data;
   },
 
-  async getProviders(params?: any) {
-    try {
-      const res: any = await apiClient.get('/admin/providers', { params });
-      return res.data;
-    } catch {
-      return [
-        {
-          _id: 'p-1',
-          businessName: 'Apex Luxury Fleet NY',
-          providerType: 'both',
-          phone: '+1 (555) 0199',
-          email: 'fleet@apex.com',
-          isVerified: true,
-          rating: 4.9,
-        },
-        {
-          _id: 'p-2',
-          businessName: 'Miami Supercar Vault',
-          providerType: 'rental',
-          phone: '+1 (555) 0288',
-          email: 'rentals@vault.com',
-          isVerified: false,
-          rating: 5.0,
-        },
-      ];
-    }
-  },
-
-  async verifyProvider(providerId: string, isVerified: boolean) {
-    const res: any = await apiClient.put(`/admin/providers/${providerId}/verify`, { isVerified });
+  async updateUserRole(userId: string, role: string) {
+    const res: any = await apiClient.put(`/admin/users/${userId}/role`, { role });
     return res.data;
   },
 
+  // ===================== MASTER CAR FLEET & MODERATION =====================
+  async getCarsAdmin(params?: any) {
+    const res: any = await apiClient.get('/admin/cars', { params });
+    return res.data || [];
+  },
+
+  async updateCarStatus(carId: string, status: string, reason?: string) {
+    const res: any = await apiClient.put(`/admin/cars/${carId}/status`, { status, reason });
+    return res.data;
+  },
+
+  async toggleCarFeatured(carId: string, isFeatured: boolean) {
+    const res: any = await apiClient.put(`/admin/cars/${carId}/feature`, { isFeatured });
+    return res.data;
+  },
+
+  async deleteCarAdmin(carId: string) {
+    const res: any = await apiClient.delete(`/admin/cars/${carId}`);
+    return res.data;
+  },
+
+  // ===================== INQUIRIES & LEADS =====================
+  async getInquiriesAdmin(params?: any) {
+    const res: any = await apiClient.get('/admin/inquiries', { params });
+    return res.data || [];
+  },
+
+  async deleteInquiryAdmin(inquiryId: string) {
+    const res: any = await apiClient.delete(`/admin/inquiries/${inquiryId}`);
+    return res.data;
+  },
+
+  // ===================== REVIEWS & REPUTATION =====================
+  async getReviewsAdmin(params?: any) {
+    const res: any = await apiClient.get('/admin/reviews', { params });
+    return res.data || [];
+  },
+
+  async deleteReviewAdmin(reviewId: string) {
+    const res: any = await apiClient.delete(`/admin/reviews/${reviewId}`);
+    return res.data;
+  },
+
+  // ===================== GLOBAL SETTINGS & CONFIG =====================
+  async getSettings(): Promise<ISettingsData> {
+    const res: any = await apiClient.get('/admin/settings');
+    return res.data;
+  },
+
+  async updateSettings(data: Partial<ISettingsData>): Promise<ISettingsData> {
+    const res: any = await apiClient.put('/admin/settings', data);
+    return res.data;
+  },
+
+  // ===================== COUPONS & PROVIDERS =====================
   async getCoupons() {
-    try {
-      const res: any = await apiClient.get('/admin/coupons');
-      return res.data;
-    } catch {
-      return [
-        {
-          _id: 'c-1',
-          code: 'SUMMER2026',
-          discountType: 'percentage',
-          discountValue: 15,
-          isActive: true,
-          usageCount: 42,
-          usageLimit: 100,
-        },
-        {
-          _id: 'c-2',
-          code: 'VIP100OFF',
-          discountType: 'fixed',
-          discountValue: 100,
-          isActive: true,
-          usageCount: 18,
-          usageLimit: 50,
-        },
-      ];
-    }
+    const res: any = await apiClient.get('/admin/coupons');
+    return res.data || [];
   },
 
   async createCoupon(data: any) {
     const res: any = await apiClient.post('/admin/coupons', data);
+    return res.data;
+  },
+
+  async getProviders(params?: any) {
+    const res: any = await apiClient.get('/admin/providers', { params });
+    return res.data || [];
+  },
+
+  async verifyProvider(providerId: string, isVerified: boolean, notes?: string) {
+    const res: any = await apiClient.put(`/admin/providers/${providerId}/verify`, {
+      isVerified,
+      notes,
+    });
     return res.data;
   },
 };
