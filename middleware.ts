@@ -12,10 +12,10 @@ export function middleware(request: NextRequest) {
     pathname.startsWith('/admin');
 
   if (isProtectedRoute && !token) {
-    // In strict production, redirect to login if not authenticated
-    // const loginUrl = new URL('/login', request.url);
-    // loginUrl.searchParams.set('from', pathname);
-    // return NextResponse.redirect(loginUrl);
+    // Redirect to login if not authenticated
+    const loginUrl = new URL('/login', request.url);
+    loginUrl.searchParams.set('redirect', pathname);
+    return NextResponse.redirect(loginUrl);
   }
 
   return NextResponse.next();

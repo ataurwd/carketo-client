@@ -23,6 +23,8 @@ export const useAuthStore = create<AuthStore>()(
       setAuth: (user, token) => {
         if (typeof window !== 'undefined') {
           localStorage.setItem('access_token', token);
+          // Set secure cookie for middleware access
+          document.cookie = `access_token=${token}; path=/; max-age=604800; SameSite=Lax`;
         }
         set({ user, token, isAuthenticated: true, isInitialized: true });
       },
@@ -33,6 +35,10 @@ export const useAuthStore = create<AuthStore>()(
       logout: () => {
         if (typeof window !== 'undefined') {
           localStorage.removeItem('access_token');
+          // Clear middleware cookie
+          document.cookie = 'access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax';
+          // Redirect to login page immediately
+          window.location.href = '/login';
         }
         set({ user: null, token: null, isAuthenticated: false, isInitialized: true });
       },
