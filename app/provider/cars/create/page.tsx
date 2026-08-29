@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { carService } from '@/services/car.service';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { DatePicker } from '@/components/ui/DatePicker';
 import { POPULAR_BRANDS, BODY_TYPES } from '@/lib/constants';
 import { useAuthStore } from '@/store/auth.store';
 import {
@@ -21,11 +22,13 @@ import {
   Phone,
   UploadCloud,
   X,
-  FileImage,
-  Lock,
   Sparkles,
   Check,
   Loader2,
+  ShieldCheck,
+  Palette,
+  Calendar,
+  Layers,
 } from 'lucide-react';
 import { uploadService } from '@/services/upload.service';
 
@@ -62,6 +65,25 @@ const PRESET_AMENITIES = [
   'Alloy Wheels',
 ];
 
+const FUEL_TYPES = ['Petrol', 'Diesel', 'Hybrid', 'Electric', 'CNG'];
+const TRANSMISSIONS = ['Automatic', 'Manual', 'Dual-Clutch'];
+const CONDITIONS = [
+  { value: 'used', label: 'Used / Pre-Owned' },
+  { value: 'new', label: 'Brand New (0 km)' },
+  { value: 'certified', label: 'Certified Pre-Owned' },
+] as const;
+
+const POPULAR_COLORS = [
+  'Obsidian Black',
+  'Pearl White',
+  'Metallic Silver',
+  'Dark Grey / Charcoal',
+  'Midnight Blue',
+  'Racing Red',
+  'Emerald Green',
+  'Champagne Gold',
+];
+
 export default function CreateCarPage() {
   const router = useRouter();
   const { user, token, isAuthenticated, isInitialized } = useAuthStore();
@@ -79,31 +101,46 @@ export default function CreateCarPage() {
     }
   }, [mounted, isInitialized, isAuthenticated, user, token, router]);
 
+  // 1. Listing Type (Top Choice)
+  const [listingType, setListingType] = useState<'sale' | 'rent'>('sale');
+
+  // 2. Pricing & Visibility
+  const [rentalPrice, setRentalPrice] = useState<number | ''>(299);
+  const [salePrice, setSalePrice] = useState<number | ''>(85000);
+  const [contactPhone, setContactPhone] = useState('');
+  const [expiresAt, setExpiresAt] = useState<Date>(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 30);
+    return d;
+  });
+
+  // 3. Vehicle Overview Details
   const [title, setTitle] = useState('');
   const [brand, setBrand] = useState('Porsche');
   const [model, setModel] = useState('');
-  const [year, setYear] = useState(2024);
-  const [listingType, setListingType] = useState<'rent' | 'sale'>('rent');
-  const [contactPhone, setContactPhone] = useState('');
-  const [rentalPrice, setRentalPrice] = useState<number | ''>(299);
-  const [rentalDeposit, setRentalDeposit] = useState<number | ''>(1000);
-  const [salePrice, setSalePrice] = useState<number | ''>(85000);
-  const [location, setLocation] = useState('New York, JFK Airport Hub');
+  const [year, setYear] = useState<number>(2024);
+  const [condition, setCondition] = useState<'new' | 'used' | 'certified'>('used');
+  const [mileage, setMileage] = useState<number | ''>(35000);
+  const [fuelType, setFuelType] = useState('Petrol');
+  const [transmission, setTransmission] = useState('Automatic');
+  const [engineCapacity, setEngineCapacity] = useState('1500cc');
+  const [color, setColor] = useState('Obsidian Black');
+  const [passengers, setPassengers] = useState<number>(5);
+  const [registrationYear, setRegistrationYear] = useState<number | ''>(2024);
+  const [vin, setVin] = useState('');
+  const [bodyType, setBodyType] = useState('Sedan');
+  const [location, setLocation] = useState('Dhaka, Gulshan-2');
+  const [doors, setDoors] = useState<number>(4);
+  const [luggage, setLuggage] = useState<number>(2);
+
+  // 4. Description & Highlights
   const [description, setDescription] = useState('');
 
-  // 3-Image Upload State (Max 3, Max 5MB each)
+  // 5. Photos State (Max 3, Max 5MB each)
   const [uploadedPhotos, setUploadedPhotos] = useState<UploadedPhoto[]>([]);
+  const [isDragging, setIsDragging] = useState(false);
 
-  // Specs
-  const [passengers, setPassengers] = useState(4);
-  const [doors, setDoors] = useState(4);
-  const [transmission, setTransmission] = useState('Automatic');
-  const [fuelType, setFuelType] = useState('Petrol');
-  const [bodyType, setBodyType] = useState('Coupe');
-  const [mileage, setMileage] = useState(3500);
-  const [luggage, setLuggage] = useState(2);
-
-  // Features & Amenities State
+  // 6. Features & Amenities
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([
     'Bluetooth Connectivity',
     'Apple CarPlay',
@@ -111,11 +148,12 @@ export default function CreateCarPage() {
     'Air Conditioning',
     'Leather Upholstery',
     'GPS Navigation',
-    'Premium Sound System',
     'Backup Camera',
+    'Keyless Entry & Push Start',
   ]);
   const [customAmenityInput, setCustomAmenityInput] = useState('');
 
+  // Status & Feedback
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
@@ -141,8 +179,7 @@ export default function CreateCarPage() {
   };
 
   // Upload handlers
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
+  const processUploadedFiles = async (files: FileList | File[]) => {
     if (!files || files.length === 0) return;
 
     const availableSlots = 3 - uploadedPhotos.length;
@@ -151,10 +188,24 @@ export default function CreateCarPage() {
       return;
     }
 
-    const filesToUpload = Array.from(files).slice(0, availableSlots);
+    const validImageFiles: File[] = [];
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      if (!file.type.startsWith('image/')) {
+        setError(`"${file.name}" is not a supported image file. Please upload JPEG, PNG, or WebP.`);
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        setError(`"${file.name}" exceeds the 5MB size limit.`);
+        return;
+      }
+      validImageFiles.push(file);
+    }
+
+    const filesToUpload = validImageFiles.slice(0, availableSlots);
+    if (filesToUpload.length === 0) return;
     setError('');
 
-    // Pre-create local photo items
     const newPhotos: UploadedPhoto[] = filesToUpload.map((file) => ({
       file,
       previewUrl: URL.createObjectURL(file),
@@ -164,26 +215,25 @@ export default function CreateCarPage() {
       uploadProgress: 10,
     }));
 
+    const startIndex = uploadedPhotos.length;
     setUploadedPhotos((prev) => [...prev, ...newPhotos]);
 
-    // Process each upload to R2
     for (let i = 0; i < filesToUpload.length; i++) {
       const file = filesToUpload[i];
-      const startIdx = uploadedPhotos.length + i;
+      const targetIdx = startIndex + i;
 
       try {
         const result = await uploadService.uploadFileToR2(file, 'cars', (progress) => {
           setUploadedPhotos((current) =>
             current.map((p, idx) =>
-              idx === startIdx ? { ...p, uploadProgress: progress } : p
+              idx === targetIdx ? { ...p, uploadProgress: progress } : p
             )
           );
         });
 
-        // Mark complete with live public R2 URL
         setUploadedPhotos((current) =>
           current.map((p, idx) =>
-            idx === startIdx
+            idx === targetIdx
               ? {
                   ...p,
                   isUploading: false,
@@ -198,7 +248,7 @@ export default function CreateCarPage() {
         console.error('Photo upload failed:', err);
         setUploadedPhotos((current) =>
           current.map((p, idx) =>
-            idx === startIdx
+            idx === targetIdx
               ? {
                   ...p,
                   isUploading: false,
@@ -212,6 +262,41 @@ export default function CreateCarPage() {
     }
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      processUploadedFiles(e.target.files);
+    }
+    e.target.value = '';
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLLabelElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!isDragging) setIsDragging(true);
+  };
+
+  const handleDragEnter = (e: React.DragEvent<HTMLLabelElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent<HTMLLabelElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.currentTarget.contains(e.relatedTarget as Node)) return;
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLLabelElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      processUploadedFiles(e.dataTransfer.files);
+    }
+  };
+
   const handleRemovePhoto = async (index: number) => {
     const photoToRemove = uploadedPhotos[index];
     if (photoToRemove?.r2Key) {
@@ -220,13 +305,13 @@ export default function CreateCarPage() {
     setUploadedPhotos((prev) => prev.filter((_, idx) => idx !== index));
   };
 
+  // Form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setFieldErrors({});
     setSuccess('');
 
-    // Pre-submission check
     if (uploadedPhotos.length === 0) {
       setError('Please upload at least 1 vehicle photo (up to 3).');
       setFieldErrors({ photos: 'At least 1 vehicle photo is required' });
@@ -249,37 +334,48 @@ export default function CreateCarPage() {
       .map((p) => p.r2Url || p.previewUrl)
       .filter(Boolean);
 
+    const autoBrand = listingType === 'rent' ? (brand || title.split(' ')[0] || 'Standard') : brand;
+    const autoModel = listingType === 'rent' ? (model || title.split(' ').slice(1).join(' ') || 'Fleet') : model;
+    const autoYear = listingType === 'rent' ? (year || new Date().getFullYear()) : Number(year);
+
     const payload = {
       title,
-      brand,
-      model,
-      year: Number(year),
+      brand: autoBrand,
+      model: autoModel,
+      year: autoYear,
+      condition: listingType === 'sale' ? condition : 'used',
+      color: listingType === 'sale' ? color : 'Standard',
+      registrationYear: (listingType === 'sale' && registrationYear) ? Number(registrationYear) : undefined,
+      vin: (listingType === 'sale' && vin) ? vin.trim() : undefined,
+      engineCapacity: listingType === 'sale' ? (engineCapacity || undefined) : undefined,
       listingType,
       contactPhone: contactPhone || '01712-345678',
       rentalPrice: listingType === 'rent' ? Number(rentalPrice) : undefined,
       rentalDeposit: undefined,
       salePrice: listingType === 'sale' ? Number(salePrice) : undefined,
       location,
-      bodyType,
-      fuelType,
-      transmission,
-      seats: Number(passengers),
+      bodyType: listingType === 'sale' ? bodyType : 'Sedan',
+      fuelType: listingType === 'sale' ? fuelType : 'Petrol',
+      transmission: listingType === 'sale' ? transmission : 'Automatic',
+      seats: listingType === 'sale' ? Number(passengers) : 4,
       doors: Number(doors),
       luggage: Number(luggage),
-      mileage: Number(mileage),
-      description: description || `${year} ${brand} ${model} in pristine condition. Certified luxury vehicle.`,
+      mileage: listingType === 'sale' ? (condition === 'new' ? 0 : Number(mileage || 0)) : 0,
+      description: description || `${title} available for ${listingType}. Verified and inspected.`,
       coverImage,
       images,
-      features: selectedAmenities.slice(0, 4),
-      amenities: selectedAmenities,
+      expiresAt: expiresAt ? expiresAt.toISOString() : undefined,
+      features: listingType === 'sale' ? selectedAmenities.slice(0, 4) : [],
+      amenities: listingType === 'sale' ? selectedAmenities : [],
       specs: {
-        passengers: Number(passengers),
+        passengers: listingType === 'sale' ? Number(passengers) : 4,
         doors: Number(doors),
-        transmission,
-        fuelType,
-        bodyType,
-        mileage: Number(mileage),
+        transmission: listingType === 'sale' ? transmission : 'Automatic',
+        fuelType: listingType === 'sale' ? fuelType : 'Petrol',
+        bodyType: listingType === 'sale' ? bodyType : 'Sedan',
+        mileage: listingType === 'sale' ? (condition === 'new' ? 0 : Number(mileage || 0)) : 0,
         luggage: Number(luggage),
+        engineCapacity: listingType === 'sale' ? engineCapacity : undefined,
         airCondition: true,
       },
     };
@@ -331,7 +427,7 @@ export default function CreateCarPage() {
         <div>
           <h1 className="text-2xl sm:text-3xl font-black text-black">List a New Vehicle</h1>
           <p className="text-xs sm:text-sm text-zinc-500 mt-1">
-            Add a car to your rental fleet or dealership inventory. Upload up to 3 photos (max 5MB each).
+            Choose your listing type, add full vehicle specifications, and upload up to 3 photos.
           </p>
         </div>
 
@@ -368,17 +464,133 @@ export default function CreateCarPage() {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-8">
-          {/* Section 1: Basic Information */}
+          {/* ========================================================================= */}
+          {/* SECTION 1: LISTING TYPE (PLACED AT THE VERY TOP AS REQUESTED)            */}
+          {/* ========================================================================= */}
+          <div className="bg-white p-6 sm:p-8 rounded-3xl border border-zinc-200 shadow-sm space-y-4">
+            <div className="flex items-center justify-between border-b border-zinc-100 pb-3">
+              <div className="flex items-center gap-2">
+                <Layers className="w-5 h-5 text-black" />
+                <h2 className="text-base font-black text-black">Listing Purpose & Intent</h2>
+              </div>
+              <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-zinc-100 text-zinc-700">
+                Primary Selection
+              </span>
+            </div>
+
+            <p className="text-xs text-zinc-500">
+              Select whether you are listing this vehicle for outright sale or daily rental.
+            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              <button
+                type="button"
+                onClick={() => {
+                  setListingType('sale');
+                  setFieldErrors({});
+                }}
+                className={`p-5 rounded-2xl text-left transition-all flex items-start gap-4 border ${
+                  listingType === 'sale'
+                    ? 'bg-black text-white border-black shadow-lg ring-2 ring-black/10 scale-[1.01]'
+                    : 'bg-zinc-50 hover:bg-zinc-100/80 border-zinc-200 text-zinc-800'
+                }`}
+              >
+                <div
+                  className={`p-3 rounded-xl shrink-0 ${
+                    listingType === 'sale' ? 'bg-white/15 text-white' : 'bg-white text-zinc-900 border border-zinc-200 shadow-sm'
+                  }`}
+                >
+                  <DollarSign className="w-6 h-6" />
+                </div>
+                <div>
+                  <div className="text-sm font-black flex items-center gap-2">
+                    <span>For Sale</span>
+                    {listingType === 'sale' && (
+                      <span className="text-[10px] bg-white text-black px-2 py-0.5 rounded-full font-bold">
+                        Active
+                      </span>
+                    )}
+                  </div>
+                  <p
+                    className={`text-[11px] leading-relaxed mt-1 ${
+                      listingType === 'sale' ? 'text-zinc-300' : 'text-zinc-500'
+                    }`}
+                  >
+                    Dealership inventory or private sale with condition, mileage, registration & VIN.
+                  </p>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setListingType('rent');
+                  setFieldErrors({});
+                }}
+                className={`p-5 rounded-2xl text-left transition-all flex items-start gap-4 border ${
+                  listingType === 'rent'
+                    ? 'bg-black text-white border-black shadow-lg ring-2 ring-black/10 scale-[1.01]'
+                    : 'bg-zinc-50 hover:bg-zinc-100/80 border-zinc-200 text-zinc-800'
+                }`}
+              >
+                <div
+                  className={`p-3 rounded-xl shrink-0 ${
+                    listingType === 'rent' ? 'bg-white/15 text-white' : 'bg-white text-zinc-900 border border-zinc-200 shadow-sm'
+                  }`}
+                >
+                  <Car className="w-6 h-6" />
+                </div>
+                <div>
+                  <div className="text-sm font-black flex items-center gap-2">
+                    <span>For Rent</span>
+                    {listingType === 'rent' && (
+                      <span className="text-[10px] bg-white text-black px-2 py-0.5 rounded-full font-bold">
+                        Active
+                      </span>
+                    )}
+                  </div>
+                  <p
+                    className={`text-[11px] leading-relaxed mt-1 ${
+                      listingType === 'rent' ? 'text-zinc-300' : 'text-zinc-500'
+                    }`}
+                  >
+                    Rental fleet listing with daily pricing, direct renter contact & pickup hub.
+                  </p>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          {/* ========================================================================= */}
+          {/* SECTION 2: VEHICLE OVERVIEW & SPECIFICATIONS                              */}
+          {/* ========================================================================= */}
           <div className="bg-white p-6 sm:p-8 rounded-3xl border border-zinc-200 shadow-sm space-y-6">
-            <div className="flex items-center gap-2 border-b border-zinc-100 pb-3">
-              <Car className="w-5 h-5 text-black" />
-              <h2 className="text-base font-black text-black">Vehicle Overview</h2>
+            <div className="flex items-center justify-between border-b border-zinc-100 pb-3">
+              <div className="flex items-center gap-2">
+                <Car className="w-5 h-5 text-black" />
+                <div>
+                  <h2 className="text-base font-black text-black">Vehicle Overview</h2>
+                  <p className="text-xs text-zinc-400">
+                    {listingType === 'rent'
+                      ? 'Essential rental vehicle details and pickup location.'
+                      : 'Comprehensive technical details, condition, and ownership specs.'}
+                  </p>
+                </div>
+              </div>
+              <span className="text-[11px] font-bold text-zinc-600 bg-zinc-100 px-3 py-1 rounded-full">
+                * Required Fields
+              </span>
             </div>
 
             <div className="space-y-4">
+              {/* Title (Always required for both Rent and Sale) */}
               <Input
-                label="Vehicle Title"
-                placeholder="e.g. 2024 Porsche 911 GT3 RS Coupe"
+                label="Vehicle Title *"
+                placeholder={
+                  listingType === 'rent'
+                    ? 'e.g. 2024 Toyota Land Cruiser Prado TX-L / Porsche Cayenne'
+                    : 'e.g. 2024 Porsche 911 GT3 RS Coupe'
+                }
                 required
                 value={title}
                 onChange={(e) => {
@@ -388,94 +600,365 @@ export default function CreateCarPage() {
                 error={fieldErrors['title']}
               />
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="space-y-1.5">
-                  <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700">
-                    Brand / Make
-                  </label>
-                  <select
-                    value={brand}
+              {/* RENT LISTING: ONLY PICKUP LOCATION */}
+              {listingType === 'rent' ? (
+                <div>
+                  <Input
+                    label="Pickup Location / Hub Address *"
+                    placeholder="e.g. Dhaka, Gulshan-2 / New York JFK Airport Hub"
+                    required
+                    value={location}
                     onChange={(e) => {
-                      setBrand(e.target.value);
-                      setFieldErrors((p) => ({ ...p, brand: '' }));
+                      setLocation(e.target.value);
+                      setFieldErrors((p) => ({ ...p, location: '' }));
                     }}
-                    className={`w-full text-xs font-semibold px-3 py-2.5 rounded-xl border ${
-                      fieldErrors['brand'] ? 'border-rose-500' : 'border-zinc-200'
-                    } bg-white focus:outline-none focus:border-black`}
-                  >
-                    {POPULAR_BRANDS.map((b) => (
-                      <option key={b} value={b}>
-                        {b}
-                      </option>
-                    ))}
-                  </select>
-                  {fieldErrors['brand'] && (
-                    <p className="text-[11px] font-bold text-rose-600 mt-1">{fieldErrors['brand']}</p>
-                  )}
+                    leftIcon={<MapPin className="w-4 h-4 text-black" />}
+                    error={fieldErrors['location']}
+                  />
+                  <p className="text-[11px] text-zinc-400 mt-1.5 font-medium">
+                    Renters will see this address for pickup and drop-off coordination.
+                  </p>
                 </div>
+              ) : (
+                /* SALE LISTINGS: COMPREHENSIVE SPECIFICATIONS */
+                <div className="space-y-4 pt-1 animate-fade-in">
+                  {/* Brand, Model, Manufacturing Year */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div className="space-y-1.5">
+                      <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700">
+                        Brand / Make *
+                      </label>
+                      <select
+                        value={brand}
+                        onChange={(e) => {
+                          setBrand(e.target.value);
+                          setFieldErrors((p) => ({ ...p, brand: '' }));
+                        }}
+                        className={`w-full text-xs font-semibold px-3 py-2.5 rounded-xl border ${
+                          fieldErrors['brand'] ? 'border-rose-500' : 'border-zinc-200'
+                        } bg-white focus:outline-none focus:border-black`}
+                      >
+                        {POPULAR_BRANDS.map((b) => (
+                          <option key={b} value={b}>
+                            {b}
+                          </option>
+                        ))}
+                      </select>
+                      {fieldErrors['brand'] && (
+                        <p className="text-[11px] font-bold text-rose-600 mt-1">{fieldErrors['brand']}</p>
+                      )}
+                    </div>
 
-                <Input
-                  label="Model"
-                  placeholder="e.g. 911 GT3"
-                  required
-                  value={model}
-                  onChange={(e) => {
-                    setModel(e.target.value);
-                    setFieldErrors((p) => ({ ...p, model: '' }));
-                  }}
-                  error={fieldErrors['model']}
-                />
+                    <Input
+                      label="Model *"
+                      placeholder="e.g. 911 GT3"
+                      required
+                      value={model}
+                      onChange={(e) => {
+                        setModel(e.target.value);
+                        setFieldErrors((p) => ({ ...p, model: '' }));
+                      }}
+                      error={fieldErrors['model']}
+                    />
 
-                <Input
-                  label="Manufacturing Year"
-                  type="number"
-                  min={1900}
-                  max={new Date().getFullYear() + 2}
-                  required
-                  value={year}
-                  onChange={(e) => {
-                    setYear(Number(e.target.value));
-                    setFieldErrors((p) => ({ ...p, year: '' }));
-                  }}
-                  error={fieldErrors['year']}
-                />
-              </div>
+                    <Input
+                      label="Manufacturing Year *"
+                      type="number"
+                      min={1950}
+                      max={new Date().getFullYear() + 2}
+                      required
+                      value={year}
+                      onChange={(e) => {
+                        setYear(Number(e.target.value));
+                        setFieldErrors((p) => ({ ...p, year: '' }));
+                      }}
+                      error={fieldErrors['year']}
+                    />
+                  </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700">
-                    Body Type
-                  </label>
-                  <select
-                    value={bodyType}
-                    onChange={(e) => setBodyType(e.target.value)}
-                    className="w-full text-xs font-semibold px-3 py-2.5 rounded-xl border border-zinc-200 bg-white focus:outline-none focus:border-black"
-                  >
-                    {BODY_TYPES.map((t) => (
-                      <option key={t} value={t}>
-                        {t}
-                      </option>
+                  {/* Condition, Mileage / Odometer, Fuel Type */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div className="space-y-1.5">
+                      <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700">
+                        Condition *
+                      </label>
+                      <select
+                        value={condition}
+                        onChange={(e) => {
+                          const newCond = e.target.value as 'new' | 'used' | 'certified';
+                          setCondition(newCond);
+                          if (newCond === 'new') setMileage(0);
+                        }}
+                        className="w-full text-xs font-semibold px-3 py-2.5 rounded-xl border border-zinc-200 bg-white focus:outline-none focus:border-black"
+                      >
+                        {CONDITIONS.map((c) => (
+                          <option key={c.value} value={c.value}>
+                            {c.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <Input
+                      label={`Mileage (km) ${condition !== 'new' ? '*' : '(Brand New = 0)'}`}
+                      type="number"
+                      min={0}
+                      disabled={condition === 'new'}
+                      required={condition !== 'new'}
+                      value={condition === 'new' ? 0 : mileage}
+                      onChange={(e) => setMileage(e.target.value === '' ? '' : Number(e.target.value))}
+                      placeholder="e.g. 45000"
+                    />
+
+                    <div className="space-y-1.5">
+                      <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700">
+                        Fuel Type *
+                      </label>
+                      <select
+                        value={fuelType}
+                        onChange={(e) => setFuelType(e.target.value)}
+                        className="w-full text-xs font-semibold px-3 py-2.5 rounded-xl border border-zinc-200 bg-white focus:outline-none focus:border-black"
+                      >
+                        {FUEL_TYPES.map((f) => (
+                          <option key={f} value={f}>
+                            {f}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Transmission, Seats, Exterior Color */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div className="space-y-1.5">
+                      <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700">
+                        Transmission *
+                      </label>
+                      <select
+                        value={transmission}
+                        onChange={(e) => setTransmission(e.target.value)}
+                        className="w-full text-xs font-semibold px-3 py-2.5 rounded-xl border border-zinc-200 bg-white focus:outline-none focus:border-black"
+                      >
+                        {TRANSMISSIONS.map((t) => (
+                          <option key={t} value={t}>
+                            {t}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <Input
+                      label="Number of Seats *"
+                      type="number"
+                      min={1}
+                      max={50}
+                      required
+                      value={passengers}
+                      onChange={(e) => setPassengers(Number(e.target.value))}
+                    />
+
+                    <div className="space-y-1.5">
+                      <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700">
+                        Exterior Color *
+                      </label>
+                      <input
+                        type="text"
+                        value={color}
+                        onChange={(e) => setColor(e.target.value)}
+                        placeholder="e.g. Pearl White, Obsidian Black"
+                        required
+                        className="w-full text-xs font-semibold px-3 py-2.5 rounded-xl border border-zinc-200 bg-white focus:outline-none focus:border-black"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Color Quick Suggestion Pills */}
+                  <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                    <span className="text-[11px] font-bold text-zinc-400 mr-1">Color presets:</span>
+                    {POPULAR_COLORS.map((c) => (
+                      <button
+                        key={c}
+                        type="button"
+                        onClick={() => setColor(c)}
+                        className={`text-[11px] font-semibold px-2.5 py-1 rounded-lg border transition-all ${
+                          color === c
+                            ? 'bg-black text-white border-black shadow-sm'
+                            : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-700 border-zinc-200'
+                        }`}
+                      >
+                        {c}
+                      </button>
                     ))}
-                  </select>
-                </div>
+                  </div>
 
-                <Input
-                  label="Pickup Location / Dealership Address"
-                  placeholder="e.g. New York, JFK Airport Hub"
-                  required
-                  value={location}
-                  onChange={(e) => {
-                    setLocation(e.target.value);
-                    setFieldErrors((p) => ({ ...p, location: '' }));
-                  }}
-                  leftIcon={<MapPin className="w-4 h-4 text-black" />}
-                  error={fieldErrors['location']}
-                />
-              </div>
+                  {/* Body Type & Location */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                    <div className="space-y-1.5">
+                      <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700">
+                        Body Type *
+                      </label>
+                      <select
+                        value={bodyType}
+                        onChange={(e) => setBodyType(e.target.value)}
+                        className="w-full text-xs font-semibold px-3 py-2.5 rounded-xl border border-zinc-200 bg-white focus:outline-none focus:border-black"
+                      >
+                        {BODY_TYPES.map((t) => (
+                          <option key={t} value={t}>
+                            {t}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <Input
+                      label="Pickup Location / Dealership Address *"
+                      placeholder="e.g. Dhaka, Gulshan-2 / New York Hub"
+                      required
+                      value={location}
+                      onChange={(e) => {
+                        setLocation(e.target.value);
+                        setFieldErrors((p) => ({ ...p, location: '' }));
+                      }}
+                      leftIcon={<MapPin className="w-4 h-4 text-black" />}
+                      error={fieldErrors['location']}
+                    />
+                  </div>
+
+                  {/* Engine Capacity, Registration Year, VIN */}
+                  <div className="pt-4 border-t border-zinc-100 space-y-4">
+                    <div className="flex items-center gap-2">
+                      <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                      <span className="text-xs font-black uppercase tracking-wider text-zinc-800">
+                        Sale Specifications & Ownership Data
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <Input
+                        label="Engine Capacity *"
+                        placeholder="e.g. 1500cc, 2.0L Turbo, 3.0L V6"
+                        required
+                        value={engineCapacity}
+                        onChange={(e) => setEngineCapacity(e.target.value)}
+                      />
+
+                      <div className="space-y-1.5">
+                        <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700">
+                          Registration Year
+                        </label>
+                        <input
+                          type="number"
+                          min={1950}
+                          max={new Date().getFullYear() + 2}
+                          value={registrationYear}
+                          onChange={(e) => setRegistrationYear(e.target.value === '' ? '' : Number(e.target.value))}
+                          placeholder="e.g. 2024"
+                          className="w-full text-xs font-semibold px-3 py-2.5 rounded-xl border border-zinc-200 bg-white focus:outline-none focus:border-black"
+                        />
+                        <p className="text-[10px] text-zinc-400">Can differ from manufacturing year</p>
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700">
+                          VIN / Chassis Number (Optional)
+                        </label>
+                        <input
+                          type="text"
+                          value={vin}
+                          onChange={(e) => setVin(e.target.value.toUpperCase())}
+                          placeholder="e.g. WVWZZZ1KZ9W123456"
+                          className="w-full text-xs font-semibold px-3 py-2.5 rounded-xl border border-zinc-200 bg-white focus:outline-none focus:border-black uppercase tracking-wider"
+                        />
+                        <p className="text-[10px] text-zinc-400">Private & secure • Masked on public listing</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Section 2: Description & Highlights */}
+          {/* ========================================================================= */}
+          {/* SECTION 3: PRICING, CONTACT & VISIBILITY EXPIRATION                       */}
+          {/* ========================================================================= */}
+          <div className="bg-white p-6 sm:p-8 rounded-3xl border border-zinc-200 shadow-sm space-y-6">
+            <div className="flex items-center gap-2 border-b border-zinc-100 pb-3">
+              <DollarSign className="w-5 h-5 text-black" />
+              <div>
+                <h2 className="text-base font-black text-black">
+                  {listingType === 'sale' ? 'Sale Pricing & Direct Contact' : 'Rental Rates & Direct Contact'}
+                </h2>
+                <p className="text-xs text-zinc-400">
+                  Set customer pricing, phone number, and visibility duration (Max 2 Months).
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {listingType === 'rent' ? (
+                <Input
+                  label="Daily Rental Rate ($ / Day)"
+                  type="number"
+                  required
+                  value={rentalPrice}
+                  onChange={(e) => {
+                    setRentalPrice(e.target.value === '' ? '' : Number(e.target.value));
+                    setFieldErrors((p) => ({ ...p, rentalPrice: '' }));
+                  }}
+                  placeholder="e.g. 299"
+                  error={fieldErrors['rentalPrice']}
+                />
+              ) : (
+                <Input
+                  label="Total Outright Sale Price ($)"
+                  type="number"
+                  required
+                  value={salePrice}
+                  onChange={(e) => {
+                    setSalePrice(e.target.value === '' ? '' : Number(e.target.value));
+                    setFieldErrors((p) => ({ ...p, salePrice: '' }));
+                  }}
+                  placeholder="e.g. 85000"
+                  error={fieldErrors['salePrice']}
+                />
+              )}
+
+              {/* Direct Contact Phone Number */}
+              <div className="space-y-1.5">
+                <label className="block text-xs font-bold uppercase tracking-wider text-black">
+                  Direct Contact Phone Number *
+                </label>
+                <Input
+                  type="tel"
+                  placeholder="01712345678"
+                  required
+                  value={contactPhone}
+                  onChange={(e) => {
+                    const cleanVal = e.target.value.replace(/[^\d\s\-()+]/g, '');
+                    setContactPhone(cleanVal);
+                    setFieldErrors((p) => ({ ...p, contactPhone: '' }));
+                  }}
+                  leftIcon={<Phone className="w-4 h-4 text-black" />}
+                  error={fieldErrors['contactPhone']}
+                />
+              </div>
+            </div>
+
+            {/* Listing Visibility Duration / Expiry Date (Custom Modern DatePicker) */}
+            <div className="space-y-1.5 p-4 rounded-2xl bg-zinc-50 border border-zinc-200">
+              <DatePicker
+                label="Listing Active Visibility Duration"
+                value={expiresAt}
+                onChange={(date) => setExpiresAt(date)}
+                maxMonthsAhead={2}
+                helperText="Select how long this vehicle remains publicly visible. After this date, the post automatically expires. Maximum limit: 2 months (60 days) from today."
+              />
+            </div>
+          </div>
+
+          {/* ========================================================================= */}
+          {/* SECTION 4: DETAILED DESCRIPTION & HIGHLIGHTS                              */}
+          {/* ========================================================================= */}
           <div className="bg-white p-6 sm:p-8 rounded-3xl border border-zinc-200 shadow-sm space-y-6">
             <div className="flex items-center gap-2 border-b border-zinc-100 pb-3">
               <Sparkles className="w-5 h-5 text-black" />
@@ -490,187 +973,28 @@ export default function CreateCarPage() {
                 rows={4}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="Highlight unique features, vehicle condition, service history, and inspection details..."
+                placeholder={
+                  listingType === 'rent'
+                    ? 'Rental terms, daily mileage limits, chauffeur option, fuel policy, and pickup details...'
+                    : 'Highlight vehicle condition, maintenance records, test-drive options, and inspection history...'
+                }
                 className="w-full text-xs font-semibold p-4 rounded-2xl border border-zinc-200 bg-white focus:outline-none focus:border-black leading-relaxed"
               />
             </div>
           </div>
 
-          {/* Section 3: Listing Type & Pricing */}
-          <div className="bg-white p-6 sm:p-8 rounded-3xl border border-zinc-200 shadow-sm space-y-6">
-            <div className="flex items-center gap-2 border-b border-zinc-100 pb-3">
-              <DollarSign className="w-5 h-5 text-black" />
-              <h2 className="text-base font-black text-black">Listing Type & Direct Contact</h2>
-            </div>
-
-            {/* Listing Type Toggle: Rent vs Sale */}
-            <div className="grid grid-cols-2 gap-4 p-1.5 rounded-2xl bg-zinc-100 border border-zinc-200">
-              {(['rent', 'sale'] as const).map((t) => (
-                <button
-                  key={t}
-                  type="button"
-                  onClick={() => {
-                    setListingType(t);
-                    setFieldErrors({});
-                  }}
-                  className={`py-3 rounded-xl text-xs font-black capitalize transition-all ${
-                    listingType === t
-                      ? 'bg-black text-white shadow-sm'
-                      : 'text-zinc-600 hover:text-black'
-                  }`}
-                >
-                  For {t}
-                </button>
-              ))}
-            </div>
-
-            {listingType === 'rent' ? (
-              <div>
-                <Input
-                  label="Daily Rental Rate ($ / Day)"
-                  type="number"
-                  required
-                  value={rentalPrice}
-                  onChange={(e) => {
-                    setRentalPrice(e.target.value === '' ? '' : Number(e.target.value));
-                    setFieldErrors((p) => ({ ...p, rentalPrice: '' }));
-                  }}
-                  placeholder="e.g. 299"
-                  error={fieldErrors['rentalPrice']}
-                />
-              </div>
-            ) : (
-              <div>
-                <Input
-                  label="Total Outright Sale Price ($)"
-                  type="number"
-                  required
-                  value={salePrice}
-                  onChange={(e) => {
-                    setSalePrice(e.target.value === '' ? '' : Number(e.target.value));
-                    setFieldErrors((p) => ({ ...p, salePrice: '' }));
-                  }}
-                  placeholder="e.g. 85000"
-                  error={fieldErrors['salePrice']}
-                />
-              </div>
-            )}
-
-            {/* Direct Contact Phone Number for BOTH Rent and Sale */}
-            <div className="space-y-1.5 p-4 rounded-2xl bg-zinc-50 border border-zinc-200">
-              <div className="flex items-center justify-between">
-                <label className="block text-xs font-bold uppercase tracking-wider text-black">
-                  Direct Contact Phone Number
-                </label>
-                <span className="text-[11px] text-zinc-500 font-semibold">
-                  e.g. 01712-345678
-                </span>
-              </div>
-              <Input
-                type="tel"
-                placeholder="01712345678"
-                required
-                value={contactPhone}
-                onChange={(e) => {
-                  // Real-time input filter: only allow digits, spaces, hyphens, plus, and parentheses
-                  const cleanVal = e.target.value.replace(/[^\d\s\-()+]/g, '');
-                  setContactPhone(cleanVal);
-                  setFieldErrors((p) => ({ ...p, contactPhone: '' }));
-                }}
-                leftIcon={<Phone className="w-4 h-4 text-black" />}
-                error={fieldErrors['contactPhone']}
-              />
-              <p className="text-[11px] text-zinc-500">
-                {listingType === 'rent'
-                  ? 'Renters will see this phone number as masked (017 ••••••••) on the listing card. Logged-in users can click to reveal and copy your number to contact you directly.'
-                  : 'Buyers will see this phone number on the vehicle page to call or message you directly to negotiate and inspect the car.'}
-              </p>
-            </div>
-          </div>
-
-          {/* Section 4: Technical Specifications (ONLY FOR CARS FOR SALE) */}
+          {/* ========================================================================= */}
+          {/* SECTION 5: FEATURES & AMENITIES OPTIONS (HIDDEN FOR RENT LISTINGS)        */}
+          {/* ========================================================================= */}
           {listingType === 'sale' && (
             <div className="bg-white p-6 sm:p-8 rounded-3xl border border-zinc-200 shadow-sm space-y-6 animate-fade-in">
-              <div className="flex items-center gap-2 border-b border-zinc-100 pb-3">
-                <Gauge className="w-5 h-5 text-black" />
-                <div>
-                  <h2 className="text-base font-black text-black">Technical Specifications</h2>
-                  <p className="text-xs text-zinc-400">Detailed technical specs for prospective buyers</p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                <Input
-                  label="Passengers / Seats"
-                  type="number"
-                  value={passengers}
-                  onChange={(e) => setPassengers(Number(e.target.value))}
-                />
-                <Input
-                  label="Doors"
-                  type="number"
-                  value={doors}
-                  onChange={(e) => setDoors(Number(e.target.value))}
-                />
-                <Input
-                  label="Luggage (Bags)"
-                  type="number"
-                  value={luggage}
-                  onChange={(e) => setLuggage(Number(e.target.value))}
-                />
-                <Input
-                  label="Mileage (Miles)"
-                  type="number"
-                  value={mileage}
-                  onChange={(e) => setMileage(Number(e.target.value))}
-                />
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700">
-                    Transmission
-                  </label>
-                  <select
-                    value={transmission}
-                    onChange={(e) => setTransmission(e.target.value)}
-                    className="w-full text-xs font-semibold px-3 py-2.5 rounded-xl border border-zinc-200 bg-white focus:outline-none focus:border-black"
-                  >
-                    <option value="Automatic">Automatic</option>
-                    <option value="Manual">Manual</option>
-                    <option value="Dual-Clutch">Dual-Clutch</option>
-                  </select>
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700">
-                    Fuel Type
-                  </label>
-                  <select
-                    value={fuelType}
-                    onChange={(e) => setFuelType(e.target.value)}
-                    className="w-full text-xs font-semibold px-3 py-2.5 rounded-xl border border-zinc-200 bg-white focus:outline-none focus:border-black"
-                  >
-                    <option value="Petrol">Petrol</option>
-                    <option value="Diesel">Diesel</option>
-                    <option value="Electric">Electric</option>
-                    <option value="Hybrid">Hybrid</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Section 5: Vehicle Features & Amenities (Checkmark Selector + Custom Option Input) - ONLY FOR SALE LISTINGS */}
-          {listingType === 'sale' && (
-            <div className="bg-white p-6 sm:p-8 rounded-3xl border border-zinc-200 shadow-sm space-y-6">
               <div className="flex items-center justify-between border-b border-zinc-100 pb-3">
                 <div className="flex items-center gap-2">
                   <Sparkles className="w-5 h-5 text-black" />
                   <div>
                     <h2 className="text-base font-black text-black">Features & Amenities Options</h2>
                     <p className="text-xs text-zinc-400">
-                      Select equipment options and add custom features to display on the vehicle page.
+                      Select standard options and add custom equipment to display on the vehicle page.
                     </p>
                   </div>
                 </div>
@@ -679,7 +1003,6 @@ export default function CreateCarPage() {
                 </span>
               </div>
 
-              {/* Predefined Features Checkmark Options */}
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-zinc-600 mb-3">
                   Standard Equipment & Packages (Click to toggle)
@@ -773,7 +1096,9 @@ export default function CreateCarPage() {
             </div>
           )}
 
-          {/* Section 6: Vehicle Imagery (Up to 3 Photos, Max 5MB Each) */}
+          {/* ========================================================================= */}
+          {/* SECTION 6: VEHICLE IMAGERY (MAX 3 PHOTOS WITH DRAG & DROP)                */}
+          {/* ========================================================================= */}
           <div className="bg-white p-6 sm:p-8 rounded-3xl border border-zinc-200 shadow-sm space-y-6">
             <div className="flex items-center justify-between border-b border-zinc-100 pb-3">
               <div className="flex items-center gap-2">
@@ -785,9 +1110,19 @@ export default function CreateCarPage() {
               </span>
             </div>
 
-            {/* Dropzone Area */}
+            {/* Dropzone Area with Live Drag and Drop */}
             {uploadedPhotos.length < 3 && (
-              <label className="relative flex flex-col items-center justify-center p-6 sm:p-8 rounded-3xl border-2 border-dashed border-zinc-300 hover:border-black bg-zinc-50/50 hover:bg-zinc-50 transition-all cursor-pointer text-center group">
+              <label
+                onDragOver={handleDragOver}
+                onDragEnter={handleDragEnter}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                className={`relative flex flex-col items-center justify-center p-6 sm:p-8 rounded-3xl border-2 border-dashed transition-all cursor-pointer text-center group ${
+                  isDragging
+                    ? 'border-black bg-black/5 ring-4 ring-black/10 scale-[1.01]'
+                    : 'border-zinc-300 hover:border-black bg-zinc-50/50 hover:bg-zinc-50'
+                }`}
+              >
                 <input
                   type="file"
                   multiple
@@ -795,11 +1130,17 @@ export default function CreateCarPage() {
                   onChange={handleFileChange}
                   className="hidden"
                 />
-                <div className="h-12 w-12 rounded-2xl bg-white border border-zinc-200 flex items-center justify-center text-zinc-700 group-hover:scale-110 transition-transform shadow-sm mb-3">
-                  <UploadCloud className="w-6 h-6 text-black" />
+                <div
+                  className={`h-12 w-12 rounded-2xl flex items-center justify-center transition-all shadow-sm mb-3 ${
+                    isDragging
+                      ? 'bg-black text-white scale-110 animate-bounce'
+                      : 'bg-white border border-zinc-200 text-zinc-700 group-hover:scale-110'
+                  }`}
+                >
+                  <UploadCloud className={`w-6 h-6 ${isDragging ? 'text-white' : 'text-black'}`} />
                 </div>
                 <p className="text-xs font-extrabold text-black">
-                  Click to select or drag & drop car photos
+                  {isDragging ? 'Release to upload photos!' : 'Click to select or drag & drop car photos'}
                 </p>
                 <p className="text-[11px] text-zinc-500 mt-1">
                   Upload up to {3 - uploadedPhotos.length} more images • Max file size: <strong>5MB</strong> each (JPEG, PNG, WebP)
@@ -838,42 +1179,27 @@ export default function CreateCarPage() {
                         </div>
                       )}
 
-                      {/* Remove Button */}
-                      <button
-                        type="button"
-                        onClick={() => handleRemovePhoto(idx)}
-                        disabled={photo.isUploading}
-                        className="absolute top-2 right-2 p-1.5 rounded-full bg-black/70 hover:bg-rose-600 text-white backdrop-blur transition-colors disabled:opacity-50"
-                        title="Remove photo"
-                      >
-                        <X className="w-3.5 h-3.5" />
-                      </button>
-
-                      {/* Cover Badge */}
-                      {idx === 0 && (
-                        <div className="absolute bottom-2 left-2">
-                          <span className="px-2 py-0.5 rounded-full bg-black text-white text-[9px] font-black uppercase tracking-wider">
-                            Cover Image
-                          </span>
-                        </div>
+                      {/* Delete Button */}
+                      {!photo.isUploading && (
+                        <button
+                          type="button"
+                          onClick={() => handleRemovePhoto(idx)}
+                          className="absolute top-2 right-2 p-1.5 rounded-full bg-black/70 hover:bg-black text-white backdrop-blur-sm transition-all"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
                       )}
 
-                      {/* R2 Synced Badge */}
-                      {!photo.isUploading && photo.r2Url && (
-                        <div className="absolute bottom-2 right-2">
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-600 text-white text-[9px] font-bold shadow-sm">
-                            <CheckCircle2 className="w-2.5 h-2.5" />
-                            <span>R2</span>
-                          </span>
-                        </div>
+                      {idx === 0 && (
+                        <span className="absolute bottom-2 left-2 px-2 py-0.5 rounded-md bg-black text-white text-[10px] font-black uppercase tracking-wider">
+                          Cover Photo
+                        </span>
                       )}
                     </div>
 
-                    <div className="flex items-center justify-between text-[11px] font-bold text-zinc-600 px-1">
-                      <span className="truncate max-w-[140px]">{photo.name}</span>
-                      <span className="text-zinc-400">
-                        {(photo.size / (1024 * 1024)).toFixed(2)} MB
-                      </span>
+                    <div className="flex items-center justify-between px-1 text-[11px] font-semibold text-zinc-500">
+                      <span className="truncate max-w-[120px]">{photo.name}</span>
+                      <span>{(photo.size / 1024 / 1024).toFixed(1)} MB</span>
                     </div>
                   </div>
                 ))}
@@ -881,23 +1207,21 @@ export default function CreateCarPage() {
             )}
           </div>
 
-
-
-          {/* Submit Action */}
-          <div className="flex items-center justify-end gap-4 pt-4">
+          {/* Submit Action Buttons */}
+          <div className="flex items-center justify-end gap-3 pt-4">
             <Link href="/provider/cars">
-              <Button variant="outline" size="md">
+              <Button type="button" variant="outline" size="md" disabled={isLoading}>
                 Cancel
               </Button>
             </Link>
             <Button
               type="submit"
               variant="dark"
-              size="md"
-              disabled={isLoading}
+              size="lg"
+              isLoading={isLoading}
               leftIcon={<Plus className="w-4 h-4" />}
             >
-              {isLoading ? 'Publishing Listing...' : 'Publish Vehicle Listing'}
+              Publish Vehicle Listing
             </Button>
           </div>
         </form>

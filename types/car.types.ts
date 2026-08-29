@@ -30,6 +30,10 @@ export interface ICar {
   model: string;
   year: number;
   condition?: CarCondition;
+  color?: string;
+  registrationYear?: number;
+  vin?: string;
+  engineCapacity?: string;
   listingType: ListingType;
   price?: number;
   salePrice?: number;
@@ -64,6 +68,7 @@ export interface ICar {
     phone?: string;
   };
   providerId?: any;
+  expiresAt?: string | Date;
   createdAt?: string;
   updatedAt?: string;
 }

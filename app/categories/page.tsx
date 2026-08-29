@@ -32,8 +32,8 @@ export default function CategoriesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-50 py-16 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto space-y-10">
+    <div className="min-h-screen bg-zinc-50 py-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 space-y-10">
         <div className="text-center space-y-3 max-w-2xl mx-auto">
           <div className="inline-flex items-center gap-2 px-4 py-1 rounded-full bg-zinc-200 text-zinc-800 text-xs font-bold uppercase tracking-widest">
             <Sparkles className="w-3.5 h-3.5" />

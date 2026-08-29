@@ -90,8 +90,8 @@ function RentCarContent() {
   }, [page, selectedBrand, selectedBodyType, selectedTransmission, priceRange, search, router]);
 
   return (
-    <div className="min-h-screen bg-zinc-50 py-10 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto space-y-8">
+    <div className="min-h-screen bg-zinc-50 py-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 space-y-8">
         {/* Hero Header */}
         <div className="bg-black text-white p-8 sm:p-12 rounded-3xl relative overflow-hidden shadow-xl">
           <div className="max-w-2xl space-y-3 relative z-10">

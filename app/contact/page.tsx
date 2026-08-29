@@ -18,8 +18,8 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-50 py-16 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto space-y-12">
+    <div className="min-h-screen bg-zinc-50 py-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 space-y-12">
         {/* Header */}
         <div className="text-center space-y-3 max-w-2xl mx-auto">
           <span className="text-xs font-bold uppercase tracking-widest text-zinc-400">

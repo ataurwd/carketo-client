@@ -405,7 +405,7 @@ export default function CarDetailPage() {
   return (
     <div className="min-h-screen bg-zinc-50">
       {/* 1. TOP HERO HEADER */}
-      <section className="relative bg-black text-white py-16 px-4 sm:px-6 lg:px-8 overflow-hidden">
+      <section className="relative bg-black text-white py-16 overflow-hidden">
         <div className="absolute inset-0 opacity-30 mix-blend-overlay">
           <img
             src={car.coverImage}
@@ -415,7 +415,7 @@ export default function CarDetailPage() {
         </div>
         <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" />
 
-        <div className="max-w-7xl mx-auto relative z-10 text-center space-y-3">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10 text-center space-y-3">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300 text-xs font-bold uppercase tracking-wider">
             <span>{isRental ? 'Direct Rental Vehicle' : 'Verified Purchase Vehicle'}</span>
           </div>
@@ -437,7 +437,7 @@ export default function CarDetailPage() {
       </section>
 
       {/* 2. MAIN 2-COLUMN CONTENT SECTION */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* LEFT COLUMN: Pricing, Contact Owner & Specs (4 Cols) */}
           <div className="lg:col-span-4 space-y-6 lg:sticky lg:top-28">
@@ -563,51 +563,79 @@ export default function CarDetailPage() {
 
               {/* Specs Table */}
               <div className="space-y-2.5 text-xs sm:text-sm">
-                <div className="flex items-center justify-between py-1.5 border-b border-zinc-100 text-zinc-600">
-                  <div className="flex items-center gap-2">
-                    <DoorClosed className="w-4 h-4 text-zinc-400" />
-                    <span>Doors</span>
+                {car.condition && (
+                  <div className="flex items-center justify-between py-1.5 border-b border-zinc-100 text-zinc-600">
+                    <span className="text-zinc-500">Condition</span>
+                    <span className="font-bold text-black capitalize">
+                      {car.condition === 'new' ? 'Brand New (0 km)' : car.condition === 'certified' ? 'Certified Pre-Owned' : 'Used / Pre-Owned'}
+                    </span>
                   </div>
-                  <span className="font-bold text-black">{car.specs?.doors || car.doors || 4}</span>
-                </div>
+                )}
 
                 <div className="flex items-center justify-between py-1.5 border-b border-zinc-100 text-zinc-600">
-                  <div className="flex items-center gap-2">
-                    <Users className="w-4 h-4 text-zinc-400" />
-                    <span>Passengers</span>
-                  </div>
-                  <span className="font-bold text-black">{car.specs?.passengers || car.seats || 4}</span>
+                  <span className="text-zinc-500">Mileage</span>
+                  <span className="font-bold text-black">
+                    {car.condition === 'new' ? '0 km' : `${(car.mileage || car.specs?.mileage || 0).toLocaleString()} km`}
+                  </span>
                 </div>
 
-                <div className="flex items-center justify-between py-1.5 border-b border-zinc-100 text-zinc-600">
-                  <div className="flex items-center gap-2">
-                    <Gauge className="w-4 h-4 text-zinc-400" />
-                    <span>Transmission</span>
+                {car.engineCapacity && (
+                  <div className="flex items-center justify-between py-1.5 border-b border-zinc-100 text-zinc-600">
+                    <span className="text-zinc-500">Engine Capacity</span>
+                    <span className="font-bold text-black">{car.engineCapacity}</span>
                   </div>
+                )}
+
+                <div className="flex items-center justify-between py-1.5 border-b border-zinc-100 text-zinc-600">
+                  <span className="text-zinc-500">Transmission</span>
                   <span className="font-bold text-black">{car.specs?.transmission || car.transmission || 'Automatic'}</span>
                 </div>
 
                 <div className="flex items-center justify-between py-1.5 border-b border-zinc-100 text-zinc-600">
-                  <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-zinc-400" />
-                    <span>Year</span>
+                  <span className="text-zinc-500">Fuel Type</span>
+                  <span className="font-bold text-black">{car.specs?.fuelType || car.fuelType || 'Petrol'}</span>
+                </div>
+
+                {car.color && (
+                  <div className="flex items-center justify-between py-1.5 border-b border-zinc-100 text-zinc-600">
+                    <span className="text-zinc-500">Exterior Color</span>
+                    <span className="font-bold text-black">{car.color}</span>
                   </div>
+                )}
+
+                <div className="flex items-center justify-between py-1.5 border-b border-zinc-100 text-zinc-600">
+                  <span className="text-zinc-500">Manufacturing Year</span>
                   <span className="font-bold text-black">{car.year}</span>
                 </div>
 
-                <div className="flex items-center justify-between py-1.5 border-b border-zinc-100 text-zinc-600">
-                  <div className="flex items-center gap-2">
-                    <Briefcase className="w-4 h-4 text-zinc-400" />
-                    <span>Luggage</span>
+                {car.registrationYear && (
+                  <div className="flex items-center justify-between py-1.5 border-b border-zinc-100 text-zinc-600">
+                    <span className="text-zinc-500">Registration Year</span>
+                    <span className="font-bold text-black">{car.registrationYear}</span>
                   </div>
-                  <span className="font-bold text-black">{car.specs?.luggage || car.luggage || 2}</span>
+                )}
+
+                {car.vin && (
+                  <div className="flex items-center justify-between py-1.5 border-b border-zinc-100 text-zinc-600">
+                    <span className="text-zinc-500">VIN / Chassis</span>
+                    <span className="font-bold text-black font-mono tracking-wider">
+                      {car.vin.length > 8 ? `${car.vin.slice(0, 4)}•••••••${car.vin.slice(-3)}` : '••••••••'}
+                    </span>
+                  </div>
+                )}
+
+                <div className="flex items-center justify-between py-1.5 border-b border-zinc-100 text-zinc-600">
+                  <span className="text-zinc-500">Seats / Passengers</span>
+                  <span className="font-bold text-black">{car.specs?.passengers || car.seats || 4} Seats</span>
+                </div>
+
+                <div className="flex items-center justify-between py-1.5 border-b border-zinc-100 text-zinc-600">
+                  <span className="text-zinc-500">Doors</span>
+                  <span className="font-bold text-black">{car.specs?.doors || car.doors || 4} Doors</span>
                 </div>
 
                 <div className="flex items-center justify-between py-1.5 text-zinc-600">
-                  <div className="flex items-center gap-2">
-                    <Wind className="w-4 h-4 text-zinc-400" />
-                    <span>Air Condition</span>
-                  </div>
+                  <span className="text-zinc-500">Air Condition</span>
                   <span className="font-bold text-black">
                     {car.specs?.airCondition !== undefined ? (car.specs.airCondition ? 'Yes' : 'No') : 'Yes'}
                   </span>
@@ -677,32 +705,115 @@ export default function CarDetailPage() {
             </div>
 
 
-            {/* Amenities Section */}
+            {/* Technical Specifications Section */}
             <div className="space-y-4 pt-4 border-t border-zinc-200">
               <div className="inline-flex items-center gap-1.5 text-zinc-500 font-bold text-xs uppercase tracking-widest">
                 <Sparkles className="w-3.5 h-3.5" />
-                <span>Amenities & Features</span>
+                <span>Technical Specifications</span>
               </div>
 
               <h2 className="text-2xl sm:text-3xl font-black text-black">
-                Vehicle specifications & amenities
+                {isRental ? 'Rental Vehicle Key Specs' : 'Detailed Vehicle Specifications'}
               </h2>
 
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-2">
-                {((car.amenities && car.amenities.length > 0)
-                  ? car.amenities
-                  : ['Bluetooth Connectivity', 'Apple CarPlay', 'Cruise Control', 'Air Conditioning', 'Keyless Entry', 'Backup Camera']
-                ).map((amenity, idx) => (
-                  <div
-                    key={idx}
-                    className="flex items-center gap-2 text-xs sm:text-sm font-semibold text-zinc-800"
-                  >
-                    <CheckCircle2 className="w-4 h-4 text-black shrink-0" />
-                    <span>{amenity}</span>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 pt-2">
+                <div className="p-3.5 rounded-2xl bg-zinc-50 border border-zinc-200">
+                  <span className="block text-[10px] uppercase font-bold text-zinc-400">Condition</span>
+                  <span className="text-xs sm:text-sm font-black text-black capitalize">
+                    {car.condition === 'new' ? 'Brand New' : car.condition === 'certified' ? 'Certified' : 'Used'}
+                  </span>
+                </div>
+
+                <div className="p-3.5 rounded-2xl bg-zinc-50 border border-zinc-200">
+                  <span className="block text-[10px] uppercase font-bold text-zinc-400">Mileage</span>
+                  <span className="text-xs sm:text-sm font-black text-black">
+                    {car.condition === 'new' ? '0 km' : `${(car.mileage || car.specs?.mileage || 0).toLocaleString()} km`}
+                  </span>
+                </div>
+
+                <div className="p-3.5 rounded-2xl bg-zinc-50 border border-zinc-200">
+                  <span className="block text-[10px] uppercase font-bold text-zinc-400">Fuel Type</span>
+                  <span className="text-xs sm:text-sm font-black text-black">
+                    {car.specs?.fuelType || car.fuelType || 'Petrol'}
+                  </span>
+                </div>
+
+                <div className="p-3.5 rounded-2xl bg-zinc-50 border border-zinc-200">
+                  <span className="block text-[10px] uppercase font-bold text-zinc-400">Transmission</span>
+                  <span className="text-xs sm:text-sm font-black text-black">
+                    {car.specs?.transmission || car.transmission || 'Automatic'}
+                  </span>
+                </div>
+
+                {car.engineCapacity && (
+                  <div className="p-3.5 rounded-2xl bg-zinc-50 border border-zinc-200">
+                    <span className="block text-[10px] uppercase font-bold text-zinc-400">Engine</span>
+                    <span className="text-xs sm:text-sm font-black text-black">{car.engineCapacity}</span>
                   </div>
-                ))}
+                )}
+
+                {car.color && (
+                  <div className="p-3.5 rounded-2xl bg-zinc-50 border border-zinc-200">
+                    <span className="block text-[10px] uppercase font-bold text-zinc-400">Exterior Color</span>
+                    <span className="text-xs sm:text-sm font-black text-black">{car.color}</span>
+                  </div>
+                )}
+
+                <div className="p-3.5 rounded-2xl bg-zinc-50 border border-zinc-200">
+                  <span className="block text-[10px] uppercase font-bold text-zinc-400">Seating</span>
+                  <span className="text-xs sm:text-sm font-black text-black">
+                    {car.specs?.passengers || car.seats || 4} Passengers
+                  </span>
+                </div>
+
+                <div className="p-3.5 rounded-2xl bg-zinc-50 border border-zinc-200">
+                  <span className="block text-[10px] uppercase font-bold text-zinc-400">Model Year</span>
+                  <span className="text-xs sm:text-sm font-black text-black">{car.year}</span>
+                </div>
+
+                {car.registrationYear && (
+                  <div className="p-3.5 rounded-2xl bg-zinc-50 border border-zinc-200">
+                    <span className="block text-[10px] uppercase font-bold text-zinc-400">Registration</span>
+                    <span className="text-xs sm:text-sm font-black text-black">{car.registrationYear}</span>
+                  </div>
+                )}
+
+                {car.vin && (
+                  <div className="p-3.5 rounded-2xl bg-zinc-50 border border-zinc-200">
+                    <span className="block text-[10px] uppercase font-bold text-zinc-400">VIN (Protected)</span>
+                    <span className="text-xs sm:text-sm font-black text-black font-mono">
+                      {car.vin.length > 8 ? `${car.vin.slice(0, 4)}•••••••${car.vin.slice(-3)}` : '••••••••'}
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
+
+            {/* Amenities Section (If available) */}
+            {car.amenities && car.amenities.length > 0 && (
+              <div className="space-y-4 pt-4 border-t border-zinc-200">
+                <div className="inline-flex items-center gap-1.5 text-zinc-500 font-bold text-xs uppercase tracking-widest">
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>Amenities & Features</span>
+                </div>
+
+                <h2 className="text-2xl sm:text-3xl font-black text-black">
+                  Vehicle features & equipment
+                </h2>
+
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-2">
+                  {car.amenities.map((amenity, idx) => (
+                    <div
+                      key={idx}
+                      className="flex items-center gap-2 text-xs sm:text-sm font-semibold text-zinc-800"
+                    >
+                      <CheckCircle2 className="w-4 h-4 text-black shrink-0" />
+                      <span>{amenity}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* FAQ / Policies */}
             <div className="space-y-4 pt-4 border-t border-zinc-200">
