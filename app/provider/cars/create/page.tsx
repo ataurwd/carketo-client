@@ -56,7 +56,7 @@ const PRESET_AMENITIES = [
 
 export default function CreateCarPage() {
   const router = useRouter();
-  const { user, token } = useAuthStore();
+  const { user, token, isAuthenticated, isInitialized } = useAuthStore();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -64,10 +64,12 @@ export default function CreateCarPage() {
   }, []);
 
   useEffect(() => {
-    if (mounted && !user && !token) {
-      router.push('/login?redirect=/provider/cars/create');
+    if (mounted && isInitialized) {
+      if (!isAuthenticated && !user && !token) {
+        router.push('/login?redirect=/provider/cars/create');
+      }
     }
-  }, [mounted, user, token, router]);
+  }, [mounted, isInitialized, isAuthenticated, user, token, router]);
 
   const [title, setTitle] = useState('');
   const [brand, setBrand] = useState('Porsche');
@@ -248,11 +250,11 @@ export default function CreateCarPage() {
     }
   };
 
-  if (!mounted || (!user && !token)) {
+  if (!mounted || !isInitialized || (!isAuthenticated && !user && !token)) {
     return (
       <div className="min-h-[75vh] flex flex-col items-center justify-center space-y-4 bg-zinc-50">
         <div className="h-10 w-10 border-4 border-black border-t-transparent rounded-full animate-spin" />
-        <p className="text-xs font-bold text-zinc-500">Authenticating...</p>
+        <p className="text-xs font-bold text-zinc-500">Checking your session...</p>
       </div>
     );
   }

@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { ICar } from '@/types/car.types';
 import { formatPrice } from '@/lib/utils';
 import { Badge } from '@/components/ui/Badge';
@@ -27,6 +27,7 @@ export interface CarCardProps {
 
 export const CarCard: React.FC<CarCardProps> = ({ car }) => {
   const router = useRouter();
+  const pathname = usePathname();
   const { isAuthenticated } = useAuthStore();
   const [revealed, setRevealed] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -224,12 +225,20 @@ export const CarCard: React.FC<CarCardProps> = ({ car }) => {
             </div>
 
             <div className="space-y-2 pt-2">
-              <Link href="/login" onClick={() => setShowLoginModal(false)} className="block">
+              <Link
+                href={`/login?redirect=${encodeURIComponent(pathname || '/')}`}
+                onClick={() => setShowLoginModal(false)}
+                className="block"
+              >
                 <Button variant="dark" size="md" className="w-full" rightIcon={<LogIn className="w-4 h-4" />}>
                   Sign In Now
                 </Button>
               </Link>
-              <Link href="/register" onClick={() => setShowLoginModal(false)} className="block">
+              <Link
+                href={`/register?redirect=${encodeURIComponent(pathname || '/')}`}
+                onClick={() => setShowLoginModal(false)}
+                className="block"
+              >
                 <Button variant="outline" size="md" className="w-full">
                   Create Free Account
                 </Button>

@@ -127,7 +127,7 @@ export default function AdminSaaSLayout({
         <div className="space-y-6">
           {/* Top Brand Logo */}
           <div className="flex items-center justify-between">
-            <Link href="/admin" className="flex items-center group">
+            <Link href="/" className="flex items-center group" title="Back to Carketo Homepage">
               <Logo variant="white" size="md" className="h-8" />
             </Link>
 

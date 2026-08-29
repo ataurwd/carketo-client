@@ -9,15 +9,17 @@ import { ShieldCheck, PlusCircle, LogIn, Sparkles, DollarSign } from 'lucide-rea
 
 export default function SellRedirectPage() {
   const router = useRouter();
-  const { isAuthenticated, user } = useAuthStore();
+  const { isAuthenticated, user, isInitialized } = useAuthStore();
 
   useEffect(() => {
-    if (isAuthenticated && user) {
-      router.push('/provider/cars/create');
-    } else {
-      router.push('/login?redirect=/provider/cars/create');
+    if (isInitialized) {
+      if (isAuthenticated && user) {
+        router.push('/provider/cars/create');
+      } else {
+        router.push('/login?redirect=/provider/cars/create');
+      }
     }
-  }, [isAuthenticated, user, router]);
+  }, [isAuthenticated, user, isInitialized, router]);
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center bg-zinc-50 px-4 py-16">

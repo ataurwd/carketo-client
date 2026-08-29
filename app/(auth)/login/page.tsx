@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, Suspense } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Logo } from '@/components/ui/Logo';
@@ -13,7 +13,7 @@ import { Mail, Lock, ArrowRight, AlertCircle, CheckCircle2 } from 'lucide-react'
 function LoginFormContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const setAuth = useAuthStore((state) => state.setAuth);
+  const { user, isAuthenticated, isInitialized, setAuth } = useAuthStore();
 
   const redirectUrl = searchParams.get('redirect') || searchParams.get('from') || '/dashboard';
 
@@ -22,6 +22,17 @@ function LoginFormContent() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+
+  // Automatically redirect if already logged in
+  useEffect(() => {
+    if (isInitialized && isAuthenticated && user) {
+      const targetUrl =
+        searchParams.get('redirect') ||
+        searchParams.get('from') ||
+        (user.role === 'admin' ? '/admin' : '/dashboard');
+      router.replace(targetUrl);
+    }
+  }, [isInitialized, isAuthenticated, user, searchParams, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
