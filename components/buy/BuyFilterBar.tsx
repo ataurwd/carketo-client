@@ -182,7 +182,7 @@ export function BuyFilterBar({
           }`}
         >
           <SlidersHorizontal className="w-4 h-4" />
-          <span>{advancedFiltersOpen ? 'Less Filters' : 'All Filters'}</span>
+          <span>{advancedFiltersOpen ? 'Hide Filters' : 'All Filters'}</span>
           {activeFiltersCount > 0 && (
             <span className="h-5 px-1.5 rounded-full bg-white text-black text-[10px] font-black flex items-center justify-center">
               {activeFiltersCount}
@@ -196,123 +196,122 @@ export function BuyFilterBar({
         </button>
       </div>
 
-      {/* PRIMARY FILTER ROW: Brand, Model, Condition, Fuel Type, Price Range */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5 pt-2 border-t border-zinc-100 text-xs font-semibold">
-        {/* 1. Brand Selector */}
-        <div>
-          <label className="block text-zinc-500 font-bold mb-1.5 text-[11px] uppercase tracking-wider">
-            Brand / Make
-          </label>
-          <select
-            value={selectedBrand}
-            onChange={(e) => {
-              setSelectedBrand(e.target.value);
-              onPageReset();
-            }}
-            className="w-full px-3 py-2.5 rounded-xl border border-zinc-200 bg-white text-xs font-bold text-zinc-800 focus:outline-none focus:border-black cursor-pointer"
-          >
-            <option value="all">All Brands</option>
-            {POPULAR_BRANDS.map((b) => (
-              <option key={b} value={b}>
-                {b}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* 2. Model Input */}
-        <div>
-          <label className="block text-zinc-500 font-bold mb-1.5 text-[11px] uppercase tracking-wider">
-            Model Name
-          </label>
-          <input
-            type="text"
-            placeholder="e.g. Premio, Civic..."
-            value={selectedModel}
-            onChange={(e) => {
-              setSelectedModel(e.target.value);
-              onPageReset();
-            }}
-            className="w-full px-3 py-2.5 rounded-xl border border-zinc-200 bg-white text-xs font-semibold text-zinc-800 focus:outline-none focus:border-black"
-          />
-        </div>
-
-        {/* 3. Condition */}
-        <div>
-          <label className="block text-zinc-500 font-bold mb-1.5 text-[11px] uppercase tracking-wider">
-            Condition
-          </label>
-          <select
-            value={selectedCondition}
-            onChange={(e) => {
-              setSelectedCondition(e.target.value);
-              onPageReset();
-            }}
-            className="w-full px-3 py-2.5 rounded-xl border border-zinc-200 bg-white text-xs font-bold text-zinc-800 focus:outline-none focus:border-black cursor-pointer"
-          >
-            {CONDITIONS_LIST.map((c) => (
-              <option key={c.value} value={c.value}>
-                {c.label}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* 4. Fuel Type */}
-        <div>
-          <label className="block text-zinc-500 font-bold mb-1.5 text-[11px] uppercase tracking-wider">
-            Fuel Type
-          </label>
-          <select
-            value={selectedFuel}
-            onChange={(e) => {
-              setSelectedFuel(e.target.value);
-              onPageReset();
-            }}
-            className="w-full px-3 py-2.5 rounded-xl border border-zinc-200 bg-white text-xs font-bold text-zinc-800 focus:outline-none focus:border-black cursor-pointer"
-          >
-            {FUEL_TYPES_LIST.map((f) => (
-              <option key={f.value} value={f.value}>
-                {f.label}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* 5. Price Range */}
-        <div>
-          <label className="block text-zinc-500 font-bold mb-1.5 text-[11px] uppercase tracking-wider">
-            Price Range (৳)
-          </label>
-          <div className="flex items-center gap-1.5">
-            <input
-              type="number"
-              placeholder="Min ৳"
-              value={minPrice}
-              onChange={(e) => {
-                setMinPrice(e.target.value);
-                onPageReset();
-              }}
-              className="w-full px-2.5 py-2.5 rounded-xl border border-zinc-200 text-xs font-semibold text-zinc-800 focus:outline-none focus:border-black"
-            />
-            <span className="text-zinc-400 font-bold">-</span>
-            <input
-              type="number"
-              placeholder="Max ৳"
-              value={maxPrice}
-              onChange={(e) => {
-                setMaxPrice(e.target.value);
-                onPageReset();
-              }}
-              className="w-full px-2.5 py-2.5 rounded-xl border border-zinc-200 text-xs font-semibold text-zinc-800 focus:outline-none focus:border-black"
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* SECONDARY EXPANDABLE FILTER ROW: Manufacturing Year, Transmission, Body Type, Location, Mileage */}
+      {/* COMPREHENSIVE FILTER CONSOLE (EXPANDS ON CLICKING 'ALL FILTERS') */}
       {advancedFiltersOpen && (
-        <div className="pt-4 border-t border-zinc-100 space-y-4 animate-fade-in">
+        <div className="space-y-4 pt-4 border-t border-zinc-100 animate-fade-in">
+          {/* PRIMARY FILTER ROW: Brand, Model, Condition, Fuel Type, Price Range */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5 text-xs font-semibold">
+            {/* 1. Brand Selector */}
+            <div>
+              <label className="block text-zinc-500 font-bold mb-1.5 text-[11px] uppercase tracking-wider">
+                Brand / Make
+              </label>
+              <select
+                value={selectedBrand}
+                onChange={(e) => {
+                  setSelectedBrand(e.target.value);
+                  onPageReset();
+                }}
+                className="w-full px-3 py-2.5 rounded-xl border border-zinc-200 bg-white text-xs font-bold text-zinc-800 focus:outline-none focus:border-black cursor-pointer"
+              >
+                <option value="all">All Brands</option>
+                {POPULAR_BRANDS.map((b) => (
+                  <option key={b} value={b}>
+                    {b}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* 2. Model Input */}
+            <div>
+              <label className="block text-zinc-500 font-bold mb-1.5 text-[11px] uppercase tracking-wider">
+                Model Name
+              </label>
+              <input
+                type="text"
+                placeholder="e.g. Premio, Civic..."
+                value={selectedModel}
+                onChange={(e) => {
+                  setSelectedModel(e.target.value);
+                  onPageReset();
+                }}
+                className="w-full px-3 py-2.5 rounded-xl border border-zinc-200 bg-white text-xs font-semibold text-zinc-800 focus:outline-none focus:border-black"
+              />
+            </div>
+
+            {/* 3. Condition */}
+            <div>
+              <label className="block text-zinc-500 font-bold mb-1.5 text-[11px] uppercase tracking-wider">
+                Condition
+              </label>
+              <select
+                value={selectedCondition}
+                onChange={(e) => {
+                  setSelectedCondition(e.target.value);
+                  onPageReset();
+                }}
+                className="w-full px-3 py-2.5 rounded-xl border border-zinc-200 bg-white text-xs font-bold text-zinc-800 focus:outline-none focus:border-black cursor-pointer"
+              >
+                {CONDITIONS_LIST.map((c) => (
+                  <option key={c.value} value={c.value}>
+                    {c.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* 4. Fuel Type */}
+            <div>
+              <label className="block text-zinc-500 font-bold mb-1.5 text-[11px] uppercase tracking-wider">
+                Fuel Type
+              </label>
+              <select
+                value={selectedFuel}
+                onChange={(e) => {
+                  setSelectedFuel(e.target.value);
+                  onPageReset();
+                }}
+                className="w-full px-3 py-2.5 rounded-xl border border-zinc-200 bg-white text-xs font-bold text-zinc-800 focus:outline-none focus:border-black cursor-pointer"
+              >
+                {FUEL_TYPES_LIST.map((f) => (
+                  <option key={f.value} value={f.value}>
+                    {f.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* 5. Price Range */}
+            <div>
+              <label className="block text-zinc-500 font-bold mb-1.5 text-[11px] uppercase tracking-wider">
+                Price Range (৳)
+              </label>
+              <div className="flex items-center gap-1.5">
+                <input
+                  type="number"
+                  placeholder="Min ৳"
+                  value={minPrice}
+                  onChange={(e) => {
+                    setMinPrice(e.target.value);
+                    onPageReset();
+                  }}
+                  className="w-full px-2.5 py-2.5 rounded-xl border border-zinc-200 text-xs font-semibold text-zinc-800 focus:outline-none focus:border-black"
+                />
+                <span className="text-zinc-400 font-bold">-</span>
+                <input
+                  type="number"
+                  placeholder="Max ৳"
+                  value={maxPrice}
+                  onChange={(e) => {
+                    setMaxPrice(e.target.value);
+                    onPageReset();
+                  }}
+                  className="w-full px-2.5 py-2.5 rounded-xl border border-zinc-200 text-xs font-semibold text-zinc-800 focus:outline-none focus:border-black"
+                />
+              </div>
+            </div>
+          </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5 text-xs font-semibold">
             {/* 6. Manufacturing Year Range */}
             <div>
