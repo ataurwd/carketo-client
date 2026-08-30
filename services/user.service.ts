@@ -33,31 +33,15 @@ export const userService = {
       const res: any = await apiClient.get('/users/dashboard');
       return res.data;
     } catch {
-      // Mock stats for immediate interactive dashboard preview
       return {
         stats: {
-          totalBookings: 3,
-          activeRentals: 1,
+          totalBookings: 0,
+          activeRentals: 0,
           totalOrders: 0,
-          wishlistCount: 4,
-          unreadNotifications: 2,
+          wishlistCount: 0,
+          unreadNotifications: 0,
         },
-        recentBookings: [
-          {
-            _id: 'bk-101',
-            carId: {
-              title: 'Viper SXT Coupe Sports',
-              brand: 'Dodge',
-              model: 'Viper SXT',
-              coverImage:
-                'https://images.unsplash.com/photo-1617788138017-80ad40651399?auto=format&fit=crop&w=400&q=80',
-            },
-            startDate: '2026-09-01T10:00:00.000Z',
-            endDate: '2026-09-05T18:00:00.000Z',
-            totalAmount: 1316,
-            status: 'confirmed',
-          },
-        ],
+        recentBookings: [],
       };
     }
   },

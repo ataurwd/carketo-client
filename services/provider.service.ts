@@ -42,28 +42,17 @@ export const providerService = {
       const res: any = await apiClient.get('/providers/stats');
       return res.data;
     } catch {
-      // Mock stats for preview
       return {
         stats: {
-          totalCars: 12,
-          activeListings: 10,
-          totalBookings: 38,
-          totalOrders: 4,
-          totalRevenue: 28450,
-          rentalRevenue: 12450,
-          salesRevenue: 16000,
+          totalCars: 0,
+          activeListings: 0,
+          totalBookings: 0,
+          totalOrders: 0,
+          totalRevenue: 0,
+          rentalRevenue: 0,
+          salesRevenue: 0,
         },
-        recentBookings: [
-          {
-            _id: 'bk-201',
-            carId: { title: 'BMW M4 Competition Coupe', model: 'M4 Competition' },
-            userId: { name: 'Sarah Jenkins', email: 'sarah@example.com' },
-            startDate: '2026-09-10T10:00:00.000Z',
-            endDate: '2026-09-14T10:00:00.000Z',
-            totalAmount: 1156,
-            status: 'confirmed',
-          },
-        ],
+        recentBookings: [],
       };
     }
   },
