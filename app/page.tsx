@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { SearchFilterBar } from '@/components/common/SearchFilterBar';
 import { CarCard } from '@/components/common/CarCard';
@@ -28,7 +28,8 @@ export default function HomePage() {
     uptime?: number;
   } | null>(null);
 
-  const [cars, setCars] = useState<ICar[]>([]);
+  const [rentalCars, setRentalCars] = useState<ICar[]>([]);
+  const [saleCars, setSaleCars] = useState<ICar[]>([]);
   const [isLoadingCars, setIsLoadingCars] = useState(true);
 
   useEffect(() => {
@@ -45,24 +46,21 @@ export default function HomePage() {
         });
       });
 
-    // 2. Fetch live cars from MongoDB
-    carService
-      .getCars()
-      .then((res) => {
-        setCars(res || []);
+    // 2. Fetch rental and sale cars in parallel with server-side type filters.
+    // Previously: one getCars() call → client-side filter (wasteful, fetches all cars).
+    // Now: two parallel filtered queries → only the data each section needs.
+    Promise.all([
+      carService.getCars({ type: 'rent', limit: 6 }),
+      carService.getCars({ type: 'sale', limit: 6 }),
+    ])
+      .then(([rental, sale]) => {
+        setRentalCars(rental || []);
+        setSaleCars(sale || []);
       })
       .finally(() => setIsLoadingCars(false));
   }, []);
 
-  // 1. Rental Cars Section dataset (strictly rental cars)
-  const rentalCars = useMemo(() => {
-    return cars.filter((car) => car.listingType === 'rent');
-  }, [cars]);
 
-  // 2. Sale Cars Section dataset (strictly sale cars)
-  const saleCars = useMemo(() => {
-    return cars.filter((car) => car.listingType === 'sale');
-  }, [cars]);
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
