@@ -239,7 +239,7 @@ export const Navbar: React.FC = () => {
                           className="flex items-center gap-2 px-4 py-2 text-xs font-semibold text-zinc-700 hover:bg-zinc-100 hover:text-black"
                         >
                           <LayoutDashboard className="w-4 h-4 text-black" />
-                          <span>SaaS Admin Center</span>
+                          <span>Admin Dashboard</span>
                         </Link>
                         <Link
                           href="/admin/cars"
@@ -266,7 +266,7 @@ export const Navbar: React.FC = () => {
                           className="flex items-center gap-2 px-4 py-2 text-xs font-semibold text-zinc-700 hover:bg-zinc-100 hover:text-black"
                         >
                           <LayoutDashboard className="w-4 h-4" />
-                          <span>User Dashboard</span>
+                          <span>Dashboard</span>
                         </Link>
                         <Link
                           href="/provider/cars"
@@ -375,13 +375,13 @@ export const Navbar: React.FC = () => {
                   className="block"
                 >
                   <Button variant="dark" size="md" className="w-full">
-                    {user?.role === 'admin' ? 'SaaS Admin Center' : 'User Dashboard'}
+                    {user?.role === 'admin' ? 'Admin Dashboard' : 'Dashboard'}
                   </Button>
                 </Link>
                 <button
                   type="button"
                   onClick={handleLogout}
-                  className="w-full py-2.5 text-center text-sm font-bold text-rose-600 hover:bg-rose-50 rounded-xl"
+                  className="w-full py-2.5 text-center text-sm font-bold text-rose-600 hover:bg-rose-50 rounded-xl mt-2"
                 >
                   Sign Out
                 </button>

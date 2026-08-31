@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
+import { HomeHero } from '@/components/home/HomeHero';
 import { SearchFilterBar } from '@/components/common/SearchFilterBar';
 import { CarCard } from '@/components/common/CarCard';
 import { CarCardSkeleton } from '@/components/common/CarCardSkeleton';
@@ -66,35 +67,8 @@ export default function HomePage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
-      {/* 1. HERO SECTION (Clean Monochrome Luxury Styling) */}
-      <section className="relative bg-black text-white pt-14 pb-28 overflow-hidden">
-        {/* Background subtle radial gradient */}
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[350px] bg-zinc-800/40 blur-[130px] rounded-full pointer-events-none" />
-
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 text-center relative z-10 space-y-6">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300 text-xs font-bold uppercase tracking-widest">
-            <Sparkles className="w-3.5 h-3.5 text-zinc-400" />
-            <span>Premium Fleet Collection ..</span>
-          </div>
-
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white max-w-4xl mx-auto leading-tight">
-            Looking to save more on <span className="text-zinc-400">your rental or purchase?</span>
-          </h1>
-
-          <p className="text-zinc-400 text-sm sm:text-base max-w-2xl mx-auto">
-            Discover verified vehicles at transparent rates with zero hidden charges. Simple, seamless car rentals & direct sales.
-          </p>
-
-          {/* Hero VIP Car Silhouette */}
-          <div className="relative max-w-4xl mx-auto pt-6 pb-2">
-            <img
-              src="https://images.unsplash.com/photo-1617788138017-80ad40651399?auto=format&fit=crop&w=1200&q=85"
-              alt="Luxury VIP Fleet"
-              className="w-full h-auto max-h-[380px] object-cover rounded-3xl shadow-2xl border border-zinc-800"
-            />
-          </div>
-        </div>
-      </section>
+      {/* 1. HERO SECTION */}
+      <HomeHero />
 
 
       {/* 3. SECTION A: DEDICATED RENTAL CARS */}
@@ -139,17 +113,19 @@ export default function HomePage() {
               ))}
             </div>
           ) : (
-            <div className="p-12 rounded-3xl bg-white border border-zinc-200 text-center space-y-4">
+            <div className="p-12 rounded-3xl bg-white border border-zinc-200 text-center space-y-3">
               <ShoppingBag className="w-10 h-10 text-zinc-400 mx-auto" />
               <h3 className="text-base font-bold text-black">No Cars for Rent Currently Listed</h3>
               <p className="text-xs text-zinc-500 max-w-md mx-auto">
                 List your vehicle for rent today and start earning booking revenue!
               </p>
-              <Link href="/sell">
-                <Button variant="dark" size="sm" leftIcon={<Plus className="w-4 h-4" />}>
-                  List Car for Rent
-                </Button>
-              </Link>
+              <div className="pt-3">
+                <Link href="/sell" className="inline-block">
+                  <Button variant="dark" size="sm" leftIcon={<Plus className="w-4 h-4" />}>
+                    List Car for Rent
+                  </Button>
+                </Link>
+              </div>
             </div>
           )}
         </div>
@@ -197,17 +173,19 @@ export default function HomePage() {
               ))}
             </div>
           ) : (
-            <div className="p-12 rounded-3xl bg-white border border-zinc-200 text-center space-y-4">
+            <div className="p-12 rounded-3xl bg-white border border-zinc-200 text-center space-y-3">
               <ShoppingBag className="w-10 h-10 text-zinc-400 mx-auto" />
               <h3 className="text-base font-bold text-black">No Cars for Sale Currently Listed</h3>
               <p className="text-xs text-zinc-500 max-w-md mx-auto">
                 List your vehicle for sale today and reach thousands of prospective car buyers!
               </p>
-              <Link href="/sell">
-                <Button variant="dark" size="sm" leftIcon={<Plus className="w-4 h-4" />}>
-                  List Car for Sale
-                </Button>
-              </Link>
+              <div className="pt-3">
+                <Link href="/sell" className="inline-block">
+                  <Button variant="dark" size="sm" leftIcon={<Plus className="w-4 h-4" />}>
+                    List Car for Sale
+                  </Button>
+                </Link>
+              </div>
             </div>
           )}
         </div>

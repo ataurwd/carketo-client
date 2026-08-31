@@ -15,48 +15,84 @@ function BuyCarContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const initialPage = Number(searchParams?.get('page')) || 1;
-  const initialSearch = searchParams?.get('q') || '';
-  const initialBrand = searchParams?.get('brand') || 'all';
-  const initialModel = searchParams?.get('model') || '';
-  const initialCondition = searchParams?.get('condition') || 'all';
-  const initialMinYear = searchParams?.get('minYear') || '';
-  const initialMaxYear = searchParams?.get('maxYear') || '';
-  const initialBodyType = searchParams?.get('bodyType') || 'all';
-  const initialTransmission = searchParams?.get('transmission') || 'all';
-  const initialFuel = searchParams?.get('fuelType') || 'all';
-  const initialLocation = searchParams?.get('location') || 'all';
-  const initialMinPrice = searchParams?.get('minPrice') || '';
-  const initialMaxPrice = searchParams?.get('maxPrice') || '';
-  const initialMaxMileage = searchParams?.get('maxMileage') || '';
-  const initialSort = searchParams?.get('sort') || 'newest';
+  const getInitialSearch = () =>
+    searchParams?.get('search') || searchParams?.get('q') || searchParams?.get('location') || '';
+  const getInitialBrand = () => searchParams?.get('brand') || 'all';
+  const getInitialModel = () => searchParams?.get('model') || '';
+  const getInitialCondition = () => searchParams?.get('condition') || 'all';
+  const getInitialMinYear = () => searchParams?.get('minYear') || '';
+  const getInitialMaxYear = () => searchParams?.get('maxYear') || '';
+  const getInitialBodyType = () => searchParams?.get('bodyType') || 'all';
+  const getInitialTransmission = () => searchParams?.get('transmission') || 'all';
+  const getInitialFuel = () => searchParams?.get('fuelType') || 'all';
+  const getInitialLocation = () => searchParams?.get('location') || 'all';
+  const getInitialMinPrice = () => searchParams?.get('minPrice') || '';
+  const getInitialMaxPrice = () => searchParams?.get('maxPrice') || '';
+  const getInitialMaxMileage = () => searchParams?.get('maxMileage') || '';
+  const getInitialSort = () => searchParams?.get('sort') || 'newest';
+  const getInitialPage = () => Number(searchParams?.get('page')) || 1;
 
   const [cars, setCars] = useState<ICar[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [page, setPage] = useState<number>(initialPage);
+  const [page, setPage] = useState<number>(getInitialPage());
   const [pagination, setPagination] = useState<IPagination>({
     total: 0,
-    page: initialPage,
+    page: getInitialPage(),
     limit: 12,
     totalPages: 1,
   });
 
   // Filter States
-  const [search, setSearch] = useState(initialSearch);
-  const [selectedBrand, setSelectedBrand] = useState(initialBrand);
-  const [selectedModel, setSelectedModel] = useState(initialModel);
-  const [selectedCondition, setSelectedCondition] = useState(initialCondition);
-  const [minYear, setMinYear] = useState(initialMinYear);
-  const [maxYear, setMaxYear] = useState(initialMaxYear);
-  const [selectedBodyType, setSelectedBodyType] = useState(initialBodyType);
-  const [selectedTransmission, setSelectedTransmission] = useState(initialTransmission);
-  const [selectedFuel, setSelectedFuel] = useState(initialFuel);
-  const [selectedLocation, setSelectedLocation] = useState(initialLocation);
-  const [minPrice, setMinPrice] = useState(initialMinPrice);
-  const [maxPrice, setMaxPrice] = useState(initialMaxPrice);
-  const [maxMileage, setMaxMileage] = useState(initialMaxMileage);
-  const [sortBy, setSortBy] = useState(initialSort);
+  const [search, setSearch] = useState(getInitialSearch());
+  const [selectedBrand, setSelectedBrand] = useState(getInitialBrand());
+  const [selectedModel, setSelectedModel] = useState(getInitialModel());
+  const [selectedCondition, setSelectedCondition] = useState(getInitialCondition());
+  const [minYear, setMinYear] = useState(getInitialMinYear());
+  const [maxYear, setMaxYear] = useState(getInitialMaxYear());
+  const [selectedBodyType, setSelectedBodyType] = useState(getInitialBodyType());
+  const [selectedTransmission, setSelectedTransmission] = useState(getInitialTransmission());
+  const [selectedFuel, setSelectedFuel] = useState(getInitialFuel());
+  const [selectedLocation, setSelectedLocation] = useState(getInitialLocation());
+  const [minPrice, setMinPrice] = useState(getInitialMinPrice());
+  const [maxPrice, setMaxPrice] = useState(getInitialMaxPrice());
+  const [maxMileage, setMaxMileage] = useState(getInitialMaxMileage());
+  const [sortBy, setSortBy] = useState(getInitialSort());
   const [advancedFiltersOpen, setAdvancedFiltersOpen] = useState(false);
+
+  // Sync state when URL searchParams changes (e.g. from homepage search)
+  useEffect(() => {
+    const q = searchParams?.get('search') || searchParams?.get('q') || searchParams?.get('location') || '';
+    const b = searchParams?.get('brand') || 'all';
+    const m = searchParams?.get('model') || '';
+    const c = searchParams?.get('condition') || 'all';
+    const minY = searchParams?.get('minYear') || '';
+    const maxY = searchParams?.get('maxYear') || '';
+    const bt = searchParams?.get('bodyType') || 'all';
+    const tr = searchParams?.get('transmission') || 'all';
+    const ft = searchParams?.get('fuelType') || 'all';
+    const loc = searchParams?.get('location') || 'all';
+    const minP = searchParams?.get('minPrice') || '';
+    const maxP = searchParams?.get('maxPrice') || '';
+    const maxMil = searchParams?.get('maxMileage') || '';
+    const srt = searchParams?.get('sort') || 'newest';
+    const p = Number(searchParams?.get('page')) || 1;
+
+    setSearch(q);
+    setSelectedBrand(b);
+    setSelectedModel(m);
+    setSelectedCondition(c);
+    setMinYear(minY);
+    setMaxYear(maxY);
+    setSelectedBodyType(bt);
+    setSelectedTransmission(tr);
+    setSelectedFuel(ft);
+    setSelectedLocation(loc);
+    setMinPrice(minP);
+    setMaxPrice(maxP);
+    setMaxMileage(maxMil);
+    setSortBy(srt);
+    setPage(p);
+  }, [searchParams]);
 
   // Calculate active filters count
   const activeFiltersCount =
@@ -169,7 +205,10 @@ function BuyCarContent() {
     if (minPrice) params.set('minPrice', minPrice);
     if (maxPrice) params.set('maxPrice', maxPrice);
     if (maxMileage) params.set('maxMileage', maxMileage);
-    if (search.trim()) params.set('q', search.trim());
+    if (search.trim()) {
+      params.set('q', search.trim());
+      params.set('search', search.trim());
+    }
     if (sortBy !== 'newest') params.set('sort', sortBy);
 
     const queryStr = params.toString();

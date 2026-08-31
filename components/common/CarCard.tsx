@@ -12,6 +12,7 @@ import {
   ArrowUpRight,
   MapPin,
   Sparkles,
+  Car as CarIcon,
 } from 'lucide-react';
 
 export interface CarCardProps {
@@ -37,8 +38,8 @@ export const CarCard: React.FC<CarCardProps> = ({ car }) => {
           >
             For {isRental ? 'Rent' : 'Sale'}
           </Badge>
-          <span className="text-xs font-bold text-zinc-400">
-            {car.year} • {car.brand}
+          <span className="text-xs font-black text-zinc-900 bg-zinc-100 px-2.5 py-0.5 rounded-full border border-zinc-200">
+            {car.brand} {car.model}
           </span>
         </div>
 
@@ -49,7 +50,7 @@ export const CarCard: React.FC<CarCardProps> = ({ car }) => {
         >
           <img
             src={car.coverImage || '/placeholder-car.jpg'}
-            alt={car.title}
+            alt={car.title || `${car.brand} ${car.model}`}
             className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
             loading="lazy"
           />
@@ -60,7 +61,22 @@ export const CarCard: React.FC<CarCardProps> = ({ car }) => {
               </span>
             </div>
           )}
+          {/* Year pill on image */}
+          <div className="absolute bottom-2.5 right-2.5">
+            <span className="px-2 py-0.5 rounded-lg bg-black/75 backdrop-blur text-white text-[10px] font-bold">
+              {car.year}
+            </span>
+          </div>
         </Link>
+
+        {/* Brand & Model Primary Header */}
+        <div className="flex items-center gap-1.5 text-xs font-bold text-zinc-500 uppercase tracking-wider mb-1">
+          <span className="text-black font-extrabold">{car.brand}</span>
+          <span>•</span>
+          <span className="text-black font-extrabold">{car.model}</span>
+          <span>•</span>
+          <span>{car.year}</span>
+        </div>
 
         {/* Title & Location */}
         <Link href={`/cars/${car.slug}`}>

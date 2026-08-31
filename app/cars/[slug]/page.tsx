@@ -405,12 +405,17 @@ export default function CarDetailPage() {
         <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10 text-center space-y-3">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300 text-xs font-bold uppercase tracking-wider">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300 text-xs font-bold uppercase tracking-wider">
+            <span className="text-white font-extrabold">{car.brand} • {car.model} ({car.year})</span>
+            <span className="text-zinc-600">|</span>
             <span>{isRental ? 'Direct Rental Vehicle' : 'Verified Purchase Vehicle'}</span>
           </div>
           <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-white">
-            {car.title}
+            {car.brand} {car.model}
           </h1>
+          <p className="text-base sm:text-lg text-zinc-300 font-semibold max-w-2xl mx-auto">
+            {car.title}
+          </p>
           <div className="flex items-center justify-center gap-2 text-xs font-semibold text-zinc-400">
             <Link href="/" className="hover:text-white transition-colors">
               Home
@@ -420,7 +425,7 @@ export default function CarDetailPage() {
               {isRental ? 'Rent Car' : 'Buy Car'}
             </Link>
             <span>/</span>
-            <span className="text-white font-bold">{car.title}</span>
+            <span className="text-white font-bold">{car.brand} {car.model}</span>
           </div>
         </div>
       </section>
@@ -552,6 +557,21 @@ export default function CarDetailPage() {
 
               {/* Specs Table */}
               <div className="space-y-2.5 text-xs sm:text-sm">
+                <div className="flex items-center justify-between py-1.5 border-b border-zinc-100 text-zinc-600">
+                  <span className="text-zinc-500 font-semibold">Brand / Make</span>
+                  <span className="font-extrabold text-black text-sm">{car.brand}</span>
+                </div>
+
+                <div className="flex items-center justify-between py-1.5 border-b border-zinc-100 text-zinc-600">
+                  <span className="text-zinc-500 font-semibold">Car Model</span>
+                  <span className="font-extrabold text-black text-sm">{car.model}</span>
+                </div>
+
+                <div className="flex items-center justify-between py-1.5 border-b border-zinc-100 text-zinc-600">
+                  <span className="text-zinc-500 font-semibold">Model Year</span>
+                  <span className="font-bold text-black">{car.year}</span>
+                </div>
+
                 {car.condition && (
                   <div className="flex items-center justify-between py-1.5 border-b border-zinc-100 text-zinc-600">
                     <span className="text-zinc-500">Condition</span>
@@ -591,11 +611,6 @@ export default function CarDetailPage() {
                     <span className="font-bold text-black">{car.color}</span>
                   </div>
                 )}
-
-                <div className="flex items-center justify-between py-1.5 border-b border-zinc-100 text-zinc-600">
-                  <span className="text-zinc-500">Manufacturing Year</span>
-                  <span className="font-bold text-black">{car.year}</span>
-                </div>
 
                 {car.registrationYear && (
                   <div className="flex items-center justify-between py-1.5 border-b border-zinc-100 text-zinc-600">
@@ -640,6 +655,26 @@ export default function CarDetailPage() {
               images={car.images.length > 0 ? car.images : [car.coverImage].filter(Boolean)}
               title={car.title}
             />
+
+            {/* Quick Spec Highlights Grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="p-3.5 rounded-2xl bg-white border border-zinc-200 text-center space-y-1 shadow-sm">
+                <span className="text-[10px] uppercase font-bold tracking-wider text-zinc-400">Brand</span>
+                <p className="text-sm font-black text-black truncate">{car.brand}</p>
+              </div>
+              <div className="p-3.5 rounded-2xl bg-white border border-zinc-200 text-center space-y-1 shadow-sm">
+                <span className="text-[10px] uppercase font-bold tracking-wider text-zinc-400">Model</span>
+                <p className="text-sm font-black text-black truncate">{car.model}</p>
+              </div>
+              <div className="p-3.5 rounded-2xl bg-white border border-zinc-200 text-center space-y-1 shadow-sm">
+                <span className="text-[10px] uppercase font-bold tracking-wider text-zinc-400">Year</span>
+                <p className="text-sm font-black text-black">{car.year}</p>
+              </div>
+              <div className="p-3.5 rounded-2xl bg-white border border-zinc-200 text-center space-y-1 shadow-sm">
+                <span className="text-[10px] uppercase font-bold tracking-wider text-zinc-400">Transmission</span>
+                <p className="text-sm font-black text-black truncate">{car.specs?.transmission || car.transmission || 'Automatic'}</p>
+              </div>
+            </div>
 
             {/* Guarantees */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

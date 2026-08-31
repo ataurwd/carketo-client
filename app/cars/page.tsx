@@ -29,37 +29,63 @@ function CarsCatalogContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const initialPage = Number(searchParams?.get('page')) || 1;
-  const initialType = searchParams?.get('type') || 'all';
-  const initialBrand = searchParams?.get('brand') || 'all';
-  const initialBodyType = searchParams?.get('bodyType') || 'all';
-  const initialQuery = searchParams?.get('q') || searchParams?.get('location') || '';
-  const initialSort = searchParams?.get('sort') || 'newest';
-  const initialTransmission = searchParams?.get('transmission') || 'all';
-  const initialFuel = searchParams?.get('fuelType') || 'all';
-  const initialMinPrice = searchParams?.get('minPrice') || '';
-  const initialMaxPrice = searchParams?.get('maxPrice') || '';
+  const getInitialPage = () => Number(searchParams?.get('page')) || 1;
+  const getInitialType = () => searchParams?.get('type') || 'all';
+  const getInitialBrand = () => searchParams?.get('brand') || 'all';
+  const getInitialBodyType = () => searchParams?.get('bodyType') || 'all';
+  const getInitialQuery = () =>
+    searchParams?.get('search') || searchParams?.get('q') || searchParams?.get('location') || '';
+  const getInitialSort = () => searchParams?.get('sort') || 'newest';
+  const getInitialTransmission = () => searchParams?.get('transmission') || 'all';
+  const getInitialFuel = () => searchParams?.get('fuelType') || 'all';
+  const getInitialMinPrice = () => searchParams?.get('minPrice') || '';
+  const getInitialMaxPrice = () => searchParams?.get('maxPrice') || '';
 
   const [cars, setCars] = useState<ICar[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [page, setPage] = useState<number>(initialPage);
+  const [page, setPage] = useState<number>(getInitialPage());
   const [pagination, setPagination] = useState<IPagination>({
     total: 0,
-    page: initialPage,
+    page: getInitialPage(),
     limit: 12,
     totalPages: 1,
   });
 
   // Filter States
-  const [typeFilter, setTypeFilter] = useState<string>(initialType);
-  const [selectedBrand, setSelectedBrand] = useState<string>(initialBrand);
-  const [selectedBodyType, setSelectedBodyType] = useState<string>(initialBodyType);
-  const [selectedTransmission, setSelectedTransmission] = useState<string>(initialTransmission);
-  const [selectedFuel, setSelectedFuel] = useState<string>(initialFuel);
-  const [minPrice, setMinPrice] = useState<string>(initialMinPrice);
-  const [maxPrice, setMaxPrice] = useState<string>(initialMaxPrice);
-  const [searchQuery, setSearchQuery] = useState<string>(initialQuery);
-  const [sortBy, setSortBy] = useState<string>(initialSort);
+  const [typeFilter, setTypeFilter] = useState<string>(getInitialType());
+  const [selectedBrand, setSelectedBrand] = useState<string>(getInitialBrand());
+  const [selectedBodyType, setSelectedBodyType] = useState<string>(getInitialBodyType());
+  const [selectedTransmission, setSelectedTransmission] = useState<string>(getInitialTransmission());
+  const [selectedFuel, setSelectedFuel] = useState<string>(getInitialFuel());
+  const [minPrice, setMinPrice] = useState<string>(getInitialMinPrice());
+  const [maxPrice, setMaxPrice] = useState<string>(getInitialMaxPrice());
+  const [searchQuery, setSearchQuery] = useState<string>(getInitialQuery());
+  const [sortBy, setSortBy] = useState<string>(getInitialSort());
+
+  // Listen to searchParams updates (e.g. from homepage search navigation)
+  useEffect(() => {
+    const q = searchParams?.get('search') || searchParams?.get('q') || searchParams?.get('location') || '';
+    const b = searchParams?.get('brand') || 'all';
+    const t = searchParams?.get('type') || 'all';
+    const bt = searchParams?.get('bodyType') || 'all';
+    const tr = searchParams?.get('transmission') || 'all';
+    const ft = searchParams?.get('fuelType') || 'all';
+    const minP = searchParams?.get('minPrice') || '';
+    const maxP = searchParams?.get('maxPrice') || '';
+    const srt = searchParams?.get('sort') || 'newest';
+    const p = Number(searchParams?.get('page')) || 1;
+
+    setSearchQuery(q);
+    setSelectedBrand(b);
+    setTypeFilter(t);
+    setSelectedBodyType(bt);
+    setSelectedTransmission(tr);
+    setSelectedFuel(ft);
+    setMinPrice(minP);
+    setMaxPrice(maxP);
+    setSortBy(srt);
+    setPage(p);
+  }, [searchParams]);
 
   // Expand filter accordion on mobile/desktop
   const [advancedFiltersOpen, setAdvancedFiltersOpen] = useState(false);

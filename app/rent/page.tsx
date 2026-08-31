@@ -16,28 +16,46 @@ function RentCarContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const initialPage = Number(searchParams?.get('page')) || 1;
-  const initialSearch = searchParams?.get('q') || '';
-  const initialBrand = searchParams?.get('brand') || 'All';
-  const initialBodyType = searchParams?.get('bodyType') || 'All';
-  const initialTransmission = searchParams?.get('transmission') || 'All';
-  const initialMaxPrice = Number(searchParams?.get('maxPrice')) || 2000;
+  const getInitialSearch = () =>
+    searchParams?.get('search') || searchParams?.get('q') || searchParams?.get('location') || '';
+  const getInitialBrand = () => searchParams?.get('brand') || 'All';
+  const getInitialBodyType = () => searchParams?.get('bodyType') || 'All';
+  const getInitialTransmission = () => searchParams?.get('transmission') || 'All';
+  const getInitialMaxPrice = () => Number(searchParams?.get('maxPrice')) || 2000;
+  const getInitialPage = () => Number(searchParams?.get('page')) || 1;
 
   const [cars, setCars] = useState<ICar[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [page, setPage] = useState<number>(initialPage);
+  const [page, setPage] = useState<number>(getInitialPage());
   const [pagination, setPagination] = useState<IPagination>({
     total: 0,
-    page: initialPage,
+    page: getInitialPage(),
     limit: 12,
     totalPages: 1,
   });
 
-  const [search, setSearch] = useState(initialSearch);
-  const [selectedBrand, setSelectedBrand] = useState(initialBrand);
-  const [selectedBodyType, setSelectedBodyType] = useState(initialBodyType);
-  const [selectedTransmission, setSelectedTransmission] = useState(initialTransmission);
-  const [priceRange, setPriceRange] = useState<number>(initialMaxPrice);
+  const [search, setSearch] = useState(getInitialSearch());
+  const [selectedBrand, setSelectedBrand] = useState(getInitialBrand());
+  const [selectedBodyType, setSelectedBodyType] = useState(getInitialBodyType());
+  const [selectedTransmission, setSelectedTransmission] = useState(getInitialTransmission());
+  const [priceRange, setPriceRange] = useState<number>(getInitialMaxPrice());
+
+  // Listen to searchParams updates (e.g. from homepage search navigation)
+  useEffect(() => {
+    const q = searchParams?.get('search') || searchParams?.get('q') || searchParams?.get('location') || '';
+    const b = searchParams?.get('brand') || 'All';
+    const bt = searchParams?.get('bodyType') || 'All';
+    const tr = searchParams?.get('transmission') || 'All';
+    const mp = Number(searchParams?.get('maxPrice')) || 2000;
+    const p = Number(searchParams?.get('page')) || 1;
+
+    setSearch(q);
+    setSelectedBrand(b);
+    setSelectedBodyType(bt);
+    setSelectedTransmission(tr);
+    setPriceRange(mp);
+    setPage(p);
+  }, [searchParams]);
 
   // Fetch paginated rental cars from backend
   const fetchRentalCars = useCallback(async () => {
@@ -47,9 +65,9 @@ function RentCarContent() {
       page,
       limit: 12,
     };
-    if (selectedBrand !== 'All') queryParams.brand = selectedBrand;
-    if (selectedBodyType !== 'All') queryParams.bodyType = selectedBodyType;
-    if (selectedTransmission !== 'All') queryParams.transmission = selectedTransmission;
+    if (selectedBrand && selectedBrand.toLowerCase() !== 'all') queryParams.brand = selectedBrand;
+    if (selectedBodyType && selectedBodyType.toLowerCase() !== 'all') queryParams.bodyType = selectedBodyType;
+    if (selectedTransmission && selectedTransmission.toLowerCase() !== 'all') queryParams.transmission = selectedTransmission;
     if (priceRange < 2000) queryParams.maxPrice = priceRange;
     if (search.trim()) queryParams.search = search.trim();
 
@@ -79,11 +97,14 @@ function RentCarContent() {
   useEffect(() => {
     const params = new URLSearchParams();
     if (page > 1) params.set('page', String(page));
-    if (selectedBrand !== 'All') params.set('brand', selectedBrand);
-    if (selectedBodyType !== 'All') params.set('bodyType', selectedBodyType);
-    if (selectedTransmission !== 'All') params.set('transmission', selectedTransmission);
+    if (selectedBrand && selectedBrand.toLowerCase() !== 'all') params.set('brand', selectedBrand);
+    if (selectedBodyType && selectedBodyType.toLowerCase() !== 'all') params.set('bodyType', selectedBodyType);
+    if (selectedTransmission && selectedTransmission.toLowerCase() !== 'all') params.set('transmission', selectedTransmission);
     if (priceRange < 2000) params.set('maxPrice', String(priceRange));
-    if (search.trim()) params.set('q', search.trim());
+    if (search.trim()) {
+      params.set('q', search.trim());
+      params.set('search', search.trim());
+    }
 
     const queryStr = params.toString();
     router.replace(queryStr ? `/rent?${queryStr}` : '/rent', { scroll: false });
