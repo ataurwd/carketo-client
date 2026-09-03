@@ -20,13 +20,15 @@ import {
   Menu,
   X,
   ShieldCheck,
+  Mail,
 } from 'lucide-react';
 
 const navItems = [
   { label: 'Overview', href: '/admin', icon: LayoutDashboard },
   { label: 'Fleet Cars', href: '/admin/cars', icon: Car },
   { label: 'Users', href: '/admin/users', icon: Users },
-  { label: 'Inquiries', href: '/admin/inquiries', icon: MessageSquare },
+  { label: 'Car Inquiries', href: '/admin/inquiries', icon: MessageSquare },
+  { label: 'Contact Messages', href: '/admin/contacts', icon: Mail },
   { label: 'Coupons', href: '/admin/coupons', icon: Ticket },
   { label: 'Settings', href: '/admin/settings', icon: Settings },
   { label: 'System Health', href: '/admin/health', icon: Activity },

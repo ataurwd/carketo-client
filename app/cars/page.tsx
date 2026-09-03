@@ -25,70 +25,117 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 
+
+interface CarsCatalogFilters {
+  type: string;
+  brand: string;
+  bodyType: string;
+  transmission: string;
+  fuelType: string;
+  minPrice: string;
+  maxPrice: string;
+  search: string;
+  sortBy: string;
+}
+
+const DEFAULT_CARS_FILTERS: CarsCatalogFilters = {
+  type: 'all',
+  brand: 'all',
+  bodyType: 'all',
+  transmission: 'all',
+  fuelType: 'all',
+  minPrice: '',
+  maxPrice: '',
+  search: '',
+  sortBy: 'newest',
+};
+
+const parseCarsFiltersFromParams = (params: ReturnType<typeof useSearchParams>): CarsCatalogFilters => ({
+  type: params?.get('type') || 'all',
+  brand: params?.get('brand') || 'all',
+  bodyType: params?.get('bodyType') || 'all',
+  transmission: params?.get('transmission') || 'all',
+  fuelType: params?.get('fuelType') || 'all',
+  minPrice: params?.get('minPrice') || '',
+  maxPrice: params?.get('maxPrice') || '',
+  search: params?.get('search') || params?.get('q') || params?.get('location') || '',
+  sortBy: params?.get('sort') || 'newest',
+});
+
 function CarsCatalogContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const getInitialPage = () => Number(searchParams?.get('page')) || 1;
-  const getInitialType = () => searchParams?.get('type') || 'all';
-  const getInitialBrand = () => searchParams?.get('brand') || 'all';
-  const getInitialBodyType = () => searchParams?.get('bodyType') || 'all';
-  const getInitialQuery = () =>
-    searchParams?.get('search') || searchParams?.get('q') || searchParams?.get('location') || '';
-  const getInitialSort = () => searchParams?.get('sort') || 'newest';
-  const getInitialTransmission = () => searchParams?.get('transmission') || 'all';
-  const getInitialFuel = () => searchParams?.get('fuelType') || 'all';
-  const getInitialMinPrice = () => searchParams?.get('minPrice') || '';
-  const getInitialMaxPrice = () => searchParams?.get('maxPrice') || '';
-
   const [cars, setCars] = useState<ICar[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [page, setPage] = useState<number>(getInitialPage());
+  const [page, setPage] = useState<number>(() => Number(searchParams?.get('page')) || 1);
   const [pagination, setPagination] = useState<IPagination>({
     total: 0,
-    page: getInitialPage(),
+    page: Number(searchParams?.get('page')) || 1,
     limit: 12,
     totalPages: 1,
   });
 
-  // Filter States
-  const [typeFilter, setTypeFilter] = useState<string>(getInitialType());
-  const [selectedBrand, setSelectedBrand] = useState<string>(getInitialBrand());
-  const [selectedBodyType, setSelectedBodyType] = useState<string>(getInitialBodyType());
-  const [selectedTransmission, setSelectedTransmission] = useState<string>(getInitialTransmission());
-  const [selectedFuel, setSelectedFuel] = useState<string>(getInitialFuel());
-  const [minPrice, setMinPrice] = useState<string>(getInitialMinPrice());
-  const [maxPrice, setMaxPrice] = useState<string>(getInitialMaxPrice());
-  const [searchQuery, setSearchQuery] = useState<string>(getInitialQuery());
-  const [sortBy, setSortBy] = useState<string>(getInitialSort());
+  // Staged / Draft filters (controlled in UI without triggering immediate reload)
+  const [draftFilters, setDraftFilters] = useState<CarsCatalogFilters>(() => parseCarsFiltersFromParams(searchParams));
+
+  // Applied filters (active query that fetches results & controls URL)
+  const [appliedFilters, setAppliedFilters] = useState<CarsCatalogFilters>(() => parseCarsFiltersFromParams(searchParams));
 
   // Listen to searchParams updates (e.g. from homepage search navigation)
   useEffect(() => {
-    const q = searchParams?.get('search') || searchParams?.get('q') || searchParams?.get('location') || '';
-    const b = searchParams?.get('brand') || 'all';
-    const t = searchParams?.get('type') || 'all';
-    const bt = searchParams?.get('bodyType') || 'all';
-    const tr = searchParams?.get('transmission') || 'all';
-    const ft = searchParams?.get('fuelType') || 'all';
-    const minP = searchParams?.get('minPrice') || '';
-    const maxP = searchParams?.get('maxPrice') || '';
-    const srt = searchParams?.get('sort') || 'newest';
-    const p = Number(searchParams?.get('page')) || 1;
-
-    setSearchQuery(q);
-    setSelectedBrand(b);
-    setTypeFilter(t);
-    setSelectedBodyType(bt);
-    setSelectedTransmission(tr);
-    setSelectedFuel(ft);
-    setMinPrice(minP);
-    setMaxPrice(maxP);
-    setSortBy(srt);
-    setPage(p);
+    const fromUrl = parseCarsFiltersFromParams(searchParams);
+    setDraftFilters(fromUrl);
+    setAppliedFilters(fromUrl);
+    setPage(Number(searchParams?.get('page')) || 1);
   }, [searchParams]);
 
   // Expand filter accordion on mobile/desktop
   const [advancedFiltersOpen, setAdvancedFiltersOpen] = useState(false);
+
+  // Check for unapplied staged selections
+  const hasPendingChanges =
+    draftFilters.brand !== appliedFilters.brand ||
+    draftFilters.bodyType !== appliedFilters.bodyType ||
+    draftFilters.transmission !== appliedFilters.transmission ||
+    draftFilters.fuelType !== appliedFilters.fuelType ||
+    draftFilters.minPrice !== appliedFilters.minPrice ||
+    draftFilters.maxPrice !== appliedFilters.maxPrice ||
+    draftFilters.search !== appliedFilters.search;
+
+  // Apply staged draft filters
+  const handleApply = useCallback(() => {
+    setPage(1);
+    setAppliedFilters({ ...draftFilters });
+  }, [draftFilters]);
+
+  // Reset all filters
+  const handleResetAll = useCallback(() => {
+    setPage(1);
+    setDraftFilters(DEFAULT_CARS_FILTERS);
+    setAppliedFilters(DEFAULT_CARS_FILTERS);
+  }, []);
+
+  // Listing type tab change (applies immediately)
+  const handleTypeChange = useCallback((newType: string) => {
+    setPage(1);
+    setDraftFilters((prev) => ({ ...prev, type: newType }));
+    setAppliedFilters((prev) => ({ ...prev, type: newType }));
+  }, []);
+
+  // Sort change (applies immediately)
+  const handleSortChange = useCallback((newSort: string) => {
+    setPage(1);
+    setDraftFilters((prev) => ({ ...prev, sortBy: newSort }));
+    setAppliedFilters((prev) => ({ ...prev, sortBy: newSort }));
+  }, []);
+
+  // Remove individual active filter
+  const handleRemoveAppliedFilter = useCallback((key: keyof CarsCatalogFilters, defaultValue: string) => {
+    setPage(1);
+    setDraftFilters((prev) => ({ ...prev, [key]: defaultValue }));
+    setAppliedFilters((prev) => ({ ...prev, [key]: defaultValue }));
+  }, []);
 
   // Fetch cars directly from backend with all filter parameters and pagination
   const fetchCars = useCallback(async () => {
@@ -97,15 +144,15 @@ function CarsCatalogContent() {
       page,
       limit: 12,
     };
-    if (typeFilter !== 'all') queryParams.listingType = typeFilter;
-    if (selectedBrand !== 'all') queryParams.brand = selectedBrand;
-    if (selectedBodyType !== 'all') queryParams.bodyType = selectedBodyType;
-    if (selectedTransmission !== 'all') queryParams.transmission = selectedTransmission;
-    if (selectedFuel !== 'all') queryParams.fuelType = selectedFuel;
-    if (minPrice) queryParams.minPrice = minPrice;
-    if (maxPrice) queryParams.maxPrice = maxPrice;
-    if (searchQuery.trim()) queryParams.search = searchQuery.trim();
-    if (sortBy !== 'newest') queryParams.sort = sortBy;
+    if (appliedFilters.type !== 'all') queryParams.listingType = appliedFilters.type;
+    if (appliedFilters.brand !== 'all') queryParams.brand = appliedFilters.brand;
+    if (appliedFilters.bodyType !== 'all') queryParams.bodyType = appliedFilters.bodyType;
+    if (appliedFilters.transmission !== 'all') queryParams.transmission = appliedFilters.transmission;
+    if (appliedFilters.fuelType !== 'all') queryParams.fuelType = appliedFilters.fuelType;
+    if (appliedFilters.minPrice) queryParams.minPrice = appliedFilters.minPrice;
+    if (appliedFilters.maxPrice) queryParams.maxPrice = appliedFilters.maxPrice;
+    if (appliedFilters.search.trim()) queryParams.search = appliedFilters.search.trim();
+    if (appliedFilters.sortBy !== 'newest') queryParams.sort = appliedFilters.sortBy;
 
     try {
       const res = await carService.getCarsWithPagination(queryParams);
@@ -123,18 +170,7 @@ function CarsCatalogContent() {
     } finally {
       setIsLoading(false);
     }
-  }, [
-    page,
-    typeFilter,
-    selectedBrand,
-    selectedBodyType,
-    selectedTransmission,
-    selectedFuel,
-    minPrice,
-    maxPrice,
-    searchQuery,
-    sortBy,
-  ]);
+  }, [page, appliedFilters]);
 
   useEffect(() => {
     fetchCars();
@@ -144,55 +180,31 @@ function CarsCatalogContent() {
   useEffect(() => {
     const params = new URLSearchParams();
     if (page > 1) params.set('page', String(page));
-    if (typeFilter !== 'all') params.set('type', typeFilter);
-    if (selectedBrand !== 'all') params.set('brand', selectedBrand);
-    if (selectedBodyType !== 'all') params.set('bodyType', selectedBodyType);
-    if (selectedTransmission !== 'all') params.set('transmission', selectedTransmission);
-    if (selectedFuel !== 'all') params.set('fuelType', selectedFuel);
-    if (minPrice) params.set('minPrice', minPrice);
-    if (maxPrice) params.set('maxPrice', maxPrice);
-    if (searchQuery.trim()) params.set('q', searchQuery.trim());
-    if (sortBy !== 'newest') params.set('sort', sortBy);
+    if (appliedFilters.type !== 'all') params.set('type', appliedFilters.type);
+    if (appliedFilters.brand !== 'all') params.set('brand', appliedFilters.brand);
+    if (appliedFilters.bodyType !== 'all') params.set('bodyType', appliedFilters.bodyType);
+    if (appliedFilters.transmission !== 'all') params.set('transmission', appliedFilters.transmission);
+    if (appliedFilters.fuelType !== 'all') params.set('fuelType', appliedFilters.fuelType);
+    if (appliedFilters.minPrice) params.set('minPrice', appliedFilters.minPrice);
+    if (appliedFilters.maxPrice) params.set('maxPrice', appliedFilters.maxPrice);
+    if (appliedFilters.search.trim()) params.set('q', appliedFilters.search.trim());
+    if (appliedFilters.sortBy !== 'newest') params.set('sort', appliedFilters.sortBy);
 
     const queryStr = params.toString();
     router.replace(queryStr ? `/cars?${queryStr}` : '/cars', { scroll: false });
-  }, [
-    page,
-    typeFilter,
-    selectedBrand,
-    selectedBodyType,
-    selectedTransmission,
-    selectedFuel,
-    minPrice,
-    maxPrice,
-    searchQuery,
-    sortBy,
-    router,
-  ]);
+  }, [page, appliedFilters, router]);
 
   const filteredCars = cars;
 
   const activeFiltersCount =
-    (typeFilter !== 'all' ? 1 : 0) +
-    (selectedBrand !== 'all' ? 1 : 0) +
-    (selectedBodyType !== 'all' ? 1 : 0) +
-    (selectedTransmission !== 'all' ? 1 : 0) +
-    (selectedFuel !== 'all' ? 1 : 0) +
-    (minPrice ? 1 : 0) +
-    (maxPrice ? 1 : 0) +
-    (searchQuery ? 1 : 0);
-
-  const resetFilters = () => {
-    setTypeFilter('all');
-    setSelectedBrand('all');
-    setSelectedBodyType('all');
-    setSelectedTransmission('all');
-    setSelectedFuel('all');
-    setMinPrice('');
-    setMaxPrice('');
-    setSearchQuery('');
-    setSortBy('newest');
-  };
+    (appliedFilters.type !== 'all' ? 1 : 0) +
+    (appliedFilters.brand !== 'all' ? 1 : 0) +
+    (appliedFilters.bodyType !== 'all' ? 1 : 0) +
+    (appliedFilters.transmission !== 'all' ? 1 : 0) +
+    (appliedFilters.fuelType !== 'all' ? 1 : 0) +
+    (appliedFilters.minPrice ? 1 : 0) +
+    (appliedFilters.maxPrice ? 1 : 0) +
+    (appliedFilters.search.trim() ? 1 : 0);
 
   return (
     <div className="min-h-screen bg-zinc-50 py-10">
@@ -220,7 +232,7 @@ function CarsCatalogContent() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={resetFilters}
+                onClick={handleResetAll}
                 leftIcon={<RotateCcw className="w-3.5 h-3.5" />}
               >
                 Reset ({activeFiltersCount})
@@ -233,19 +245,46 @@ function CarsCatalogContent() {
         <div className="bg-white p-6 rounded-3xl border border-zinc-200 shadow-sm space-y-5">
           {/* Row 1: Search, Type Pills, Sort */}
           <div className="flex flex-col lg:flex-row items-center gap-4">
-            {/* Search Input */}
-            <div className="relative flex-1 w-full">
-              <Search className="w-4 h-4 text-zinc-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                placeholder="Search by title, brand, model, or city (e.g. BMW, Miami, Coupe)..."
-                value={searchQuery}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value);
-                  setPage(1);
-                }}
-                className="w-full pl-10 pr-4 py-2.5 rounded-2xl border border-zinc-200 text-xs font-semibold focus:outline-none focus:border-black"
-              />
+            {/* Search Input with explicit Search button */}
+            <div className="relative flex-1 w-full flex items-center gap-2">
+              <div className="relative flex-1">
+                <Search className="w-4 h-4 text-zinc-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  placeholder="Search by title, brand, model, or city (e.g. BMW, Miami, Coupe)..."
+                  value={draftFilters.search}
+                  onChange={(e) => setDraftFilters((prev) => ({ ...prev, search: e.target.value }))}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleApply();
+                    }
+                  }}
+                  className="w-full pl-10 pr-9 py-2.5 rounded-2xl border border-zinc-200 text-xs font-semibold focus:outline-none focus:border-black transition-colors"
+                />
+                {draftFilters.search && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setDraftFilters((prev) => ({ ...prev, search: '' }));
+                      if (appliedFilters.search) {
+                        handleRemoveAppliedFilter('search', '');
+                      }
+                    }}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-black p-1"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+              <button
+                type="button"
+                onClick={handleApply}
+                className="px-4 py-2.5 rounded-2xl bg-black text-white hover:bg-zinc-800 text-xs font-bold transition-all shadow-sm flex items-center gap-1.5 shrink-0 active:scale-95"
+              >
+                <Search className="w-3.5 h-3.5" />
+                <span>Search</span>
+              </button>
             </div>
 
             {/* Listing Type Tabs */}
@@ -257,12 +296,9 @@ function CarsCatalogContent() {
               ].map((tab) => (
                 <button
                   key={tab.key}
-                  onClick={() => {
-                    setTypeFilter(tab.key);
-                    setPage(1);
-                  }}
+                  onClick={() => handleTypeChange(tab.key)}
                   className={`flex-1 lg:flex-none px-4 py-2 rounded-xl transition-all ${
-                    typeFilter === tab.key
+                    appliedFilters.type === tab.key
                       ? 'bg-black text-white shadow-sm'
                       : 'text-zinc-600 hover:text-black'
                   }`}
@@ -275,12 +311,9 @@ function CarsCatalogContent() {
             {/* Sort Dropdown */}
             <div className="w-full lg:w-56">
               <select
-                value={sortBy}
-                onChange={(e) => {
-                  setSortBy(e.target.value);
-                  setPage(1);
-                }}
-                className="w-full px-3 py-2.5 rounded-2xl border border-zinc-200 bg-white text-xs font-bold text-zinc-800 focus:outline-none focus:border-black cursor-pointer"
+                value={appliedFilters.sortBy}
+                onChange={(e) => handleSortChange(e.target.value)}
+                className="w-full px-3 py-2.5 rounded-2xl border border-zinc-200 bg-white text-xs font-bold text-zinc-800 focus:outline-none focus:border-black cursor-pointer shadow-sm"
               >
                 <option value="newest">Sort: Newest First</option>
                 <option value="price_asc">Price: Low to High</option>
@@ -292,16 +325,16 @@ function CarsCatalogContent() {
             {/* Toggle Advanced Filters */}
             <button
               onClick={() => setAdvancedFiltersOpen(!advancedFiltersOpen)}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl border text-xs font-bold transition-all w-full lg:w-auto justify-center ${
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl border text-xs font-bold transition-all w-full lg:w-auto justify-center shadow-sm ${
                 advancedFiltersOpen || activeFiltersCount > 0
-                  ? 'border-black bg-zinc-50 text-black'
-                  : 'border-zinc-200 text-zinc-600 hover:border-black'
+                  ? 'border-black bg-zinc-900 text-white'
+                  : 'border-zinc-200 text-zinc-700 bg-white hover:border-black'
               }`}
             >
               <SlidersHorizontal className="w-4 h-4" />
-              <span>Filters</span>
+              <span>{advancedFiltersOpen ? 'Hide Filters' : 'Filters'}</span>
               {activeFiltersCount > 0 && (
-                <span className="h-5 w-5 rounded-full bg-black text-white text-[10px] font-black flex items-center justify-center">
+                <span className="h-5 px-1.5 rounded-full bg-white text-black text-[10px] font-black flex items-center justify-center">
                   {activeFiltersCount}
                 </span>
               )}
@@ -315,12 +348,9 @@ function CarsCatalogContent() {
               <div>
                 <label className="block text-zinc-500 font-bold mb-1 text-[11px] uppercase">Brand</label>
                 <select
-                  value={selectedBrand}
-                  onChange={(e) => {
-                    setSelectedBrand(e.target.value);
-                    setPage(1);
-                  }}
-                  className="w-full px-3 py-2 rounded-xl border border-zinc-200 bg-white text-xs font-semibold text-zinc-800 focus:outline-none focus:border-black"
+                  value={draftFilters.brand}
+                  onChange={(e) => setDraftFilters((prev) => ({ ...prev, brand: e.target.value }))}
+                  className="w-full px-3 py-2 rounded-xl border border-zinc-200 bg-white text-xs font-semibold text-zinc-800 focus:outline-none focus:border-black cursor-pointer"
                 >
                   <option value="all">All Brands</option>
                   {POPULAR_BRANDS.map((b) => (
@@ -335,12 +365,9 @@ function CarsCatalogContent() {
               <div>
                 <label className="block text-zinc-500 font-bold mb-1 text-[11px] uppercase">Body Type</label>
                 <select
-                  value={selectedBodyType}
-                  onChange={(e) => {
-                    setSelectedBodyType(e.target.value);
-                    setPage(1);
-                  }}
-                  className="w-full px-3 py-2 rounded-xl border border-zinc-200 bg-white text-xs font-semibold text-zinc-800 focus:outline-none focus:border-black"
+                  value={draftFilters.bodyType}
+                  onChange={(e) => setDraftFilters((prev) => ({ ...prev, bodyType: e.target.value }))}
+                  className="w-full px-3 py-2 rounded-xl border border-zinc-200 bg-white text-xs font-semibold text-zinc-800 focus:outline-none focus:border-black cursor-pointer"
                 >
                   <option value="all">All Body Types</option>
                   {BODY_TYPES.map((bt) => (
@@ -355,12 +382,9 @@ function CarsCatalogContent() {
               <div>
                 <label className="block text-zinc-500 font-bold mb-1 text-[11px] uppercase">Transmission</label>
                 <select
-                  value={selectedTransmission}
-                  onChange={(e) => {
-                    setSelectedTransmission(e.target.value);
-                    setPage(1);
-                  }}
-                  className="w-full px-3 py-2 rounded-xl border border-zinc-200 bg-white text-xs font-semibold text-zinc-800 focus:outline-none focus:border-black"
+                  value={draftFilters.transmission}
+                  onChange={(e) => setDraftFilters((prev) => ({ ...prev, transmission: e.target.value }))}
+                  className="w-full px-3 py-2 rounded-xl border border-zinc-200 bg-white text-xs font-semibold text-zinc-800 focus:outline-none focus:border-black cursor-pointer"
                 >
                   <option value="all">All Transmissions</option>
                   <option value="automatic">Automatic</option>
@@ -372,12 +396,9 @@ function CarsCatalogContent() {
               <div>
                 <label className="block text-zinc-500 font-bold mb-1 text-[11px] uppercase">Fuel Type</label>
                 <select
-                  value={selectedFuel}
-                  onChange={(e) => {
-                    setSelectedFuel(e.target.value);
-                    setPage(1);
-                  }}
-                  className="w-full px-3 py-2 rounded-xl border border-zinc-200 bg-white text-xs font-semibold text-zinc-800 focus:outline-none focus:border-black"
+                  value={draftFilters.fuelType}
+                  onChange={(e) => setDraftFilters((prev) => ({ ...prev, fuelType: e.target.value }))}
+                  className="w-full px-3 py-2 rounded-xl border border-zinc-200 bg-white text-xs font-semibold text-zinc-800 focus:outline-none focus:border-black cursor-pointer"
                 >
                   <option value="all">All Fuel Types</option>
                   <option value="petrol">Petrol / Gasoline</option>
@@ -394,10 +415,13 @@ function CarsCatalogContent() {
                   <input
                     type="number"
                     placeholder="Min"
-                    value={minPrice}
-                    onChange={(e) => {
-                      setMinPrice(e.target.value);
-                      setPage(1);
+                    value={draftFilters.minPrice}
+                    onChange={(e) => setDraftFilters((prev) => ({ ...prev, minPrice: e.target.value }))}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleApply();
+                      }
                     }}
                     className="w-full px-2.5 py-2 rounded-xl border border-zinc-200 text-xs font-semibold text-zinc-800 focus:outline-none focus:border-black"
                   />
@@ -405,13 +429,45 @@ function CarsCatalogContent() {
                   <input
                     type="number"
                     placeholder="Max"
-                    value={maxPrice}
-                    onChange={(e) => {
-                      setMaxPrice(e.target.value);
-                      setPage(1);
+                    value={draftFilters.maxPrice}
+                    onChange={(e) => setDraftFilters((prev) => ({ ...prev, maxPrice: e.target.value }))}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleApply();
+                      }
                     }}
                     className="w-full px-2.5 py-2 rounded-xl border border-zinc-200 text-xs font-semibold text-zinc-800 focus:outline-none focus:border-black"
                   />
+                </div>
+              </div>
+
+              {/* Action Bar: Reset, Changes notice, and Apply Filters */}
+              <div className="col-span-full pt-3 border-t border-zinc-100 flex flex-col sm:flex-row items-center justify-between gap-3">
+                <button
+                  type="button"
+                  onClick={handleResetAll}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold text-zinc-500 hover:text-black hover:bg-zinc-100 transition-colors w-full sm:w-auto justify-center"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  <span>Reset All</span>
+                </button>
+
+                <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
+                  {hasPendingChanges && (
+                    <span className="text-[11px] font-semibold text-amber-700 bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-full flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                      Filters selected — click Apply
+                    </span>
+                  )}
+                  <button
+                    type="button"
+                    onClick={handleApply}
+                    className="flex items-center gap-2 px-6 py-2.5 rounded-2xl bg-black text-white hover:bg-zinc-800 text-xs font-bold transition-all shadow-md active:scale-95 w-full sm:w-auto justify-center"
+                  >
+                    <SlidersHorizontal className="w-3.5 h-3.5" />
+                    <span>Apply Filters</span>
+                  </button>
                 </div>
               </div>
             </div>
@@ -421,69 +477,69 @@ function CarsCatalogContent() {
           {activeFiltersCount > 0 && (
             <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-zinc-100">
               <span className="text-[11px] font-bold text-zinc-400">Active filters:</span>
-              {typeFilter !== 'all' && (
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-zinc-100 text-xs font-bold text-black">
-                  Type: {typeFilter.toUpperCase()}
-                  <button onClick={() => setTypeFilter('all')}>
+              {appliedFilters.type !== 'all' && (
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-zinc-100 text-xs font-bold text-black border border-zinc-200">
+                  Type: {appliedFilters.type.toUpperCase()}
+                  <button onClick={() => handleRemoveAppliedFilter('type', 'all')}>
                     <X className="w-3 h-3 text-zinc-500 hover:text-black" />
                   </button>
                 </span>
               )}
-              {selectedBrand !== 'all' && (
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-zinc-100 text-xs font-bold text-black">
-                  Brand: {selectedBrand}
-                  <button onClick={() => setSelectedBrand('all')}>
+              {appliedFilters.brand !== 'all' && (
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-zinc-100 text-xs font-bold text-black border border-zinc-200">
+                  Brand: {appliedFilters.brand}
+                  <button onClick={() => handleRemoveAppliedFilter('brand', 'all')}>
                     <X className="w-3 h-3 text-zinc-500 hover:text-black" />
                   </button>
                 </span>
               )}
-              {selectedBodyType !== 'all' && (
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-zinc-100 text-xs font-bold text-black">
-                  Body: {selectedBodyType}
-                  <button onClick={() => setSelectedBodyType('all')}>
+              {appliedFilters.bodyType !== 'all' && (
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-zinc-100 text-xs font-bold text-black border border-zinc-200">
+                  Body: {appliedFilters.bodyType}
+                  <button onClick={() => handleRemoveAppliedFilter('bodyType', 'all')}>
                     <X className="w-3 h-3 text-zinc-500 hover:text-black" />
                   </button>
                 </span>
               )}
-              {selectedTransmission !== 'all' && (
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-zinc-100 text-xs font-bold text-black">
-                  Transmission: {selectedTransmission}
-                  <button onClick={() => setSelectedTransmission('all')}>
+              {appliedFilters.transmission !== 'all' && (
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-zinc-100 text-xs font-bold text-black border border-zinc-200">
+                  Transmission: {appliedFilters.transmission}
+                  <button onClick={() => handleRemoveAppliedFilter('transmission', 'all')}>
                     <X className="w-3 h-3 text-zinc-500 hover:text-black" />
                   </button>
                 </span>
               )}
-              {selectedFuel !== 'all' && (
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-zinc-100 text-xs font-bold text-black">
-                  Fuel: {selectedFuel}
-                  <button onClick={() => setSelectedFuel('all')}>
+              {appliedFilters.fuelType !== 'all' && (
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-zinc-100 text-xs font-bold text-black border border-zinc-200">
+                  Fuel: {appliedFilters.fuelType}
+                  <button onClick={() => handleRemoveAppliedFilter('fuelType', 'all')}>
                     <X className="w-3 h-3 text-zinc-500 hover:text-black" />
                   </button>
                 </span>
               )}
-              {(minPrice || maxPrice) && (
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-zinc-100 text-xs font-bold text-black">
-                  Price: ${minPrice || '0'} - ${maxPrice || '∞'}
+              {(appliedFilters.minPrice || appliedFilters.maxPrice) && (
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-zinc-100 text-xs font-bold text-black border border-zinc-200">
+                  Price: ${appliedFilters.minPrice || '0'} - ${appliedFilters.maxPrice || '∞'}
                   <button
                     onClick={() => {
-                      setMinPrice('');
-                      setMaxPrice('');
+                      handleRemoveAppliedFilter('minPrice', '');
+                      handleRemoveAppliedFilter('maxPrice', '');
                     }}
                   >
                     <X className="w-3 h-3 text-zinc-500 hover:text-black" />
                   </button>
                 </span>
               )}
-              {searchQuery && (
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-zinc-100 text-xs font-bold text-black">
-                  Search: &ldquo;{searchQuery}&rdquo;
-                  <button onClick={() => setSearchQuery('')}>
+              {appliedFilters.search && (
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-zinc-100 text-xs font-bold text-black border border-zinc-200">
+                  Search: &ldquo;{appliedFilters.search}&rdquo;
+                  <button onClick={() => handleRemoveAppliedFilter('search', '')}>
                     <X className="w-3 h-3 text-zinc-500 hover:text-black" />
                   </button>
                 </span>
               )}
               <button
-                onClick={resetFilters}
+                onClick={handleResetAll}
                 className="text-[11px] font-bold text-rose-600 hover:underline ml-auto"
               >
                 Clear all filters
@@ -526,7 +582,7 @@ function CarsCatalogContent() {
             <p className="text-xs text-zinc-500 max-w-sm mx-auto">
               We couldn&apos;t find any vehicles matching your selected search and filter criteria.
             </p>
-            <Button variant="dark" size="sm" onClick={resetFilters}>
+            <Button variant="dark" size="sm" onClick={handleResetAll}>
               Reset All Filters
             </Button>
           </div>

@@ -61,6 +61,8 @@ export const authService = {
   getGoogleAuthUrl(): string {
     const backendUrl =
       process.env.NEXT_PUBLIC_API_URL?.replace(/\/api\/v1\/?$/, '') || 'http://localhost:5000';
-    return `${backendUrl}/api/auth/google`;
+    const currentOrigin = typeof window !== 'undefined' ? window.location.origin : '';
+    const originParam = currentOrigin ? `?origin=${encodeURIComponent(currentOrigin)}` : '';
+    return `${backendUrl}/api/auth/google${originParam}`;
   },
 };

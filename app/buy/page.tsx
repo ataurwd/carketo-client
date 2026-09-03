@@ -11,124 +11,157 @@ import { BuyHero } from '@/components/buy/BuyHero';
 import { BuyFilterBar } from '@/components/buy/BuyFilterBar';
 import { BuyEmptyState } from '@/components/buy/BuyEmptyState';
 
+
+interface BuyFilters {
+  search: string;
+  brand: string;
+  model: string;
+  condition: string;
+  minYear: string;
+  maxYear: string;
+  bodyType: string;
+  transmission: string;
+  fuelType: string;
+  location: string;
+  minPrice: string;
+  maxPrice: string;
+  maxMileage: string;
+  sortBy: string;
+}
+
+const DEFAULT_BUY_FILTERS: BuyFilters = {
+  search: '',
+  brand: 'all',
+  model: '',
+  condition: 'all',
+  minYear: '',
+  maxYear: '',
+  bodyType: 'all',
+  transmission: 'all',
+  fuelType: 'all',
+  location: 'all',
+  minPrice: '',
+  maxPrice: '',
+  maxMileage: '',
+  sortBy: 'newest',
+};
+
+const parseFiltersFromParams = (params: ReturnType<typeof useSearchParams>): BuyFilters => ({
+  search: params?.get('search') || params?.get('q') || params?.get('location') || '',
+  brand: params?.get('brand') || 'all',
+  model: params?.get('model') || '',
+  condition: params?.get('condition') || 'all',
+  minYear: params?.get('minYear') || '',
+  maxYear: params?.get('maxYear') || '',
+  bodyType: params?.get('bodyType') || 'all',
+  transmission: params?.get('transmission') || 'all',
+  fuelType: params?.get('fuelType') || 'all',
+  location: params?.get('location') || 'all',
+  minPrice: params?.get('minPrice') || '',
+  maxPrice: params?.get('maxPrice') || '',
+  maxMileage: params?.get('maxMileage') || '',
+  sortBy: params?.get('sort') || 'newest',
+});
+
 function BuyCarContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const getInitialSearch = () =>
-    searchParams?.get('search') || searchParams?.get('q') || searchParams?.get('location') || '';
-  const getInitialBrand = () => searchParams?.get('brand') || 'all';
-  const getInitialModel = () => searchParams?.get('model') || '';
-  const getInitialCondition = () => searchParams?.get('condition') || 'all';
-  const getInitialMinYear = () => searchParams?.get('minYear') || '';
-  const getInitialMaxYear = () => searchParams?.get('maxYear') || '';
-  const getInitialBodyType = () => searchParams?.get('bodyType') || 'all';
-  const getInitialTransmission = () => searchParams?.get('transmission') || 'all';
-  const getInitialFuel = () => searchParams?.get('fuelType') || 'all';
-  const getInitialLocation = () => searchParams?.get('location') || 'all';
-  const getInitialMinPrice = () => searchParams?.get('minPrice') || '';
-  const getInitialMaxPrice = () => searchParams?.get('maxPrice') || '';
-  const getInitialMaxMileage = () => searchParams?.get('maxMileage') || '';
-  const getInitialSort = () => searchParams?.get('sort') || 'newest';
-  const getInitialPage = () => Number(searchParams?.get('page')) || 1;
-
   const [cars, setCars] = useState<ICar[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [page, setPage] = useState<number>(getInitialPage());
+  const [page, setPage] = useState<number>(() => Number(searchParams?.get('page')) || 1);
   const [pagination, setPagination] = useState<IPagination>({
     total: 0,
-    page: getInitialPage(),
+    page: Number(searchParams?.get('page')) || 1,
     limit: 12,
     totalPages: 1,
   });
 
-  // Filter States
-  const [search, setSearch] = useState(getInitialSearch());
-  const [selectedBrand, setSelectedBrand] = useState(getInitialBrand());
-  const [selectedModel, setSelectedModel] = useState(getInitialModel());
-  const [selectedCondition, setSelectedCondition] = useState(getInitialCondition());
-  const [minYear, setMinYear] = useState(getInitialMinYear());
-  const [maxYear, setMaxYear] = useState(getInitialMaxYear());
-  const [selectedBodyType, setSelectedBodyType] = useState(getInitialBodyType());
-  const [selectedTransmission, setSelectedTransmission] = useState(getInitialTransmission());
-  const [selectedFuel, setSelectedFuel] = useState(getInitialFuel());
-  const [selectedLocation, setSelectedLocation] = useState(getInitialLocation());
-  const [minPrice, setMinPrice] = useState(getInitialMinPrice());
-  const [maxPrice, setMaxPrice] = useState(getInitialMaxPrice());
-  const [maxMileage, setMaxMileage] = useState(getInitialMaxMileage());
-  const [sortBy, setSortBy] = useState(getInitialSort());
+  // Staged / Draft filters (controlled in UI without triggering immediate reload)
+  const [draftFilters, setDraftFilters] = useState<BuyFilters>(() => parseFiltersFromParams(searchParams));
+
+  // Applied filters (active query that fetches results & controls URL)
+  const [appliedFilters, setAppliedFilters] = useState<BuyFilters>(() => parseFiltersFromParams(searchParams));
   const [advancedFiltersOpen, setAdvancedFiltersOpen] = useState(false);
 
-  // Sync state when URL searchParams changes (e.g. from homepage search)
+  // Sync state when URL searchParams changes externally (e.g. from homepage search navigation)
   useEffect(() => {
-    const q = searchParams?.get('search') || searchParams?.get('q') || searchParams?.get('location') || '';
-    const b = searchParams?.get('brand') || 'all';
-    const m = searchParams?.get('model') || '';
-    const c = searchParams?.get('condition') || 'all';
-    const minY = searchParams?.get('minYear') || '';
-    const maxY = searchParams?.get('maxYear') || '';
-    const bt = searchParams?.get('bodyType') || 'all';
-    const tr = searchParams?.get('transmission') || 'all';
-    const ft = searchParams?.get('fuelType') || 'all';
-    const loc = searchParams?.get('location') || 'all';
-    const minP = searchParams?.get('minPrice') || '';
-    const maxP = searchParams?.get('maxPrice') || '';
-    const maxMil = searchParams?.get('maxMileage') || '';
-    const srt = searchParams?.get('sort') || 'newest';
-    const p = Number(searchParams?.get('page')) || 1;
-
-    setSearch(q);
-    setSelectedBrand(b);
-    setSelectedModel(m);
-    setSelectedCondition(c);
-    setMinYear(minY);
-    setMaxYear(maxY);
-    setSelectedBodyType(bt);
-    setSelectedTransmission(tr);
-    setSelectedFuel(ft);
-    setSelectedLocation(loc);
-    setMinPrice(minP);
-    setMaxPrice(maxP);
-    setMaxMileage(maxMil);
-    setSortBy(srt);
-    setPage(p);
+    const fromUrl = parseFiltersFromParams(searchParams);
+    setDraftFilters(fromUrl);
+    setAppliedFilters(fromUrl);
+    setPage(Number(searchParams?.get('page')) || 1);
   }, [searchParams]);
 
-  // Calculate active filters count
+  // Calculate active applied filters count
   const activeFiltersCount =
-    (selectedBrand !== 'all' ? 1 : 0) +
-    (selectedModel.trim() ? 1 : 0) +
-    (selectedCondition !== 'all' ? 1 : 0) +
-    (minYear ? 1 : 0) +
-    (maxYear ? 1 : 0) +
-    (selectedBodyType !== 'all' ? 1 : 0) +
-    (selectedTransmission !== 'all' ? 1 : 0) +
-    (selectedFuel !== 'all' ? 1 : 0) +
-    (selectedLocation !== 'all' ? 1 : 0) +
-    (minPrice ? 1 : 0) +
-    (maxPrice ? 1 : 0) +
-    (maxMileage ? 1 : 0) +
-    (search.trim() ? 1 : 0);
+    (appliedFilters.brand !== 'all' ? 1 : 0) +
+    (appliedFilters.model.trim() ? 1 : 0) +
+    (appliedFilters.condition !== 'all' ? 1 : 0) +
+    (appliedFilters.minYear ? 1 : 0) +
+    (appliedFilters.maxYear ? 1 : 0) +
+    (appliedFilters.bodyType !== 'all' ? 1 : 0) +
+    (appliedFilters.transmission !== 'all' ? 1 : 0) +
+    (appliedFilters.fuelType !== 'all' ? 1 : 0) +
+    (appliedFilters.location !== 'all' ? 1 : 0) +
+    (appliedFilters.minPrice ? 1 : 0) +
+    (appliedFilters.maxPrice ? 1 : 0) +
+    (appliedFilters.maxMileage ? 1 : 0) +
+    (appliedFilters.search.trim() ? 1 : 0);
 
-  const resetFilters = () => {
+  // Check if there are unapplied staged selections
+  const hasPendingChanges =
+    draftFilters.search !== appliedFilters.search ||
+    draftFilters.brand !== appliedFilters.brand ||
+    draftFilters.model !== appliedFilters.model ||
+    draftFilters.condition !== appliedFilters.condition ||
+    draftFilters.minYear !== appliedFilters.minYear ||
+    draftFilters.maxYear !== appliedFilters.maxYear ||
+    draftFilters.bodyType !== appliedFilters.bodyType ||
+    draftFilters.transmission !== appliedFilters.transmission ||
+    draftFilters.fuelType !== appliedFilters.fuelType ||
+    draftFilters.location !== appliedFilters.location ||
+    draftFilters.minPrice !== appliedFilters.minPrice ||
+    draftFilters.maxPrice !== appliedFilters.maxPrice ||
+    draftFilters.maxMileage !== appliedFilters.maxMileage;
+
+  // Apply staged draft filters
+  const handleApply = useCallback(() => {
     setPage(1);
-    setSelectedBrand('all');
-    setSelectedModel('');
-    setSelectedCondition('all');
-    setMinYear('');
-    setMaxYear('');
-    setSelectedBodyType('all');
-    setSelectedTransmission('all');
-    setSelectedFuel('all');
-    setSelectedLocation('all');
-    setMinPrice('');
-    setMaxPrice('');
-    setMaxMileage('');
-    setSearch('');
-    setSortBy('newest');
-  };
+    setAppliedFilters({ ...draftFilters });
+  }, [draftFilters]);
 
-  // Fetch paginated cars for sale from backend
+  // Reset all filters to default
+  const handleResetAll = useCallback(() => {
+    setPage(1);
+    setDraftFilters(DEFAULT_BUY_FILTERS);
+    setAppliedFilters(DEFAULT_BUY_FILTERS);
+  }, []);
+
+  // Preset click handler (stages & applies instantly for convenience)
+  const handleApplyPreset = useCallback((presetUpdates: Partial<BuyFilters>) => {
+    setPage(1);
+    setDraftFilters((prev) => {
+      const updated = { ...prev, ...presetUpdates };
+      setAppliedFilters(updated);
+      return updated;
+    });
+  }, []);
+
+  // Remove individual active filter from chips
+  const handleRemoveAppliedFilter = useCallback((key: string, defaultValue: string) => {
+    setPage(1);
+    setDraftFilters((prev) => ({ ...prev, [key]: defaultValue }));
+    setAppliedFilters((prev) => ({ ...prev, [key]: defaultValue }));
+  }, []);
+
+  // Sort change handler
+  const handleSortChange = useCallback((newSort: string) => {
+    setPage(1);
+    setDraftFilters((prev) => ({ ...prev, sortBy: newSort }));
+    setAppliedFilters((prev) => ({ ...prev, sortBy: newSort }));
+  }, []);
+
+  // Fetch paginated cars for sale from backend based ONLY on appliedFilters
   const fetchSaleCars = useCallback(async () => {
     setIsLoading(true);
     const queryParams: Record<string, any> = {
@@ -136,20 +169,20 @@ function BuyCarContent() {
       page,
       limit: 12,
     };
-    if (selectedBrand !== 'all') queryParams.brand = selectedBrand;
-    if (selectedModel.trim()) queryParams.model = selectedModel.trim();
-    if (selectedCondition !== 'all') queryParams.condition = selectedCondition;
-    if (minYear) queryParams.minYear = minYear;
-    if (maxYear) queryParams.maxYear = maxYear;
-    if (selectedBodyType !== 'all') queryParams.bodyType = selectedBodyType;
-    if (selectedTransmission !== 'all') queryParams.transmission = selectedTransmission;
-    if (selectedFuel !== 'all') queryParams.fuelType = selectedFuel;
-    if (selectedLocation !== 'all') queryParams.location = selectedLocation;
-    if (minPrice) queryParams.minPrice = minPrice;
-    if (maxPrice) queryParams.maxPrice = maxPrice;
-    if (maxMileage) queryParams.maxMileage = maxMileage;
-    if (search.trim()) queryParams.search = search.trim();
-    if (sortBy !== 'newest') queryParams.sort = sortBy;
+    if (appliedFilters.brand !== 'all') queryParams.brand = appliedFilters.brand;
+    if (appliedFilters.model.trim()) queryParams.model = appliedFilters.model.trim();
+    if (appliedFilters.condition !== 'all') queryParams.condition = appliedFilters.condition;
+    if (appliedFilters.minYear) queryParams.minYear = appliedFilters.minYear;
+    if (appliedFilters.maxYear) queryParams.maxYear = appliedFilters.maxYear;
+    if (appliedFilters.bodyType !== 'all') queryParams.bodyType = appliedFilters.bodyType;
+    if (appliedFilters.transmission !== 'all') queryParams.transmission = appliedFilters.transmission;
+    if (appliedFilters.fuelType !== 'all') queryParams.fuelType = appliedFilters.fuelType;
+    if (appliedFilters.location !== 'all') queryParams.location = appliedFilters.location;
+    if (appliedFilters.minPrice) queryParams.minPrice = appliedFilters.minPrice;
+    if (appliedFilters.maxPrice) queryParams.maxPrice = appliedFilters.maxPrice;
+    if (appliedFilters.maxMileage) queryParams.maxMileage = appliedFilters.maxMileage;
+    if (appliedFilters.search.trim()) queryParams.search = appliedFilters.search.trim();
+    if (appliedFilters.sortBy !== 'newest') queryParams.sort = appliedFilters.sortBy;
 
     try {
       const res = await carService.getCarsWithPagination(queryParams);
@@ -167,70 +200,37 @@ function BuyCarContent() {
     } finally {
       setIsLoading(false);
     }
-  }, [
-    page,
-    selectedBrand,
-    selectedModel,
-    selectedCondition,
-    minYear,
-    maxYear,
-    selectedBodyType,
-    selectedTransmission,
-    selectedFuel,
-    selectedLocation,
-    minPrice,
-    maxPrice,
-    maxMileage,
-    search,
-    sortBy,
-  ]);
+  }, [page, appliedFilters]);
 
   useEffect(() => {
     fetchSaleCars();
   }, [fetchSaleCars]);
 
-  // Synchronize URL parameters
+  // Synchronize URL parameters with appliedFilters
   useEffect(() => {
     const params = new URLSearchParams();
     if (page > 1) params.set('page', String(page));
-    if (selectedBrand !== 'all') params.set('brand', selectedBrand);
-    if (selectedModel.trim()) params.set('model', selectedModel.trim());
-    if (selectedCondition !== 'all') params.set('condition', selectedCondition);
-    if (minYear) params.set('minYear', minYear);
-    if (maxYear) params.set('maxYear', maxYear);
-    if (selectedBodyType !== 'all') params.set('bodyType', selectedBodyType);
-    if (selectedTransmission !== 'all') params.set('transmission', selectedTransmission);
-    if (selectedFuel !== 'all') params.set('fuelType', selectedFuel);
-    if (selectedLocation !== 'all') params.set('location', selectedLocation);
-    if (minPrice) params.set('minPrice', minPrice);
-    if (maxPrice) params.set('maxPrice', maxPrice);
-    if (maxMileage) params.set('maxMileage', maxMileage);
-    if (search.trim()) {
-      params.set('q', search.trim());
-      params.set('search', search.trim());
+    if (appliedFilters.brand !== 'all') params.set('brand', appliedFilters.brand);
+    if (appliedFilters.model.trim()) params.set('model', appliedFilters.model.trim());
+    if (appliedFilters.condition !== 'all') params.set('condition', appliedFilters.condition);
+    if (appliedFilters.minYear) params.set('minYear', appliedFilters.minYear);
+    if (appliedFilters.maxYear) params.set('maxYear', appliedFilters.maxYear);
+    if (appliedFilters.bodyType !== 'all') params.set('bodyType', appliedFilters.bodyType);
+    if (appliedFilters.transmission !== 'all') params.set('transmission', appliedFilters.transmission);
+    if (appliedFilters.fuelType !== 'all') params.set('fuelType', appliedFilters.fuelType);
+    if (appliedFilters.location !== 'all') params.set('location', appliedFilters.location);
+    if (appliedFilters.minPrice) params.set('minPrice', appliedFilters.minPrice);
+    if (appliedFilters.maxPrice) params.set('maxPrice', appliedFilters.maxPrice);
+    if (appliedFilters.maxMileage) params.set('maxMileage', appliedFilters.maxMileage);
+    if (appliedFilters.search.trim()) {
+      params.set('q', appliedFilters.search.trim());
+      params.set('search', appliedFilters.search.trim());
     }
-    if (sortBy !== 'newest') params.set('sort', sortBy);
+    if (appliedFilters.sortBy !== 'newest') params.set('sort', appliedFilters.sortBy);
 
     const queryStr = params.toString();
     router.replace(queryStr ? `/buy?${queryStr}` : '/buy', { scroll: false });
-  }, [
-    page,
-    selectedBrand,
-    selectedModel,
-    selectedCondition,
-    minYear,
-    maxYear,
-    selectedBodyType,
-    selectedTransmission,
-    selectedFuel,
-    selectedLocation,
-    minPrice,
-    maxPrice,
-    maxMileage,
-    search,
-    sortBy,
-    router,
-  ]);
+  }, [page, appliedFilters, router]);
 
   return (
     <div className="min-h-screen bg-zinc-50 py-10">
@@ -240,39 +240,43 @@ function BuyCarContent() {
 
         {/* Modular Multi-Parameter Filter Console */}
         <BuyFilterBar
-          search={search}
-          setSearch={setSearch}
-          selectedBrand={selectedBrand}
-          setSelectedBrand={setSelectedBrand}
-          selectedModel={selectedModel}
-          setSelectedModel={setSelectedModel}
-          selectedCondition={selectedCondition}
-          setSelectedCondition={setSelectedCondition}
-          minYear={minYear}
-          setMinYear={setMinYear}
-          maxYear={maxYear}
-          setMaxYear={setMaxYear}
-          selectedFuel={selectedFuel}
-          setSelectedFuel={setSelectedFuel}
-          minPrice={minPrice}
-          setMinPrice={setMinPrice}
-          maxPrice={maxPrice}
-          setMaxPrice={setMaxPrice}
-          selectedTransmission={selectedTransmission}
-          setSelectedTransmission={setSelectedTransmission}
-          selectedBodyType={selectedBodyType}
-          setSelectedBodyType={setSelectedBodyType}
-          selectedLocation={selectedLocation}
-          setSelectedLocation={setSelectedLocation}
-          maxMileage={maxMileage}
-          setMaxMileage={setMaxMileage}
-          sortBy={sortBy}
-          setSortBy={setSortBy}
+          search={draftFilters.search}
+          setSearch={(val) => setDraftFilters((prev) => ({ ...prev, search: val }))}
+          selectedBrand={draftFilters.brand}
+          setSelectedBrand={(val) => setDraftFilters((prev) => ({ ...prev, brand: val }))}
+          selectedModel={draftFilters.model}
+          setSelectedModel={(val) => setDraftFilters((prev) => ({ ...prev, model: val }))}
+          selectedCondition={draftFilters.condition}
+          setSelectedCondition={(val) => setDraftFilters((prev) => ({ ...prev, condition: val }))}
+          minYear={draftFilters.minYear}
+          setMinYear={(val) => setDraftFilters((prev) => ({ ...prev, minYear: val }))}
+          maxYear={draftFilters.maxYear}
+          setMaxYear={(val) => setDraftFilters((prev) => ({ ...prev, maxYear: val }))}
+          selectedFuel={draftFilters.fuelType}
+          setSelectedFuel={(val) => setDraftFilters((prev) => ({ ...prev, fuelType: val }))}
+          minPrice={draftFilters.minPrice}
+          setMinPrice={(val) => setDraftFilters((prev) => ({ ...prev, minPrice: val }))}
+          maxPrice={draftFilters.maxPrice}
+          setMaxPrice={(val) => setDraftFilters((prev) => ({ ...prev, maxPrice: val }))}
+          selectedTransmission={draftFilters.transmission}
+          setSelectedTransmission={(val) => setDraftFilters((prev) => ({ ...prev, transmission: val }))}
+          selectedBodyType={draftFilters.bodyType}
+          setSelectedBodyType={(val) => setDraftFilters((prev) => ({ ...prev, bodyType: val }))}
+          selectedLocation={draftFilters.location}
+          setSelectedLocation={(val) => setDraftFilters((prev) => ({ ...prev, location: val }))}
+          maxMileage={draftFilters.maxMileage}
+          setMaxMileage={(val) => setDraftFilters((prev) => ({ ...prev, maxMileage: val }))}
+          sortBy={draftFilters.sortBy}
+          setSortBy={handleSortChange}
           advancedFiltersOpen={advancedFiltersOpen}
           setAdvancedFiltersOpen={setAdvancedFiltersOpen}
           activeFiltersCount={activeFiltersCount}
-          onPageReset={() => setPage(1)}
-          onResetAll={resetFilters}
+          hasPendingChanges={hasPendingChanges}
+          onApply={handleApply}
+          onResetAll={handleResetAll}
+          onApplyPreset={handleApplyPreset}
+          appliedFilters={appliedFilters}
+          onRemoveAppliedFilter={handleRemoveAppliedFilter}
         />
 
         {/* Cars For Sale Grid Section */}
@@ -313,7 +317,7 @@ function BuyCarContent() {
         ) : (
           <BuyEmptyState
             activeFiltersCount={activeFiltersCount}
-            onResetFilters={resetFilters}
+            onResetFilters={handleResetAll}
           />
         )}
       </div>

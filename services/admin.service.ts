@@ -151,6 +151,27 @@ export const adminService = {
     return res.data;
   },
 
+  // ===================== CONTACT SUBMISSIONS =====================
+  async getContactMessages(params?: { page?: number; limit?: number; status?: string; search?: string }) {
+    const res: any = await apiClient.get('/admin/contacts', { params });
+    return res;
+  },
+
+  async getContactStats() {
+    const res: any = await apiClient.get('/admin/contacts/stats');
+    return res.data;
+  },
+
+  async updateContactStatus(id: string, status: string) {
+    const res: any = await apiClient.patch(`/admin/contacts/${id}/status`, { status });
+    return res.data;
+  },
+
+  async deleteContactMessage(id: string) {
+    const res: any = await apiClient.delete(`/admin/contacts/${id}`);
+    return res.data;
+  },
+
   // ===================== REVIEWS & REPUTATION =====================
   async getReviewsAdmin(params?: any) {
     const res: any = await apiClient.get('/admin/reviews', { params });

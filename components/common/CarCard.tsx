@@ -69,15 +69,6 @@ export const CarCard: React.FC<CarCardProps> = ({ car }) => {
           </div>
         </Link>
 
-        {/* Brand & Model Primary Header */}
-        <div className="flex items-center gap-1.5 text-xs font-bold text-zinc-500 uppercase tracking-wider mb-1">
-          <span className="text-black font-extrabold">{car.brand}</span>
-          <span>•</span>
-          <span className="text-black font-extrabold">{car.model}</span>
-          <span>•</span>
-          <span>{car.year}</span>
-        </div>
-
         {/* Title & Location */}
         <Link href={`/cars/${car.slug}`}>
           <h3 className="text-base font-extrabold text-black group-hover:text-zinc-600 transition-colors line-clamp-1 mb-1">

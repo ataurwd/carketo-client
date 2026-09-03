@@ -10,6 +10,7 @@ import {
   ChevronDown,
   ChevronUp,
   Tag,
+  RotateCcw,
 } from 'lucide-react';
 import { ActiveFilterChips } from './ActiveFilterChips';
 
@@ -82,8 +83,32 @@ interface BuyFilterBarProps {
   advancedFiltersOpen: boolean;
   setAdvancedFiltersOpen: (val: boolean | ((prev: boolean) => boolean)) => void;
   activeFiltersCount: number;
-  onPageReset: () => void;
+  hasPendingChanges?: boolean;
+  onApply: () => void;
+  onPageReset?: () => void;
   onResetAll: () => void;
+  onApplyPreset?: (updates: {
+    minPrice?: string;
+    maxPrice?: string;
+    selectedFuel?: string;
+    minYear?: string;
+  }) => void;
+  appliedFilters: {
+    search: string;
+    brand: string;
+    model: string;
+    condition: string;
+    minYear: string;
+    maxYear: string;
+    fuelType: string;
+    minPrice: string;
+    maxPrice: string;
+    transmission: string;
+    bodyType: string;
+    location: string;
+    maxMileage: string;
+  };
+  onRemoveAppliedFilter: (key: string, defaultValue: string) => void;
 }
 
 export function BuyFilterBar({
@@ -118,47 +143,64 @@ export function BuyFilterBar({
   advancedFiltersOpen,
   setAdvancedFiltersOpen,
   activeFiltersCount,
-  onPageReset,
+  hasPendingChanges = false,
+  onApply,
   onResetAll,
+  onApplyPreset,
+  appliedFilters,
+  onRemoveAppliedFilter,
 }: BuyFilterBarProps) {
   return (
     <div className="bg-white p-6 sm:p-7 rounded-3xl border border-zinc-200 shadow-sm space-y-5">
       {/* TOP BAR: Keyword Search, Sort, and Filter Toggle */}
       <div className="flex flex-col lg:flex-row items-center gap-3">
-        {/* Search Input */}
-        <div className="relative flex-1 w-full">
-          <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
-          <input
-            type="text"
-            placeholder="Search by title, brand, model name (e.g. Premio, Civic), location..."
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              onPageReset();
-            }}
-            className="w-full pl-10 pr-4 py-2.5 rounded-2xl border border-zinc-200 text-xs font-semibold text-zinc-800 placeholder-zinc-400 focus:outline-none focus:border-black transition-colors"
-          />
-          {search && (
-            <button
-              type="button"
-              onClick={() => {
-                setSearch('');
-                onPageReset();
+        {/* Search Input with explicit Search button */}
+        <div className="relative flex-1 w-full flex items-center gap-2">
+          <div className="relative flex-1">
+            <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
+            <input
+              type="text"
+              placeholder="Search by title, brand, model name (e.g. Premio, Civic), location..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  onApply();
+                }
               }}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-black p-1"
-            >
-              <X className="w-3.5 h-3.5" />
-            </button>
-          )}
+              className="w-full pl-10 pr-9 py-2.5 rounded-2xl border border-zinc-200 text-xs font-semibold text-zinc-800 placeholder-zinc-400 focus:outline-none focus:border-black transition-colors"
+            />
+            {search && (
+              <button
+                type="button"
+                onClick={() => {
+                  setSearch('');
+                  if (appliedFilters.search) {
+                    onRemoveAppliedFilter('search', '');
+                  }
+                }}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-black p-1"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
+          <button
+            type="button"
+            onClick={onApply}
+            className="px-4 py-2.5 rounded-2xl bg-black text-white hover:bg-zinc-800 text-xs font-bold transition-all shadow-sm flex items-center gap-1.5 shrink-0 active:scale-95"
+          >
+            <Search className="w-3.5 h-3.5" />
+            <span>Search</span>
+          </button>
         </div>
-
         {/* Sort Selector */}
         <div className="w-full lg:w-56">
           <select
             value={sortBy}
             onChange={(e) => {
               setSortBy(e.target.value);
-              onPageReset();
             }}
             className="w-full px-3.5 py-2.5 rounded-2xl border border-zinc-200 bg-white text-xs font-bold text-zinc-800 focus:outline-none focus:border-black cursor-pointer shadow-sm"
           >
@@ -208,10 +250,7 @@ export function BuyFilterBar({
               </label>
               <select
                 value={selectedBrand}
-                onChange={(e) => {
-                  setSelectedBrand(e.target.value);
-                  onPageReset();
-                }}
+                onChange={(e) => setSelectedBrand(e.target.value)}
                 className="w-full px-3 py-2.5 rounded-xl border border-zinc-200 bg-white text-xs font-bold text-zinc-800 focus:outline-none focus:border-black cursor-pointer"
               >
                 <option value="all">All Brands</option>
@@ -232,9 +271,12 @@ export function BuyFilterBar({
                 type="text"
                 placeholder="e.g. Premio, Civic..."
                 value={selectedModel}
-                onChange={(e) => {
-                  setSelectedModel(e.target.value);
-                  onPageReset();
+                onChange={(e) => setSelectedModel(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    onApply();
+                  }
                 }}
                 className="w-full px-3 py-2.5 rounded-xl border border-zinc-200 bg-white text-xs font-semibold text-zinc-800 focus:outline-none focus:border-black"
               />
@@ -247,10 +289,7 @@ export function BuyFilterBar({
               </label>
               <select
                 value={selectedCondition}
-                onChange={(e) => {
-                  setSelectedCondition(e.target.value);
-                  onPageReset();
-                }}
+                onChange={(e) => setSelectedCondition(e.target.value)}
                 className="w-full px-3 py-2.5 rounded-xl border border-zinc-200 bg-white text-xs font-bold text-zinc-800 focus:outline-none focus:border-black cursor-pointer"
               >
                 {CONDITIONS_LIST.map((c) => (
@@ -268,10 +307,7 @@ export function BuyFilterBar({
               </label>
               <select
                 value={selectedFuel}
-                onChange={(e) => {
-                  setSelectedFuel(e.target.value);
-                  onPageReset();
-                }}
+                onChange={(e) => setSelectedFuel(e.target.value)}
                 className="w-full px-3 py-2.5 rounded-xl border border-zinc-200 bg-white text-xs font-bold text-zinc-800 focus:outline-none focus:border-black cursor-pointer"
               >
                 {FUEL_TYPES_LIST.map((f) => (
@@ -292,9 +328,12 @@ export function BuyFilterBar({
                   type="number"
                   placeholder="Min ৳"
                   value={minPrice}
-                  onChange={(e) => {
-                    setMinPrice(e.target.value);
-                    onPageReset();
+                  onChange={(e) => setMinPrice(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      onApply();
+                    }
                   }}
                   className="w-full px-2.5 py-2.5 rounded-xl border border-zinc-200 text-xs font-semibold text-zinc-800 focus:outline-none focus:border-black"
                 />
@@ -303,15 +342,19 @@ export function BuyFilterBar({
                   type="number"
                   placeholder="Max ৳"
                   value={maxPrice}
-                  onChange={(e) => {
-                    setMaxPrice(e.target.value);
-                    onPageReset();
+                  onChange={(e) => setMaxPrice(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      onApply();
+                    }
                   }}
                   className="w-full px-2.5 py-2.5 rounded-xl border border-zinc-200 text-xs font-semibold text-zinc-800 focus:outline-none focus:border-black"
                 />
               </div>
             </div>
           </div>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5 text-xs font-semibold">
             {/* 6. Manufacturing Year Range */}
             <div>
@@ -322,15 +365,12 @@ export function BuyFilterBar({
               <div className="flex items-center gap-1.5">
                 <select
                   value={minYear}
-                  onChange={(e) => {
-                    setMinYear(e.target.value);
-                    onPageReset();
-                  }}
+                  onChange={(e) => setMinYear(e.target.value)}
                   className="w-full px-2 py-2.5 rounded-xl border border-zinc-200 bg-white text-xs font-semibold text-zinc-800 focus:outline-none focus:border-black cursor-pointer"
                 >
                   <option value="">Min Year</option>
                   {YEAR_OPTIONS.map((y) => (
-                        <option key={`min-${y}`} value={y}>
+                    <option key={`min-${y}`} value={y}>
                       {y}
                     </option>
                   ))}
@@ -338,10 +378,7 @@ export function BuyFilterBar({
                 <span className="text-zinc-400 font-bold">-</span>
                 <select
                   value={maxYear}
-                  onChange={(e) => {
-                    setMaxYear(e.target.value);
-                    onPageReset();
-                  }}
+                  onChange={(e) => setMaxYear(e.target.value)}
                   className="w-full px-2 py-2.5 rounded-xl border border-zinc-200 bg-white text-xs font-semibold text-zinc-800 focus:outline-none focus:border-black cursor-pointer"
                 >
                   <option value="">Max Year</option>
@@ -362,10 +399,7 @@ export function BuyFilterBar({
               </label>
               <select
                 value={selectedTransmission}
-                onChange={(e) => {
-                  setSelectedTransmission(e.target.value);
-                  onPageReset();
-                }}
+                onChange={(e) => setSelectedTransmission(e.target.value)}
                 className="w-full px-3 py-2.5 rounded-xl border border-zinc-200 bg-white text-xs font-bold text-zinc-800 focus:outline-none focus:border-black cursor-pointer"
               >
                 {TRANSMISSIONS_LIST.map((t) => (
@@ -383,10 +417,7 @@ export function BuyFilterBar({
               </label>
               <select
                 value={selectedBodyType}
-                onChange={(e) => {
-                  setSelectedBodyType(e.target.value);
-                  onPageReset();
-                }}
+                onChange={(e) => setSelectedBodyType(e.target.value)}
                 className="w-full px-3 py-2.5 rounded-xl border border-zinc-200 bg-white text-xs font-bold text-zinc-800 focus:outline-none focus:border-black cursor-pointer"
               >
                 <option value="all">All Body Classes</option>
@@ -406,10 +437,7 @@ export function BuyFilterBar({
               </label>
               <select
                 value={selectedLocation}
-                onChange={(e) => {
-                  setSelectedLocation(e.target.value);
-                  onPageReset();
-                }}
+                onChange={(e) => setSelectedLocation(e.target.value)}
                 className="w-full px-3 py-2.5 rounded-xl border border-zinc-200 bg-white text-xs font-bold text-zinc-800 focus:outline-none focus:border-black cursor-pointer"
               >
                 {LOCATIONS_LIST.map((loc) => (
@@ -427,10 +455,7 @@ export function BuyFilterBar({
               </label>
               <select
                 value={maxMileage}
-                onChange={(e) => {
-                  setMaxMileage(e.target.value);
-                  onPageReset();
-                }}
+                onChange={(e) => setMaxMileage(e.target.value)}
                 className="w-full px-3 py-2.5 rounded-xl border border-zinc-200 bg-white text-xs font-bold text-zinc-800 focus:outline-none focus:border-black cursor-pointer"
               >
                 <option value="">Any Mileage</option>
@@ -451,9 +476,13 @@ export function BuyFilterBar({
             <button
               type="button"
               onClick={() => {
-                setMinPrice('');
-                setMaxPrice('2000000');
-                onPageReset();
+                if (onApplyPreset) {
+                  onApplyPreset({ minPrice: '', maxPrice: '2000000' });
+                } else {
+                  setMinPrice('');
+                  setMaxPrice('2000000');
+                  onApply();
+                }
               }}
               className="px-3 py-1 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-800 font-bold text-[11px] transition-colors"
             >
@@ -462,9 +491,13 @@ export function BuyFilterBar({
             <button
               type="button"
               onClick={() => {
-                setMinPrice('2000000');
-                setMaxPrice('4000000');
-                onPageReset();
+                if (onApplyPreset) {
+                  onApplyPreset({ minPrice: '2000000', maxPrice: '4000000' });
+                } else {
+                  setMinPrice('2000000');
+                  setMaxPrice('4000000');
+                  onApply();
+                }
               }}
               className="px-3 py-1 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-800 font-bold text-[11px] transition-colors"
             >
@@ -473,9 +506,13 @@ export function BuyFilterBar({
             <button
               type="button"
               onClick={() => {
-                setMinPrice('4000000');
-                setMaxPrice('8000000');
-                onPageReset();
+                if (onApplyPreset) {
+                  onApplyPreset({ minPrice: '4000000', maxPrice: '8000000' });
+                } else {
+                  setMinPrice('4000000');
+                  setMaxPrice('8000000');
+                  onApply();
+                }
               }}
               className="px-3 py-1 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-800 font-bold text-[11px] transition-colors"
             >
@@ -484,9 +521,13 @@ export function BuyFilterBar({
             <button
               type="button"
               onClick={() => {
-                setMinPrice('8000000');
-                setMaxPrice('');
-                onPageReset();
+                if (onApplyPreset) {
+                  onApplyPreset({ minPrice: '8000000', maxPrice: '' });
+                } else {
+                  setMinPrice('8000000');
+                  setMaxPrice('');
+                  onApply();
+                }
               }}
               className="px-3 py-1 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-800 font-bold text-[11px] transition-colors"
             >
@@ -495,8 +536,12 @@ export function BuyFilterBar({
             <button
               type="button"
               onClick={() => {
-                setSelectedFuel('hybrid');
-                onPageReset();
+                if (onApplyPreset) {
+                  onApplyPreset({ selectedFuel: 'hybrid' });
+                } else {
+                  setSelectedFuel('hybrid');
+                  onApply();
+                }
               }}
               className="px-3 py-1 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-800 font-bold text-[11px] transition-colors"
             >
@@ -505,13 +550,46 @@ export function BuyFilterBar({
             <button
               type="button"
               onClick={() => {
-                setMinYear('2021');
-                onPageReset();
+                if (onApplyPreset) {
+                  onApplyPreset({ minYear: '2021' });
+                } else {
+                  setMinYear('2021');
+                  onApply();
+                }
               }}
               className="px-3 py-1 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-800 font-bold text-[11px] transition-colors"
             >
               2021 & Newer
             </button>
+          </div>
+
+          {/* Action Bar: Reset, Changes Alert, and Apply Filters Button */}
+          <div className="pt-3 border-t border-zinc-100 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <button
+              type="button"
+              onClick={onResetAll}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold text-zinc-500 hover:text-black hover:bg-zinc-100 transition-colors w-full sm:w-auto justify-center"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              <span>Reset All</span>
+            </button>
+
+            <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
+              {hasPendingChanges && (
+                <span className="text-[11px] font-semibold text-amber-700 bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-full flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                  Filters selected — click Apply
+                </span>
+              )}
+              <button
+                type="button"
+                onClick={onApply}
+                className="flex items-center gap-2 px-6 py-2.5 rounded-2xl bg-black text-white hover:bg-zinc-800 text-xs font-bold transition-all shadow-md active:scale-95 w-full sm:w-auto justify-center"
+              >
+                <SlidersHorizontal className="w-3.5 h-3.5" />
+                <span>Apply Filters</span>
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -519,71 +597,32 @@ export function BuyFilterBar({
       {/* ACTIVE FILTER CHIPS & RESET */}
       {activeFiltersCount > 0 && (
         <ActiveFilterChips
-          search={search}
-          setSearch={(v) => {
-            setSearch(v);
-            onPageReset();
-          }}
-          selectedBrand={selectedBrand}
-          setSelectedBrand={(v) => {
-            setSelectedBrand(v);
-            onPageReset();
-          }}
-          selectedModel={selectedModel}
-          setSelectedModel={(v) => {
-            setSelectedModel(v);
-            onPageReset();
-          }}
-          selectedCondition={selectedCondition}
-          setSelectedCondition={(v) => {
-            setSelectedCondition(v);
-            onPageReset();
-          }}
-          minYear={minYear}
-          setMinYear={(v) => {
-            setMinYear(v);
-            onPageReset();
-          }}
-          maxYear={maxYear}
-          setMaxYear={(v) => {
-            setMaxYear(v);
-            onPageReset();
-          }}
-          selectedFuel={selectedFuel}
-          setSelectedFuel={(v) => {
-            setSelectedFuel(v);
-            onPageReset();
-          }}
-          minPrice={minPrice}
-          setMinPrice={(v) => {
-            setMinPrice(v);
-            onPageReset();
-          }}
-          maxPrice={maxPrice}
-          setMaxPrice={(v) => {
-            setMaxPrice(v);
-            onPageReset();
-          }}
-          selectedTransmission={selectedTransmission}
-          setSelectedTransmission={(v) => {
-            setSelectedTransmission(v);
-            onPageReset();
-          }}
-          selectedBodyType={selectedBodyType}
-          setSelectedBodyType={(v) => {
-            setSelectedBodyType(v);
-            onPageReset();
-          }}
-          selectedLocation={selectedLocation}
-          setSelectedLocation={(v) => {
-            setSelectedLocation(v);
-            onPageReset();
-          }}
-          maxMileage={maxMileage}
-          setMaxMileage={(v) => {
-            setMaxMileage(v);
-            onPageReset();
-          }}
+          search={appliedFilters.search}
+          setSearch={(v) => onRemoveAppliedFilter('search', v)}
+          selectedBrand={appliedFilters.brand}
+          setSelectedBrand={(v) => onRemoveAppliedFilter('brand', v)}
+          selectedModel={appliedFilters.model}
+          setSelectedModel={(v) => onRemoveAppliedFilter('model', v)}
+          selectedCondition={appliedFilters.condition}
+          setSelectedCondition={(v) => onRemoveAppliedFilter('condition', v)}
+          minYear={appliedFilters.minYear}
+          setMinYear={(v) => onRemoveAppliedFilter('minYear', v)}
+          maxYear={appliedFilters.maxYear}
+          setMaxYear={(v) => onRemoveAppliedFilter('maxYear', v)}
+          selectedFuel={appliedFilters.fuelType}
+          setSelectedFuel={(v) => onRemoveAppliedFilter('fuelType', v)}
+          minPrice={appliedFilters.minPrice}
+          setMinPrice={(v) => onRemoveAppliedFilter('minPrice', v)}
+          maxPrice={appliedFilters.maxPrice}
+          setMaxPrice={(v) => onRemoveAppliedFilter('maxPrice', v)}
+          selectedTransmission={appliedFilters.transmission}
+          setSelectedTransmission={(v) => onRemoveAppliedFilter('transmission', v)}
+          selectedBodyType={appliedFilters.bodyType}
+          setSelectedBodyType={(v) => onRemoveAppliedFilter('bodyType', v)}
+          selectedLocation={appliedFilters.location}
+          setSelectedLocation={(v) => onRemoveAppliedFilter('location', v)}
+          maxMileage={appliedFilters.maxMileage}
+          setMaxMileage={(v) => onRemoveAppliedFilter('maxMileage', v)}
           onResetAll={onResetAll}
         />
       )}

@@ -21,6 +21,7 @@ import {
   CheckCircle2,
   Tag,
   Eye,
+  Mail,
 } from 'lucide-react';
 
 export default function AdminOverviewPage() {
@@ -102,6 +103,13 @@ export default function AdminOverviewPage() {
         </div>
 
         <div className="flex items-center gap-2 self-start sm:self-auto">
+          <Link
+            href="/admin/contacts"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-2xl bg-zinc-100 hover:bg-zinc-200 text-zinc-800 text-xs font-bold transition-all border border-zinc-200 shadow-sm"
+          >
+            <Mail className="w-4 h-4 text-zinc-600" />
+            <span>Contact Messages</span>
+          </Link>
           <Link
             href="/provider/cars/create"
             className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-2xl bg-black text-white text-xs font-bold hover:bg-zinc-800 transition-all shadow-sm"

@@ -3,18 +3,53 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { Mail, Phone, MapPin, MessageSquare, Send, CheckCircle2 } from 'lucide-react';
+import { Mail, Phone, MapPin, MessageSquare, Send, CheckCircle2, AlertCircle } from 'lucide-react';
+import { contactService } from '@/services/contact.service';
+import { showToast } from '@/lib/alert';
 
 export default function ContactPage() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [subject, setSubject] = useState('');
   const [message, setMessage] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
+    setErrorMessage(null);
+
+    if (!name.trim() || !email.trim() || !subject.trim() || !message.trim()) {
+      showToast('Please fill out all required fields.', 'error');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      await contactService.submitContact({
+        name: name.trim(),
+        email: email.trim(),
+        phone: phone.trim() || undefined,
+        subject: subject.trim(),
+        message: message.trim(),
+      });
+
+      setSubmitted(true);
+      setName('');
+      setEmail('');
+      setPhone('');
+      setSubject('');
+      setMessage('');
+      showToast('Your message has been sent successfully!', 'success');
+    } catch (err: any) {
+      const msg = err.message || 'Failed to submit your message. Please try again.';
+      setErrorMessage(msg);
+      showToast(msg, 'error');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -83,12 +118,19 @@ export default function ContactPage() {
             <div>
               <h3 className="text-xl font-black text-black">Send Us a Message</h3>
               <p className="text-xs text-zinc-500 mt-1">
-                Fill out the form below and an automotive specialist will respond within 30 minutes.
+                Fill out the form below and an automotive specialist will respond promptly.
               </p>
             </div>
 
+            {errorMessage && (
+              <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-3">
+                <AlertCircle className="w-5 h-5 shrink-0 text-rose-600" />
+                <span>{errorMessage}</span>
+              </div>
+            )}
+
             {submitted ? (
-              <div className="py-12 text-center space-y-3">
+              <div className="py-12 text-center space-y-4">
                 <div className="h-14 w-14 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto">
                   <CheckCircle2 className="w-8 h-8" />
                 </div>
@@ -104,33 +146,46 @@ export default function ContactPage() {
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Input
-                    label="Your Name"
+                    label="Your Name *"
                     required
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="John Doe"
+                    disabled={isSubmitting}
                   />
                   <Input
-                    label="Email Address"
+                    label="Email Address *"
                     type="email"
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="you@example.com"
+                    disabled={isSubmitting}
                   />
                 </div>
 
-                <Input
-                  label="Subject"
-                  required
-                  value={subject}
-                  onChange={(e) => setSubject(e.target.value)}
-                  placeholder="e.g. VIP Airport Delivery Inquiry"
-                />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <Input
+                    label="Phone Number"
+                    type="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="+1 (555) 000-0000"
+                    disabled={isSubmitting}
+                  />
+                  <Input
+                    label="Subject *"
+                    required
+                    value={subject}
+                    onChange={(e) => setSubject(e.target.value)}
+                    placeholder="e.g. VIP Airport Delivery Inquiry"
+                    disabled={isSubmitting}
+                  />
+                </div>
 
                 <div className="space-y-1.5">
                   <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700">
-                    Message
+                    Message *
                   </label>
                   <textarea
                     rows={4}
@@ -138,7 +193,8 @@ export default function ContactPage() {
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     placeholder="How can we assist you with your rental or purchase today?"
-                    className="w-full text-xs font-semibold p-3 rounded-xl border border-zinc-200 bg-white focus:outline-none focus:border-black"
+                    disabled={isSubmitting}
+                    className="w-full text-xs font-semibold p-3 rounded-xl border border-zinc-200 bg-white focus:outline-none focus:border-black disabled:bg-zinc-50 disabled:cursor-not-allowed"
                   />
                 </div>
 
@@ -147,9 +203,11 @@ export default function ContactPage() {
                   variant="dark"
                   size="lg"
                   className="w-full font-bold shadow-md hover:bg-black"
-                  rightIcon={<Send className="w-4 h-4" />}
+                  disabled={isSubmitting}
+                  isLoading={isSubmitting}
+                  rightIcon={!isSubmitting ? <Send className="w-4 h-4" /> : undefined}
                 >
-                  Submit Inquiry
+                  {isSubmitting ? 'Sending Inquiry...' : 'Submit Inquiry'}
                 </Button>
               </form>
             )}

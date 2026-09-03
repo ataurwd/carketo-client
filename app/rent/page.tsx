@@ -10,54 +10,89 @@ import { CarCardSkeleton } from '@/components/common/CarCardSkeleton';
 import { Pagination } from '@/components/common/Pagination';
 import { Button } from '@/components/ui/Button';
 import { POPULAR_BRANDS, BODY_TYPES, TRANSMISSION_TYPES } from '@/lib/constants';
-import { Search, KeyRound, CalendarCheck, ShieldCheck, Plus } from 'lucide-react';
+import { Search, KeyRound, CalendarCheck, ShieldCheck, Plus, RotateCcw, SlidersHorizontal, X } from 'lucide-react';
+
+interface RentFilters {
+  search: string;
+  brand: string;
+  bodyType: string;
+  transmission: string;
+  maxPrice: number;
+}
+
+const DEFAULT_RENT_FILTERS: RentFilters = {
+  search: '',
+  brand: 'All',
+  bodyType: 'All',
+  transmission: 'All',
+  maxPrice: 2000,
+};
+
+const parseRentFiltersFromParams = (params: ReturnType<typeof useSearchParams>): RentFilters => ({
+  search: params?.get('search') || params?.get('q') || params?.get('location') || '',
+  brand: params?.get('brand') || 'All',
+  bodyType: params?.get('bodyType') || 'All',
+  transmission: params?.get('transmission') || 'All',
+  maxPrice: Number(params?.get('maxPrice')) || 2000,
+});
 
 function RentCarContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const getInitialSearch = () =>
-    searchParams?.get('search') || searchParams?.get('q') || searchParams?.get('location') || '';
-  const getInitialBrand = () => searchParams?.get('brand') || 'All';
-  const getInitialBodyType = () => searchParams?.get('bodyType') || 'All';
-  const getInitialTransmission = () => searchParams?.get('transmission') || 'All';
-  const getInitialMaxPrice = () => Number(searchParams?.get('maxPrice')) || 2000;
-  const getInitialPage = () => Number(searchParams?.get('page')) || 1;
-
   const [cars, setCars] = useState<ICar[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [page, setPage] = useState<number>(getInitialPage());
+  const [page, setPage] = useState<number>(() => Number(searchParams?.get('page')) || 1);
   const [pagination, setPagination] = useState<IPagination>({
     total: 0,
-    page: getInitialPage(),
+    page: Number(searchParams?.get('page')) || 1,
     limit: 12,
     totalPages: 1,
   });
 
-  const [search, setSearch] = useState(getInitialSearch());
-  const [selectedBrand, setSelectedBrand] = useState(getInitialBrand());
-  const [selectedBodyType, setSelectedBodyType] = useState(getInitialBodyType());
-  const [selectedTransmission, setSelectedTransmission] = useState(getInitialTransmission());
-  const [priceRange, setPriceRange] = useState<number>(getInitialMaxPrice());
+  // Staged / Draft filters (controlled in UI without triggering immediate reload)
+  const [draftFilters, setDraftFilters] = useState<RentFilters>(() => parseRentFiltersFromParams(searchParams));
+
+  // Applied filters (active query that fetches results & controls URL)
+  const [appliedFilters, setAppliedFilters] = useState<RentFilters>(() => parseRentFiltersFromParams(searchParams));
 
   // Listen to searchParams updates (e.g. from homepage search navigation)
   useEffect(() => {
-    const q = searchParams?.get('search') || searchParams?.get('q') || searchParams?.get('location') || '';
-    const b = searchParams?.get('brand') || 'All';
-    const bt = searchParams?.get('bodyType') || 'All';
-    const tr = searchParams?.get('transmission') || 'All';
-    const mp = Number(searchParams?.get('maxPrice')) || 2000;
-    const p = Number(searchParams?.get('page')) || 1;
-
-    setSearch(q);
-    setSelectedBrand(b);
-    setSelectedBodyType(bt);
-    setSelectedTransmission(tr);
-    setPriceRange(mp);
-    setPage(p);
+    const fromUrl = parseRentFiltersFromParams(searchParams);
+    setDraftFilters(fromUrl);
+    setAppliedFilters(fromUrl);
+    setPage(Number(searchParams?.get('page')) || 1);
   }, [searchParams]);
 
-  // Fetch paginated rental cars from backend
+  // Check for unapplied staged selections
+  const hasPendingChanges =
+    draftFilters.search !== appliedFilters.search ||
+    draftFilters.brand !== appliedFilters.brand ||
+    draftFilters.bodyType !== appliedFilters.bodyType ||
+    draftFilters.transmission !== appliedFilters.transmission ||
+    draftFilters.maxPrice !== appliedFilters.maxPrice;
+
+  // Apply staged draft filters
+  const handleApply = useCallback(() => {
+    setPage(1);
+    setAppliedFilters({ ...draftFilters });
+  }, [draftFilters]);
+
+  // Reset all filters
+  const handleResetAll = useCallback(() => {
+    setPage(1);
+    setDraftFilters(DEFAULT_RENT_FILTERS);
+    setAppliedFilters(DEFAULT_RENT_FILTERS);
+  }, []);
+
+  // Remove individual active filter
+  const handleRemoveAppliedFilter = useCallback((key: keyof RentFilters, defaultValue: any) => {
+    setPage(1);
+    setDraftFilters((prev) => ({ ...prev, [key]: defaultValue }));
+    setAppliedFilters((prev) => ({ ...prev, [key]: defaultValue }));
+  }, []);
+
+  // Fetch paginated rental cars from backend based on appliedFilters
   const fetchRentalCars = useCallback(async () => {
     setIsLoading(true);
     const queryParams: Record<string, any> = {
@@ -65,11 +100,21 @@ function RentCarContent() {
       page,
       limit: 12,
     };
-    if (selectedBrand && selectedBrand.toLowerCase() !== 'all') queryParams.brand = selectedBrand;
-    if (selectedBodyType && selectedBodyType.toLowerCase() !== 'all') queryParams.bodyType = selectedBodyType;
-    if (selectedTransmission && selectedTransmission.toLowerCase() !== 'all') queryParams.transmission = selectedTransmission;
-    if (priceRange < 2000) queryParams.maxPrice = priceRange;
-    if (search.trim()) queryParams.search = search.trim();
+    if (appliedFilters.brand && appliedFilters.brand.toLowerCase() !== 'all') {
+      queryParams.brand = appliedFilters.brand;
+    }
+    if (appliedFilters.bodyType && appliedFilters.bodyType.toLowerCase() !== 'all') {
+      queryParams.bodyType = appliedFilters.bodyType;
+    }
+    if (appliedFilters.transmission && appliedFilters.transmission.toLowerCase() !== 'all') {
+      queryParams.transmission = appliedFilters.transmission;
+    }
+    if (appliedFilters.maxPrice < 2000) {
+      queryParams.maxPrice = appliedFilters.maxPrice;
+    }
+    if (appliedFilters.search.trim()) {
+      queryParams.search = appliedFilters.search.trim();
+    }
 
     try {
       const res = await carService.getCarsWithPagination(queryParams);
@@ -87,7 +132,7 @@ function RentCarContent() {
     } finally {
       setIsLoading(false);
     }
-  }, [page, selectedBrand, selectedBodyType, selectedTransmission, priceRange, search]);
+  }, [page, appliedFilters]);
 
   useEffect(() => {
     fetchRentalCars();
@@ -97,18 +142,33 @@ function RentCarContent() {
   useEffect(() => {
     const params = new URLSearchParams();
     if (page > 1) params.set('page', String(page));
-    if (selectedBrand && selectedBrand.toLowerCase() !== 'all') params.set('brand', selectedBrand);
-    if (selectedBodyType && selectedBodyType.toLowerCase() !== 'all') params.set('bodyType', selectedBodyType);
-    if (selectedTransmission && selectedTransmission.toLowerCase() !== 'all') params.set('transmission', selectedTransmission);
-    if (priceRange < 2000) params.set('maxPrice', String(priceRange));
-    if (search.trim()) {
-      params.set('q', search.trim());
-      params.set('search', search.trim());
+    if (appliedFilters.brand && appliedFilters.brand.toLowerCase() !== 'all') {
+      params.set('brand', appliedFilters.brand);
+    }
+    if (appliedFilters.bodyType && appliedFilters.bodyType.toLowerCase() !== 'all') {
+      params.set('bodyType', appliedFilters.bodyType);
+    }
+    if (appliedFilters.transmission && appliedFilters.transmission.toLowerCase() !== 'all') {
+      params.set('transmission', appliedFilters.transmission);
+    }
+    if (appliedFilters.maxPrice < 2000) {
+      params.set('maxPrice', String(appliedFilters.maxPrice));
+    }
+    if (appliedFilters.search.trim()) {
+      params.set('q', appliedFilters.search.trim());
+      params.set('search', appliedFilters.search.trim());
     }
 
     const queryStr = params.toString();
     router.replace(queryStr ? `/rent?${queryStr}` : '/rent', { scroll: false });
-  }, [page, selectedBrand, selectedBodyType, selectedTransmission, priceRange, search, router]);
+  }, [page, appliedFilters, router]);
+
+  const activeFiltersCount =
+    (appliedFilters.brand !== 'All' ? 1 : 0) +
+    (appliedFilters.bodyType !== 'All' ? 1 : 0) +
+    (appliedFilters.transmission !== 'All' ? 1 : 0) +
+    (appliedFilters.maxPrice < 2000 ? 1 : 0) +
+    (appliedFilters.search.trim() ? 1 : 0);
 
   return (
     <div className="min-h-screen bg-zinc-50 py-10">
@@ -141,32 +201,56 @@ function RentCarContent() {
         </div>
 
         {/* Filter Bar */}
-        <div className="bg-white p-5 rounded-3xl border border-zinc-200 shadow-sm space-y-4">
+        <div className="bg-white p-6 rounded-3xl border border-zinc-200 shadow-sm space-y-4">
           <div className="flex flex-col lg:flex-row items-center gap-4">
-            {/* Search Input */}
-            <div className="relative flex-1 w-full">
-              <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
-              <input
-                type="text"
-                placeholder="Search by vehicle title, make, or model..."
-                value={search}
-                onChange={(e) => {
-                  setSearch(e.target.value);
-                  setPage(1);
-                }}
-                className="w-full pl-10 pr-4 py-2.5 rounded-2xl border border-zinc-200 text-xs font-semibold text-zinc-800 placeholder-zinc-400 focus:outline-none focus:border-black transition-colors"
-              />
+            {/* Search Input with explicit Search button */}
+            <div className="relative flex-1 w-full flex items-center gap-2">
+              <div className="relative flex-1">
+                <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
+                <input
+                  type="text"
+                  placeholder="Search by vehicle title, make, or model..."
+                  value={draftFilters.search}
+                  onChange={(e) => setDraftFilters((prev) => ({ ...prev, search: e.target.value }))}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleApply();
+                    }
+                  }}
+                  className="w-full pl-10 pr-9 py-2.5 rounded-2xl border border-zinc-200 text-xs font-semibold text-zinc-800 placeholder-zinc-400 focus:outline-none focus:border-black transition-colors"
+                />
+                {draftFilters.search && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setDraftFilters((prev) => ({ ...prev, search: '' }));
+                      if (appliedFilters.search) {
+                        handleRemoveAppliedFilter('search', '');
+                      }
+                    }}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-black p-1"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+              <button
+                type="button"
+                onClick={handleApply}
+                className="px-4 py-2.5 rounded-2xl bg-black text-white hover:bg-zinc-800 text-xs font-bold transition-all shadow-sm flex items-center gap-1.5 shrink-0 active:scale-95"
+              >
+                <Search className="w-3.5 h-3.5" />
+                <span>Search</span>
+              </button>
             </div>
 
             {/* Selects */}
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 w-full lg:w-auto">
               <select
-                value={selectedBrand}
-                onChange={(e) => {
-                  setSelectedBrand(e.target.value);
-                  setPage(1);
-                }}
-                className="px-3 py-2.5 rounded-2xl border border-zinc-200 bg-white text-xs font-semibold text-zinc-700 focus:outline-none focus:border-black"
+                value={draftFilters.brand}
+                onChange={(e) => setDraftFilters((prev) => ({ ...prev, brand: e.target.value }))}
+                className="px-3 py-2.5 rounded-2xl border border-zinc-200 bg-white text-xs font-semibold text-zinc-700 focus:outline-none focus:border-black cursor-pointer"
               >
                 <option value="All">All Makes</option>
                 {POPULAR_BRANDS.map((b) => (
@@ -177,12 +261,9 @@ function RentCarContent() {
               </select>
 
               <select
-                value={selectedBodyType}
-                onChange={(e) => {
-                  setSelectedBodyType(e.target.value);
-                  setPage(1);
-                }}
-                className="px-3 py-2.5 rounded-2xl border border-zinc-200 bg-white text-xs font-semibold text-zinc-700 focus:outline-none focus:border-black"
+                value={draftFilters.bodyType}
+                onChange={(e) => setDraftFilters((prev) => ({ ...prev, bodyType: e.target.value }))}
+                className="px-3 py-2.5 rounded-2xl border border-zinc-200 bg-white text-xs font-semibold text-zinc-700 focus:outline-none focus:border-black cursor-pointer"
               >
                 <option value="All">All Body Types</option>
                 {BODY_TYPES.map((bt) => (
@@ -193,12 +274,9 @@ function RentCarContent() {
               </select>
 
               <select
-                value={selectedTransmission}
-                onChange={(e) => {
-                  setSelectedTransmission(e.target.value);
-                  setPage(1);
-                }}
-                className="px-3 py-2.5 rounded-2xl border border-zinc-200 bg-white text-xs font-semibold text-zinc-700 focus:outline-none focus:border-black col-span-2 sm:col-span-1"
+                value={draftFilters.transmission}
+                onChange={(e) => setDraftFilters((prev) => ({ ...prev, transmission: e.target.value }))}
+                className="px-3 py-2.5 rounded-2xl border border-zinc-200 bg-white text-xs font-semibold text-zinc-700 focus:outline-none focus:border-black col-span-2 sm:col-span-1 cursor-pointer"
               >
                 <option value="All">All Transmissions</option>
                 {TRANSMISSION_TYPES.map((t) => (
@@ -210,29 +288,109 @@ function RentCarContent() {
             </div>
           </div>
 
-          {/* Price Range Slider */}
+          {/* Price Range Slider & Action Bar */}
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-3 border-t border-zinc-100 text-xs">
             <div className="flex items-center gap-3 w-full sm:w-auto">
               <span className="font-bold text-zinc-700 whitespace-nowrap">
-                Max Daily Rate: <span className="text-black font-black">${priceRange}/day</span>
+                Max Daily Rate: <span className="text-black font-black">${draftFilters.maxPrice}/day</span>
               </span>
               <input
                 type="range"
                 min={50}
                 max={2000}
                 step={25}
-                value={priceRange}
-                onChange={(e) => {
-                  setPriceRange(Number(e.target.value));
-                  setPage(1);
-                }}
+                value={draftFilters.maxPrice}
+                onChange={(e) => setDraftFilters((prev) => ({ ...prev, maxPrice: Number(e.target.value) }))}
                 className="w-full sm:w-48 accent-black cursor-pointer"
               />
             </div>
 
-            <span className="text-zinc-500 font-semibold self-start sm:self-auto">
-              Showing <span className="font-bold text-black">{pagination.total}</span> rental vehicles
+            <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
+              <button
+                type="button"
+                onClick={handleResetAll}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold text-zinc-500 hover:text-black hover:bg-zinc-100 transition-colors"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span>Reset</span>
+              </button>
+
+              {hasPendingChanges && (
+                <span className="text-[11px] font-semibold text-amber-700 bg-amber-50 border border-amber-200 px-3 py-1 rounded-full flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                  Filters selected
+                </span>
+              )}
+
+              <button
+                type="button"
+                onClick={handleApply}
+                className="flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-black text-white hover:bg-zinc-800 text-xs font-bold transition-all shadow-md active:scale-95"
+              >
+                <SlidersHorizontal className="w-3.5 h-3.5" />
+                <span>Apply Filters</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Active Filter Chips */}
+          {activeFiltersCount > 0 && (
+            <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-zinc-100">
+              <span className="text-[11px] font-bold text-zinc-400">Active filters:</span>
+              {appliedFilters.brand !== 'All' && (
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-zinc-100 text-xs font-bold text-black border border-zinc-200">
+                  Make: {appliedFilters.brand}
+                  <button onClick={() => handleRemoveAppliedFilter('brand', 'All')}>
+                    <X className="w-3 h-3 text-zinc-500 hover:text-black" />
+                  </button>
+                </span>
+              )}
+              {appliedFilters.bodyType !== 'All' && (
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-zinc-100 text-xs font-bold text-black border border-zinc-200">
+                  Body: {appliedFilters.bodyType}
+                  <button onClick={() => handleRemoveAppliedFilter('bodyType', 'All')}>
+                    <X className="w-3 h-3 text-zinc-500 hover:text-black" />
+                  </button>
+                </span>
+              )}
+              {appliedFilters.transmission !== 'All' && (
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-zinc-100 text-xs font-bold text-black border border-zinc-200">
+                  Transmission: {appliedFilters.transmission}
+                  <button onClick={() => handleRemoveAppliedFilter('transmission', 'All')}>
+                    <X className="w-3 h-3 text-zinc-500 hover:text-black" />
+                  </button>
+                </span>
+              )}
+              {appliedFilters.maxPrice < 2000 && (
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-zinc-100 text-xs font-bold text-black border border-zinc-200">
+                  Up to ${appliedFilters.maxPrice}/day
+                  <button onClick={() => handleRemoveAppliedFilter('maxPrice', 2000)}>
+                    <X className="w-3 h-3 text-zinc-500 hover:text-black" />
+                  </button>
+                </span>
+              )}
+              {appliedFilters.search && (
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-zinc-100 text-xs font-bold text-black border border-zinc-200">
+                  Search: &ldquo;{appliedFilters.search}&rdquo;
+                  <button onClick={() => handleRemoveAppliedFilter('search', '')}>
+                    <X className="w-3 h-3 text-zinc-500 hover:text-black" />
+                  </button>
+                </span>
+              )}
+              <button
+                onClick={handleResetAll}
+                className="text-[11px] font-bold text-rose-600 hover:underline ml-auto"
+              >
+                Clear all filters
+              </button>
+            </div>
+          )}
+
+          <div className="pt-2 flex items-center justify-between text-xs text-zinc-500 font-semibold">
+            <span>
+              Showing <strong className="text-black font-black">{pagination.total}</strong> rental vehicles
             </span>
+            <span>Page {pagination.page} of {pagination.totalPages}</span>
           </div>
         </div>
 
