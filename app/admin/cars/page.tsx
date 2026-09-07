@@ -8,6 +8,7 @@ import { ICar } from '@/types/car.types';
 import { formatPrice } from '@/lib/utils';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
+import { Pagination } from '@/components/common/Pagination';
 import {
   Car,
   Search,
@@ -211,6 +212,8 @@ export default function AdminCarsPage() {
   const [listingTypeFilter, setListingTypeFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
   const [isLoading, setIsLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   // Modals state
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -221,6 +224,10 @@ export default function AdminCarsPage() {
   useEffect(() => {
     fetchCars();
   }, []);
+
+  useEffect(() => {
+    setPage(1);
+  }, [search, listingTypeFilter, statusFilter, pageSize]);
 
   const fetchCars = () => {
     setIsLoading(true);
@@ -340,6 +347,9 @@ export default function AdminCarsPage() {
     }
     return true;
   });
+
+  const totalPages = Math.ceil(filteredCars.length / pageSize) || 1;
+  const paginatedCars = filteredCars.slice((page - 1) * pageSize, page * pageSize);
 
   const exportCSV = () => {
     const headers = ['Title', 'Brand', 'Model', 'Year', 'ListingType', 'Price', 'Status', 'Location'];
@@ -469,6 +479,18 @@ export default function AdminCarsPage() {
             <option value="sold">Sold</option>
             <option value="archived">Archived</option>
           </select>
+
+          {/* Page Size Selector */}
+          <select
+            value={pageSize}
+            onChange={(e) => setPageSize(Number(e.target.value))}
+            className="px-3.5 py-2.5 rounded-2xl bg-zinc-950 border border-zinc-800 text-xs font-bold text-zinc-300 focus:outline-none focus:border-orange-500 cursor-pointer"
+          >
+            <option value={5}>5 / page</option>
+            <option value={10}>10 / page</option>
+            <option value={20}>20 / page</option>
+            <option value={50}>50 / page</option>
+          </select>
         </div>
       </div>
 
@@ -485,7 +507,8 @@ export default function AdminCarsPage() {
             <p className="text-xs font-bold text-zinc-400">No vehicles matching your current filter criteria.</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <div>
+            <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="border-b border-zinc-800 bg-zinc-950/70 text-[10px] font-extrabold uppercase tracking-wider text-zinc-400">
@@ -498,7 +521,7 @@ export default function AdminCarsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-800/60 text-xs font-medium">
-                {filteredCars.map((car) => (
+                {paginatedCars.map((car) => (
                   <tr key={car._id} className="hover:bg-zinc-800/40 transition-colors">
                     {/* Vehicle Details */}
                     <td className="py-4 px-4 sm:px-6">
@@ -608,6 +631,20 @@ export default function AdminCarsPage() {
               </tbody>
             </table>
           </div>
+
+          {/* Pagination Controls */}
+          <div className="px-6 py-2">
+            <Pagination
+              currentPage={page}
+              totalPages={totalPages}
+              totalItems={filteredCars.length}
+              limit={pageSize}
+              onPageChange={setPage}
+              variant="dark"
+              itemLabel="vehicles"
+            />
+          </div>
+        </div>
         )}
       </div>
 

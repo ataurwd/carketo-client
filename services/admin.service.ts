@@ -26,12 +26,6 @@ export interface AdminStatsData {
     totalRentals: number;
     totalSales: number;
     totalInquiries: number;
-    totalProviders?: number;
-    totalBookings?: number;
-    totalOrders?: number;
-    pendingBookingsCount?: number;
-    pendingOrdersCount?: number;
-    pendingProvidersCount?: number;
     completedPaymentsCount: number;
   };
   analytics?: {
@@ -43,8 +37,6 @@ export interface AdminStatsData {
       sale: number;
     };
   };
-  recentBookings?: any[];
-  recentOrders?: any[];
   recentUsers: any[];
   recentCars: any[];
   recentInquiries: any[];
@@ -90,88 +82,6 @@ export interface IHealthTelemetry {
     cache: string;
     orchestration: string;
   };
-}
-
-export interface IBookingAdmin {
-  _id: string;
-  carId?: {
-    _id: string;
-    title: string;
-    slug: string;
-    brand: string;
-    model: string;
-    coverImage?: string;
-    rentalPrice?: number;
-  };
-  userId?: {
-    _id: string;
-    name: string;
-    email: string;
-    phone?: string;
-    avatar?: string;
-  };
-  providerId?: {
-    _id: string;
-    name: string;
-    email: string;
-    phone?: string;
-  };
-  startDate: string;
-  endDate: string;
-  totalDays: number;
-  dailyRate: number;
-  totalAmount: number;
-  depositAmount: number;
-  discountAmount?: number;
-  couponCode?: string;
-  pickupLocation: string;
-  returnLocation: string;
-  status: 'pending' | 'confirmed' | 'active' | 'completed' | 'cancelled';
-  paymentStatus: 'pending' | 'paid' | 'refunded' | 'failed';
-  cancellationReason?: string;
-  createdAt: string;
-}
-
-export interface IOrderAdmin {
-  _id: string;
-  carId?: {
-    _id: string;
-    title: string;
-    slug: string;
-    brand: string;
-    model: string;
-    coverImage?: string;
-    salePrice?: number;
-  };
-  userId?: {
-    _id: string;
-    name: string;
-    email: string;
-    phone?: string;
-    avatar?: string;
-  };
-  providerId?: {
-    _id: string;
-    name: string;
-    email: string;
-    phone?: string;
-  };
-  salePrice: number;
-  finalPrice: number;
-  discountAmount?: number;
-  couponCode?: string;
-  deliveryAddress: {
-    street: string;
-    city: string;
-    state?: string;
-    country: string;
-    zipCode?: string;
-  };
-  status: 'pending' | 'processing' | 'completed' | 'cancelled';
-  paymentStatus: 'pending' | 'paid' | 'refunded' | 'failed';
-  paymentMethod?: string;
-  notes?: string;
-  createdAt: string;
 }
 
 export interface IPaymentAdmin {
@@ -223,28 +133,6 @@ export const adminService = {
   async getAuditLogs(params?: any) {
     const res: any = await apiClient.get('/admin/audit-logs', { params });
     return res.data || [];
-  },
-
-  // ===================== BOOKINGS MANAGEMENT =====================
-  async getBookings(params?: any) {
-    const res: any = await apiClient.get('/admin/bookings', { params });
-    return res.data || [];
-  },
-
-  async updateBookingStatus(bookingId: string, status: string, notes?: string) {
-    const res: any = await apiClient.put(`/admin/bookings/${bookingId}/status`, { status, notes });
-    return res.data;
-  },
-
-  // ===================== ORDERS MANAGEMENT =====================
-  async getOrders(params?: any) {
-    const res: any = await apiClient.get('/admin/orders', { params });
-    return res.data || [];
-  },
-
-  async updateOrderStatus(orderId: string, status: string, notes?: string) {
-    const res: any = await apiClient.put(`/admin/orders/${orderId}/status`, { status, notes });
-    return res.data;
   },
 
   // ===================== PAYMENTS & TRANSACTIONS =====================
@@ -348,7 +236,7 @@ export const adminService = {
     return res.data;
   },
 
-  // ===================== COUPONS & PROVIDERS =====================
+  // ===================== COUPONS =====================
   async getCoupons() {
     const res: any = await apiClient.get('/admin/coupons');
     return res.data || [];
@@ -356,19 +244,6 @@ export const adminService = {
 
   async createCoupon(data: any) {
     const res: any = await apiClient.post('/admin/coupons', data);
-    return res.data;
-  },
-
-  async getProviders(params?: any) {
-    const res: any = await apiClient.get('/admin/providers', { params });
-    return res.data || [];
-  },
-
-  async verifyProvider(providerId: string, isVerified: boolean, notes?: string) {
-    const res: any = await apiClient.put(`/admin/providers/${providerId}/verify`, {
-      isVerified,
-      notes,
-    });
     return res.data;
   },
 };

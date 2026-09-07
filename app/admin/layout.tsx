@@ -9,13 +9,10 @@ import { adminService } from '@/services/admin.service';
 import {
   LayoutDashboard,
   Car,
-  CalendarCheck2,
-  ShoppingBag,
   CreditCard,
   MessageSquare,
   Mail,
   Users,
-  Building2,
   Ticket,
   ScrollText,
   Settings,
@@ -51,8 +48,6 @@ const navSections: NavSection[] = [
     title: 'FLEET & COMMERCE',
     items: [
       { label: 'Fleet Inventory', href: '/admin/cars', icon: Car },
-      { label: 'Rental Bookings', href: '/admin/bookings', icon: CalendarCheck2, badgeKey: 'bookings' },
-      { label: 'Sales Orders', href: '/admin/orders', icon: ShoppingBag, badgeKey: 'orders' },
       { label: 'Financial Ledger', href: '/admin/payments', icon: CreditCard },
     ],
   },
@@ -62,7 +57,6 @@ const navSections: NavSection[] = [
       { label: 'Car Inquiries', href: '/admin/inquiries', icon: MessageSquare, badgeKey: 'inquiries' },
       { label: 'Contact Messages', href: '/admin/contacts', icon: Mail, badgeKey: 'contacts' },
       { label: 'Users & RBAC', href: '/admin/users', icon: Users },
-      { label: 'Dealerships', href: '/admin/providers', icon: Building2, badgeKey: 'providers' },
     ],
   },
   {
@@ -137,10 +131,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         .then((res) => {
           if (res?.metrics) {
             setCounts({
-              bookings: res.metrics.pendingBookingsCount || 0,
-              orders: res.metrics.pendingOrdersCount || 0,
               inquiries: res.metrics.totalInquiries || 0,
-              providers: res.metrics.pendingProvidersCount || 0,
             });
           }
         })

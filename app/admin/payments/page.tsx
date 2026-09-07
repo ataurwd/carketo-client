@@ -6,6 +6,7 @@ import { adminService, IPaymentAdmin } from '@/services/admin.service';
 import { confirmDialog, showToast } from '@/lib/alert';
 import { formatPrice } from '@/lib/utils';
 import { Button } from '@/components/ui/Button';
+import { Pagination } from '@/components/common/Pagination';
 import {
   CreditCard,
   Search,
@@ -30,10 +31,16 @@ export default function AdminPaymentsPage() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [isLoading, setIsLoading] = useState(true);
   const [selectedPayment, setSelectedPayment] = useState<IPaymentAdmin | null>(null);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   useEffect(() => {
     fetchPayments();
   }, []);
+
+  useEffect(() => {
+    setPage(1);
+  }, [search, statusFilter, pageSize]);
 
   const fetchPayments = () => {
     setIsLoading(true);
@@ -79,6 +86,9 @@ export default function AdminPaymentsPage() {
     }
     return true;
   });
+
+  const totalPages = Math.ceil(filteredPayments.length / pageSize) || 1;
+  const paginatedPayments = filteredPayments.slice((page - 1) * pageSize, page * pageSize);
 
   const totalCollected = payments
     .filter((p) => p.status === 'paid')
@@ -187,6 +197,17 @@ export default function AdminPaymentsPage() {
             <option value="refunded">Refunded</option>
             <option value="failed">Failed</option>
           </select>
+
+          <select
+            value={pageSize}
+            onChange={(e) => setPageSize(Number(e.target.value))}
+            className="px-3.5 py-2.5 rounded-2xl bg-zinc-950 border border-zinc-800 text-xs font-bold text-zinc-300 focus:outline-none focus:border-orange-500 cursor-pointer"
+          >
+            <option value={5}>5 / page</option>
+            <option value={10}>10 / page</option>
+            <option value={20}>20 / page</option>
+            <option value={50}>50 / page</option>
+          </select>
         </div>
       </div>
 
@@ -203,7 +224,8 @@ export default function AdminPaymentsPage() {
             <p className="text-xs font-bold text-zinc-400">No payment transaction records found.</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <div>
+            <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="border-b border-zinc-800 bg-zinc-950/70 text-[10px] font-extrabold uppercase tracking-wider text-zinc-400">
@@ -217,7 +239,7 @@ export default function AdminPaymentsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-800/60 text-xs font-medium">
-                {filteredPayments.map((p) => (
+                {paginatedPayments.map((p) => (
                   <tr key={p._id} className="hover:bg-zinc-800/40 transition-colors">
                     {/* Transaction ID */}
                     <td className="py-4 px-4 sm:px-6">
@@ -298,6 +320,20 @@ export default function AdminPaymentsPage() {
               </tbody>
             </table>
           </div>
+
+          {/* Pagination Controls */}
+          <div className="px-6 py-2">
+            <Pagination
+              currentPage={page}
+              totalPages={totalPages}
+              totalItems={filteredPayments.length}
+              limit={pageSize}
+              onPageChange={setPage}
+              variant="dark"
+              itemLabel="transactions"
+            />
+          </div>
+        </div>
         )}
       </div>
 

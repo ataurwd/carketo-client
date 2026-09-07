@@ -5,6 +5,7 @@ import { adminService } from '@/services/admin.service';
 import { IContactMessageRecord } from '@/services/contact.service';
 import { confirmDialog, showToast } from '@/lib/alert';
 import { Button } from '@/components/ui/Button';
+import { Pagination } from '@/components/common/Pagination';
 import {
   Mail,
   Search,
@@ -36,6 +37,8 @@ export default function AdminContactsPage() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [isLoading, setIsLoading] = useState(true);
   const [activeMessage, setActiveMessage] = useState<IContactMessageRecord | null>(null);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   const fetchContacts = async () => {
     setIsLoading(true);
@@ -58,6 +61,10 @@ export default function AdminContactsPage() {
   useEffect(() => {
     fetchContacts();
   }, []);
+
+  useEffect(() => {
+    setPage(1);
+  }, [search, statusFilter, pageSize]);
 
   const handleStatusChange = async (messageId: string, newStatus: string) => {
     try {
@@ -111,15 +118,16 @@ export default function AdminContactsPage() {
       if (statusFilter !== 'all' && m.status !== statusFilter) return false;
       if (!search.trim()) return true;
       const q = search.toLowerCase();
-      return (
-        m.name?.toLowerCase().includes(q) ||
-        m.email?.toLowerCase().includes(q) ||
-        m.subject?.toLowerCase().includes(q) ||
-        m.message?.toLowerCase().includes(q) ||
-        (m.phone && m.phone.toLowerCase().includes(q))
-      );
+      const matchName = m.name?.toLowerCase().includes(q);
+      const matchEmail = m.email?.toLowerCase().includes(q);
+      const matchSubject = m.subject?.toLowerCase().includes(q);
+      const matchMsg = m.message?.toLowerCase().includes(q);
+      return matchName || matchEmail || matchSubject || matchMsg;
     });
   }, [messages, statusFilter, search]);
+
+  const totalPages = Math.ceil(filteredMessages.length / pageSize) || 1;
+  const paginatedMessages = filteredMessages.slice((page - 1) * pageSize, page * pageSize);
 
   return (
     <div className="space-y-6 pb-12">
@@ -197,6 +205,17 @@ export default function AdminContactsPage() {
             <option value="read">Read (In Review)</option>
             <option value="replied">Replied (Closed)</option>
           </select>
+
+          <select
+            value={pageSize}
+            onChange={(e) => setPageSize(Number(e.target.value))}
+            className="px-3.5 py-2.5 rounded-2xl bg-zinc-950 border border-zinc-800 text-xs font-bold text-zinc-300 focus:outline-none focus:border-orange-500 cursor-pointer"
+          >
+            <option value={5}>5 / page</option>
+            <option value={10}>10 / page</option>
+            <option value={20}>20 / page</option>
+            <option value={50}>50 / page</option>
+          </select>
         </div>
       </div>
 
@@ -213,7 +232,8 @@ export default function AdminContactsPage() {
             <p className="text-xs font-bold text-zinc-400">No contact messages found.</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <div>
+            <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="border-b border-zinc-800 bg-zinc-950/70 text-[10px] font-extrabold uppercase tracking-wider text-zinc-400">
@@ -225,7 +245,7 @@ export default function AdminContactsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-800/60 text-xs font-medium">
-                {filteredMessages.map((msg) => (
+                {paginatedMessages.map((msg) => (
                   <tr
                     key={msg.id}
                     onClick={() => handleOpenDetail(msg)}
@@ -306,6 +326,20 @@ export default function AdminContactsPage() {
               </tbody>
             </table>
           </div>
+
+          {/* Pagination Controls */}
+          <div className="px-6 py-2">
+            <Pagination
+              currentPage={page}
+              totalPages={totalPages}
+              totalItems={filteredMessages.length}
+              limit={pageSize}
+              onPageChange={setPage}
+              variant="dark"
+              itemLabel="messages"
+            />
+          </div>
+        </div>
         )}
       </div>
 

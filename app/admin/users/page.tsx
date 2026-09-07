@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { adminService } from '@/services/admin.service';
 import { confirmDialog, showToast } from '@/lib/alert';
 import { Button } from '@/components/ui/Button';
+import { Pagination } from '@/components/common/Pagination';
 import {
   Users,
   ShieldCheck,
@@ -26,10 +27,17 @@ export default function AdminUsersPage() {
   const [roleFilter, setRoleFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
   const [isLoading, setIsLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   useEffect(() => {
     fetchUsers();
   }, []);
+
+  // Reset to first page on search or filter change
+  useEffect(() => {
+    setPage(1);
+  }, [search, roleFilter, statusFilter, pageSize]);
 
   const fetchUsers = () => {
     setIsLoading(true);
@@ -86,6 +94,9 @@ export default function AdminUsersPage() {
     }
     return true;
   });
+
+  const totalPages = Math.ceil(filteredUsers.length / pageSize) || 1;
+  const paginatedUsers = filteredUsers.slice((page - 1) * pageSize, page * pageSize);
 
   const exportCSV = () => {
     const headers = ['Name', 'Email', 'Phone', 'Role', 'Status', 'RegisteredDate'];
@@ -177,7 +188,7 @@ export default function AdminUsersPage() {
           <select
             value={roleFilter}
             onChange={(e) => setRoleFilter(e.target.value)}
-            className="px-3.5 py-2.5 rounded-2xl bg-zinc-950 border border-zinc-800 text-xs font-bold text-white focus:outline-none focus:border-orange-500"
+            className="px-3.5 py-2.5 rounded-2xl bg-zinc-950 border border-zinc-800 text-xs font-bold text-white focus:outline-none focus:border-orange-500 cursor-pointer"
           >
             <option value="all">All Roles</option>
             <option value="admin">Administrators</option>
@@ -187,12 +198,23 @@ export default function AdminUsersPage() {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-3.5 py-2.5 rounded-2xl bg-zinc-950 border border-zinc-800 text-xs font-bold text-white focus:outline-none focus:border-orange-500"
+            className="px-3.5 py-2.5 rounded-2xl bg-zinc-950 border border-zinc-800 text-xs font-bold text-white focus:outline-none focus:border-orange-500 cursor-pointer"
           >
             <option value="all">All Statuses</option>
             <option value="active">Active</option>
             <option value="suspended">Suspended</option>
             <option value="banned">Banned</option>
+          </select>
+
+          <select
+            value={pageSize}
+            onChange={(e) => setPageSize(Number(e.target.value))}
+            className="px-3.5 py-2.5 rounded-2xl bg-zinc-950 border border-zinc-800 text-xs font-bold text-zinc-300 focus:outline-none focus:border-orange-500 cursor-pointer"
+          >
+            <option value={5}>5 / page</option>
+            <option value={10}>10 / page</option>
+            <option value={20}>20 / page</option>
+            <option value={50}>50 / page</option>
           </select>
         </div>
       </div>
@@ -210,89 +232,104 @@ export default function AdminUsersPage() {
             <p className="text-xs font-bold text-zinc-400">No user accounts found matching your search.</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b border-zinc-800 bg-zinc-950/70 text-[10px] font-extrabold uppercase tracking-wider text-zinc-400">
-                  <th className="py-3.5 px-4 sm:px-6">User Details</th>
-                  <th className="py-3.5 px-4">Contact Phone</th>
-                  <th className="py-3.5 px-4">Role Privileges</th>
-                  <th className="py-3.5 px-4">Account Status</th>
-                  <th className="py-3.5 px-4">Joined Date</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-zinc-800/60 text-xs font-medium">
-                {filteredUsers.map((u) => (
-                  <tr key={u._id} className="hover:bg-zinc-800/40 transition-colors">
-                    {/* User */}
-                    <td className="py-4 px-4 sm:px-6">
-                      <div className="flex items-center gap-3">
-                        {u.avatar ? (
-                          <img
-                            src={u.avatar}
-                            alt=""
-                            className="w-9 h-9 rounded-xl object-cover bg-zinc-800 shrink-0 border border-zinc-700"
-                          />
-                        ) : (
-                          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-zinc-800 to-zinc-700 text-white flex items-center justify-center font-bold text-xs shrink-0 border border-zinc-700">
-                            {u.name ? u.name.charAt(0).toUpperCase() : 'U'}
-                          </div>
-                        )}
-                        <div className="min-w-0">
-                          <p className="font-bold text-white truncate">{u.name || 'User'}</p>
-                          <p className="text-[11px] text-zinc-400 truncate">{u.email}</p>
-                        </div>
-                      </div>
-                    </td>
-
-                    {/* Phone */}
-                    <td className="py-4 px-4 text-zinc-300">
-                      {u.phone || <span className="text-zinc-500 italic">Not Provided</span>}
-                    </td>
-
-                    {/* Role Dropdown */}
-                    <td className="py-4 px-4">
-                      <select
-                        value={u.role}
-                        onChange={(e) => handleRoleChange(u._id, e.target.value)}
-                        className={`px-2.5 py-1.5 rounded-xl text-xs font-bold border focus:outline-none transition-all ${
-                          u.role === 'admin'
-                            ? 'bg-orange-500/20 text-orange-400 border-orange-500/30'
-                            : 'bg-zinc-800 text-zinc-300 border-zinc-700'
-                        }`}
-                      >
-                        <option value="user">User</option>
-                        <option value="admin">Administrator</option>
-                      </select>
-                    </td>
-
-                    {/* Status Dropdown */}
-                    <td className="py-4 px-4">
-                      <select
-                        value={u.status || 'active'}
-                        onChange={(e) => handleStatusChange(u._id, e.target.value)}
-                        className={`px-2.5 py-1.5 rounded-xl text-xs font-bold border focus:outline-none transition-all ${
-                          u.status === 'active' || !u.status
-                            ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
-                            : u.status === 'suspended'
-                            ? 'bg-amber-500/10 text-amber-400 border-amber-500/30'
-                            : 'bg-rose-500/10 text-rose-400 border-rose-500/30'
-                        }`}
-                      >
-                        <option value="active">Active</option>
-                        <option value="suspended">Suspended</option>
-                        <option value="banned">Banned</option>
-                      </select>
-                    </td>
-
-                    {/* Joined Date */}
-                    <td className="py-4 px-4 text-zinc-400 text-[11px]">
-                      {new Date(u.createdAt).toLocaleDateString()}
-                    </td>
+          <div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="border-b border-zinc-800 bg-zinc-950/70 text-[10px] font-extrabold uppercase tracking-wider text-zinc-400">
+                    <th className="py-3.5 px-4 sm:px-6">User Details</th>
+                    <th className="py-3.5 px-4">Contact Phone</th>
+                    <th className="py-3.5 px-4">Role Privileges</th>
+                    <th className="py-3.5 px-4">Account Status</th>
+                    <th className="py-3.5 px-4">Joined Date</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-zinc-800/60 text-xs font-medium">
+                  {paginatedUsers.map((u) => (
+                    <tr key={u._id} className="hover:bg-zinc-800/40 transition-colors">
+                      {/* User */}
+                      <td className="py-4 px-4 sm:px-6">
+                        <div className="flex items-center gap-3">
+                          {u.avatar ? (
+                            <img
+                              src={u.avatar}
+                              alt=""
+                              className="w-9 h-9 rounded-xl object-cover bg-zinc-800 shrink-0 border border-zinc-700"
+                            />
+                          ) : (
+                            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-zinc-800 to-zinc-700 text-white flex items-center justify-center font-bold text-xs shrink-0 border border-zinc-700">
+                              {u.name ? u.name.charAt(0).toUpperCase() : 'U'}
+                            </div>
+                          )}
+                          <div className="min-w-0">
+                            <p className="font-bold text-white truncate">{u.name || 'User'}</p>
+                            <p className="text-[11px] text-zinc-400 truncate">{u.email}</p>
+                          </div>
+                        </div>
+                      </td>
+
+                      {/* Phone */}
+                      <td className="py-4 px-4 text-zinc-300">
+                        {u.phone || <span className="text-zinc-500 italic">Not Provided</span>}
+                      </td>
+
+                      {/* Role Dropdown */}
+                      <td className="py-4 px-4">
+                        <select
+                          value={u.role}
+                          onChange={(e) => handleRoleChange(u._id, e.target.value)}
+                          className={`px-2.5 py-1.5 rounded-xl text-xs font-bold border focus:outline-none transition-all cursor-pointer ${
+                            u.role === 'admin'
+                              ? 'bg-orange-500/20 text-orange-400 border-orange-500/30'
+                              : 'bg-zinc-800 text-zinc-300 border-zinc-700'
+                          }`}
+                        >
+                          <option value="user">User</option>
+                          <option value="admin">Administrator</option>
+                        </select>
+                      </td>
+
+                      {/* Status Dropdown */}
+                      <td className="py-4 px-4">
+                        <select
+                          value={u.status || 'active'}
+                          onChange={(e) => handleStatusChange(u._id, e.target.value)}
+                          className={`px-2.5 py-1.5 rounded-xl text-xs font-bold border focus:outline-none transition-all cursor-pointer ${
+                            u.status === 'active' || !u.status
+                              ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
+                              : u.status === 'suspended'
+                              ? 'bg-amber-500/10 text-amber-400 border-amber-500/30'
+                              : 'bg-rose-500/10 text-rose-400 border-rose-500/30'
+                          }`}
+                        >
+                          <option value="active">Active</option>
+                          <option value="suspended">Suspended</option>
+                          <option value="banned">Banned</option>
+                        </select>
+                      </td>
+
+                      {/* Joined Date */}
+                      <td className="py-4 px-4 text-zinc-400 text-[11px]">
+                        {new Date(u.createdAt).toLocaleDateString()}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Pagination Controls */}
+            <div className="px-6 py-2">
+              <Pagination
+                currentPage={page}
+                totalPages={totalPages}
+                totalItems={filteredUsers.length}
+                limit={pageSize}
+                onPageChange={setPage}
+                variant="dark"
+                itemLabel="users"
+              />
+            </div>
           </div>
         )}
       </div>

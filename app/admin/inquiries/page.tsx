@@ -6,6 +6,7 @@ import { adminService } from '@/services/admin.service';
 import { confirmDialog, showToast } from '@/lib/alert';
 import { IInquiry } from '@/services/inquiry.service';
 import { Button } from '@/components/ui/Button';
+import { Pagination } from '@/components/common/Pagination';
 import {
   MessageSquare,
   Search,
@@ -27,10 +28,16 @@ export default function AdminInquiriesPage() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [isLoading, setIsLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(6);
 
   useEffect(() => {
     fetchInquiries();
   }, []);
+
+  useEffect(() => {
+    setPage(1);
+  }, [search, statusFilter, pageSize]);
 
   const fetchInquiries = () => {
     setIsLoading(true);
@@ -76,6 +83,9 @@ export default function AdminInquiriesPage() {
     );
   });
 
+  const totalPages = Math.ceil(filteredInquiries.length / pageSize) || 1;
+  const paginatedInquiries = filteredInquiries.slice((page - 1) * pageSize, page * pageSize);
+
   return (
     <div className="space-y-6 pb-12">
       {/* HEADER */}
@@ -117,6 +127,17 @@ export default function AdminInquiriesPage() {
             <option value="replied">Replied</option>
             <option value="closed">Closed</option>
           </select>
+
+          <select
+            value={pageSize}
+            onChange={(e) => setPageSize(Number(e.target.value))}
+            className="px-3.5 py-2.5 rounded-2xl bg-zinc-950 border border-zinc-800 text-xs font-bold text-zinc-300 focus:outline-none focus:border-orange-500 cursor-pointer"
+          >
+            <option value={4}>4 / page</option>
+            <option value={6}>6 / page</option>
+            <option value={10}>10 / page</option>
+            <option value={20}>20 / page</option>
+          </select>
         </div>
       </div>
 
@@ -133,8 +154,9 @@ export default function AdminInquiriesPage() {
             <p className="text-xs font-bold text-zinc-400">No buyer inquiries found matching filters.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {filteredInquiries.map((inq) => {
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {paginatedInquiries.map((inq) => {
               const cleanPhone = inq.senderPhone?.replace(/[^0-9]/g, '');
               const whatsappUrl = cleanPhone ? `https://wa.me/${cleanPhone}` : null;
 
@@ -232,6 +254,20 @@ export default function AdminInquiriesPage() {
               );
             })}
           </div>
+
+          {/* Pagination Controls */}
+          <div className="bg-zinc-900/80 backdrop-blur-sm p-4 rounded-3xl border border-zinc-800">
+            <Pagination
+              currentPage={page}
+              totalPages={totalPages}
+              totalItems={filteredInquiries.length}
+              limit={pageSize}
+              onPageChange={setPage}
+              variant="dark"
+              itemLabel="inquiries"
+            />
+          </div>
+        </div>
         )}
       </div>
     </div>

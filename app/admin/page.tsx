@@ -7,29 +7,11 @@ import { formatPrice } from '@/lib/utils';
 import {
   Users,
   Car,
-  CalendarCheck2,
-  ShoppingBag,
-  CreditCard,
   MessageSquare,
-  Star,
   TrendingUp,
-  ArrowUpRight,
   Plus,
   ArrowRight,
-  ShieldCheck,
-  Calendar,
-  Layers,
-  Sparkles,
-  ExternalLink,
-  CheckCircle2,
-  Tag,
-  Eye,
-  Mail,
-  AlertTriangle,
-  Clock,
   DollarSign,
-  Building2,
-  Ticket,
   ChevronRight,
 } from 'lucide-react';
 
@@ -79,12 +61,6 @@ export default function AdminOverviewPage() {
     totalRentals: 0,
     totalSales: 0,
     totalInquiries: 0,
-    totalProviders: 0,
-    totalBookings: 0,
-    totalOrders: 0,
-    pendingBookingsCount: 0,
-    pendingOrdersCount: 0,
-    pendingProvidersCount: 0,
     completedPaymentsCount: 0,
   };
 
@@ -98,11 +74,6 @@ export default function AdminOverviewPage() {
   const rentPercent = Math.round((listingBreakdown.rent / totalListingsCount) * 100);
   const salePercent = Math.round((listingBreakdown.sale / totalListingsCount) * 100);
 
-  const hasUrgentActions =
-    (metrics.pendingBookingsCount || 0) > 0 ||
-    (metrics.pendingOrdersCount || 0) > 0 ||
-    (metrics.pendingProvidersCount || 0) > 0;
-
   return (
     <div className="space-y-8 pb-12">
       {/* PAGE HEADER & CONTROLS */}
@@ -114,7 +85,7 @@ export default function AdminOverviewPage() {
             Executive Analytics & Fleet Control
           </h1>
           <p className="text-xs sm:text-sm text-zinc-400 mt-1">
-            Holistic performance metrics, customer bookings, revenue telemetry, and inventory management.
+            Holistic performance metrics, customer leads, revenue telemetry, and inventory management.
           </p>
         </div>
 
@@ -129,69 +100,17 @@ export default function AdminOverviewPage() {
           </Link>
 
           <Link
-            href="/admin/bookings"
+            href="/admin/inquiries"
             className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 text-xs font-bold transition-all"
           >
-            <CalendarCheck2 className="w-3.5 h-3.5 text-orange-400" />
-            <span>Bookings</span>
-          </Link>
-
-          <Link
-            href="/admin/orders"
-            className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 text-xs font-bold transition-all"
-          >
-            <ShoppingBag className="w-3.5 h-3.5 text-blue-400" />
-            <span>Orders</span>
+            <MessageSquare className="w-3.5 h-3.5 text-cyan-400" />
+            <span>Buyer Inquiries</span>
           </Link>
         </div>
       </div>
 
-      {/* URGENT ACTION ALERT BANNER */}
-      {hasUrgentActions && (
-        <div className="p-4 sm:p-5 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-amber-500/20 text-amber-400 shrink-0">
-              <AlertTriangle className="w-5 h-5" />
-            </div>
-            <div>
-              <p className="text-xs sm:text-sm font-black text-amber-300">
-                Action Required: Pending Items Waiting for Moderation
-              </p>
-              <p className="text-[11px] sm:text-xs text-zinc-400 mt-0.5">
-                {[
-                  metrics.pendingBookingsCount ? `${metrics.pendingBookingsCount} pending rental booking(s)` : null,
-                  metrics.pendingOrdersCount ? `${metrics.pendingOrdersCount} pending car sales order(s)` : null,
-                  metrics.pendingProvidersCount ? `${metrics.pendingProvidersCount} unverified dealership(s)` : null,
-                ]
-                  .filter(Boolean)
-                  .join(' • ')}
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2">
-            {metrics.pendingBookingsCount ? (
-              <Link
-                href="/admin/bookings"
-                className="px-3 py-1.5 rounded-xl bg-amber-500 text-black font-extrabold text-xs hover:bg-amber-400 transition-colors"
-              >
-                Review Bookings
-              </Link>
-            ) : null}
-            {metrics.pendingOrdersCount ? (
-              <Link
-                href="/admin/orders"
-                className="px-3 py-1.5 rounded-xl bg-amber-500 text-black font-extrabold text-xs hover:bg-amber-400 transition-colors"
-              >
-                Review Orders
-              </Link>
-            ) : null}
-          </div>
-        </div>
-      )}
-
-      {/* 8-METRIC EXECUTIVE KPI GRID */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+      {/* 5-METRIC EXECUTIVE KPI GRID */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-6">
         {/* Metric 1: Total Revenue */}
         <div className="bg-zinc-900/80 backdrop-blur-sm p-5 sm:p-6 rounded-3xl border border-zinc-800 shadow-sm relative overflow-hidden group hover:border-zinc-700 transition-all">
           <div className="flex items-center justify-between">
@@ -253,47 +172,7 @@ export default function AdminOverviewPage() {
           </div>
         </div>
 
-        {/* Metric 4: Rental Reservations */}
-        <div className="bg-zinc-900/80 backdrop-blur-sm p-5 sm:p-6 rounded-3xl border border-zinc-800 shadow-sm relative overflow-hidden group hover:border-zinc-700 transition-all">
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-extrabold uppercase tracking-wider text-zinc-400">
-              Rental Bookings
-            </span>
-            <div className="p-2 rounded-xl bg-purple-500/10 text-purple-400 border border-purple-500/20">
-              <CalendarCheck2 className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="mt-3">
-            <h3 className="text-2xl sm:text-3xl font-black text-white">
-              {metrics.totalBookings || 0}
-            </h3>
-            <p className="text-[11px] text-zinc-400 mt-1 flex items-center gap-1.5">
-              <span className="text-amber-400 font-bold">{metrics.pendingBookingsCount || 0}</span> pending confirmation
-            </p>
-          </div>
-        </div>
-
-        {/* Metric 5: Car Sales Orders */}
-        <div className="bg-zinc-900/80 backdrop-blur-sm p-5 sm:p-6 rounded-3xl border border-zinc-800 shadow-sm relative overflow-hidden group hover:border-zinc-700 transition-all">
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-extrabold uppercase tracking-wider text-zinc-400">
-              Car Sales Orders
-            </span>
-            <div className="p-2 rounded-xl bg-rose-500/10 text-rose-400 border border-rose-500/20">
-              <ShoppingBag className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="mt-3">
-            <h3 className="text-2xl sm:text-3xl font-black text-white">
-              {metrics.totalOrders || 0}
-            </h3>
-            <p className="text-[11px] text-zinc-400 mt-1 flex items-center gap-1.5">
-              <span className="text-rose-400 font-bold">{metrics.pendingOrdersCount || 0}</span> pending processing
-            </p>
-          </div>
-        </div>
-
-        {/* Metric 6: Platform Users */}
+        {/* Metric 4: Platform Users */}
         <div className="bg-zinc-900/80 backdrop-blur-sm p-5 sm:p-6 rounded-3xl border border-zinc-800 shadow-sm relative overflow-hidden group hover:border-zinc-700 transition-all">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-extrabold uppercase tracking-wider text-zinc-400">
@@ -313,7 +192,7 @@ export default function AdminOverviewPage() {
           </div>
         </div>
 
-        {/* Metric 7: Inquiries & Leads */}
+        {/* Metric 5: Inquiries & Leads */}
         <div className="bg-zinc-900/80 backdrop-blur-sm p-5 sm:p-6 rounded-3xl border border-zinc-800 shadow-sm relative overflow-hidden group hover:border-zinc-700 transition-all">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-extrabold uppercase tracking-wider text-zinc-400">
@@ -329,26 +208,6 @@ export default function AdminOverviewPage() {
             </h3>
             <p className="text-[11px] text-zinc-400 mt-1 flex items-center gap-1.5">
               Direct vehicle buyer inquiries
-            </p>
-          </div>
-        </div>
-
-        {/* Metric 8: Dealership Partners */}
-        <div className="bg-zinc-900/80 backdrop-blur-sm p-5 sm:p-6 rounded-3xl border border-zinc-800 shadow-sm relative overflow-hidden group hover:border-zinc-700 transition-all">
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-extrabold uppercase tracking-wider text-zinc-400">
-              Dealership Partners
-            </span>
-            <div className="p-2 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
-              <Building2 className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="mt-3">
-            <h3 className="text-2xl sm:text-3xl font-black text-white">
-              {metrics.totalProviders || (metrics.pendingProvidersCount || 0) + 1}
-            </h3>
-            <p className="text-[11px] text-zinc-400 mt-1 flex items-center gap-1.5">
-              <span className="text-amber-400 font-bold">{metrics.pendingProvidersCount || 0}</span> awaiting verification
             </p>
           </div>
         </div>
@@ -571,10 +430,10 @@ export default function AdminOverviewPage() {
               <p className="text-xs text-zinc-400">Top car manufacturers represented in active fleet</p>
             </div>
             <Link
-              href="/admin/taxonomy"
+              href="/admin/cars"
               className="text-xs font-bold text-orange-400 hover:text-orange-300 flex items-center gap-1"
             >
-              <span>Taxonomy</span>
+              <span>Inventory</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
@@ -606,137 +465,9 @@ export default function AdminOverviewPage() {
         </div>
       </div>
 
-      {/* 4-GRID LIVE ACTIVITY FEEDS */}
+      {/* 2-COLUMN LIVE ACTIVITY FEEDS */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Feed 1: Recent Rental Bookings */}
-        <div className="bg-zinc-900/80 backdrop-blur-sm p-6 rounded-3xl border border-zinc-800 shadow-sm space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <CalendarCheck2 className="w-4 h-4 text-purple-400" />
-              <h2 className="text-base font-black text-white">Recent Rental Bookings</h2>
-            </div>
-            <Link
-              href="/admin/bookings"
-              className="text-xs font-bold text-orange-400 hover:text-orange-300 flex items-center gap-1"
-            >
-              <span>View All</span>
-              <ChevronRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-
-          <div className="space-y-3">
-            {(!data?.recentBookings || data.recentBookings.length === 0) ? (
-              <p className="text-xs text-zinc-400 py-4 text-center">No rental bookings recorded yet.</p>
-            ) : (
-              data.recentBookings.map((b: any) => (
-                <div
-                  key={b._id}
-                  className="p-3.5 rounded-2xl bg-zinc-950/60 border border-zinc-800/80 flex items-center justify-between gap-3"
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    {b.carId?.coverImage ? (
-                      <img
-                        src={b.carId.coverImage}
-                        alt=""
-                        className="w-11 h-9 rounded-xl object-cover bg-zinc-800 shrink-0"
-                      />
-                    ) : (
-                      <div className="w-11 h-9 rounded-xl bg-zinc-800 flex items-center justify-center shrink-0">
-                        <Car className="w-4 h-4 text-zinc-400" />
-                      </div>
-                    )}
-                    <div className="min-w-0">
-                      <p className="text-xs font-bold text-white truncate">
-                        {b.carId?.title || 'Rental Vehicle'}
-                      </p>
-                      <p className="text-[10px] text-zinc-400 truncate">
-                        {b.userId?.name || b.userId?.email || 'Customer'} • {formatPrice(b.totalAmount || 0)}
-                      </p>
-                    </div>
-                  </div>
-
-                  <span
-                    className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider shrink-0 ${
-                      b.status === 'confirmed' || b.status === 'active'
-                        ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                        : b.status === 'pending'
-                        ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
-                        : 'bg-zinc-800 text-zinc-400'
-                    }`}
-                  >
-                    {b.status}
-                  </span>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-
-        {/* Feed 2: Recent Car Sales Orders */}
-        <div className="bg-zinc-900/80 backdrop-blur-sm p-6 rounded-3xl border border-zinc-800 shadow-sm space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <ShoppingBag className="w-4 h-4 text-rose-400" />
-              <h2 className="text-base font-black text-white">Recent Sales Orders</h2>
-            </div>
-            <Link
-              href="/admin/orders"
-              className="text-xs font-bold text-orange-400 hover:text-orange-300 flex items-center gap-1"
-            >
-              <span>View All</span>
-              <ChevronRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-
-          <div className="space-y-3">
-            {(!data?.recentOrders || data.recentOrders.length === 0) ? (
-              <p className="text-xs text-zinc-400 py-4 text-center">No car sales orders recorded yet.</p>
-            ) : (
-              data.recentOrders.map((o: any) => (
-                <div
-                  key={o._id}
-                  className="p-3.5 rounded-2xl bg-zinc-950/60 border border-zinc-800/80 flex items-center justify-between gap-3"
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    {o.carId?.coverImage ? (
-                      <img
-                        src={o.carId.coverImage}
-                        alt=""
-                        className="w-11 h-9 rounded-xl object-cover bg-zinc-800 shrink-0"
-                      />
-                    ) : (
-                      <div className="w-11 h-9 rounded-xl bg-zinc-800 flex items-center justify-center shrink-0">
-                        <ShoppingBag className="w-4 h-4 text-zinc-400" />
-                      </div>
-                    )}
-                    <div className="min-w-0">
-                      <p className="text-xs font-bold text-white truncate">
-                        {o.carId?.title || 'Purchase Listing'}
-                      </p>
-                      <p className="text-[10px] text-zinc-400 truncate">
-                        {o.userId?.name || o.userId?.email || 'Buyer'} • {formatPrice(o.finalPrice || o.salePrice || 0)}
-                      </p>
-                    </div>
-                  </div>
-
-                  <span
-                    className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider shrink-0 ${
-                      o.status === 'completed'
-                        ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                        : o.status === 'processing'
-                        ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
-                        : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
-                    }`}
-                  >
-                    {o.status}
-                  </span>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-
-        {/* Feed 3: Recent Car Inquiries */}
+        {/* Feed 1: Recent Car Inquiries */}
         <div className="bg-zinc-900/80 backdrop-blur-sm p-6 rounded-3xl border border-zinc-800 shadow-sm space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -770,7 +501,7 @@ export default function AdminOverviewPage() {
                     </p>
                   </div>
                   <Link
-                    href={`/admin/inquiries`}
+                    href="/admin/inquiries"
                     className="p-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white transition-colors shrink-0"
                   >
                     <ArrowRight className="w-3.5 h-3.5" />
@@ -781,7 +512,7 @@ export default function AdminOverviewPage() {
           </div>
         </div>
 
-        {/* Feed 4: Recent Registered Users */}
+        {/* Feed 2: Recent Registered Users */}
         <div className="bg-zinc-900/80 backdrop-blur-sm p-6 rounded-3xl border border-zinc-800 shadow-sm space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">

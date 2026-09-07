@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { adminService } from '@/services/admin.service';
 import { showToast } from '@/lib/alert';
 import { Button } from '@/components/ui/Button';
+import { Pagination } from '@/components/common/Pagination';
 import {
   Ticket,
   Plus,
@@ -28,6 +29,8 @@ export default function AdminCouponsPage() {
   const [daysValid, setDaysValid] = useState(30);
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(6);
 
   useEffect(() => {
     fetchCoupons();
@@ -207,73 +210,101 @@ export default function AdminCouponsPage() {
             <span className="text-xs text-zinc-400 font-semibold">{coupons.length} vouchers</span>
           </div>
 
-          {isFetching ? (
-            <div className="p-12 text-center text-xs font-bold text-zinc-400 bg-zinc-900/60 rounded-3xl border border-zinc-800">
-              Loading active promo campaigns...
-            </div>
-          ) : coupons.length === 0 ? (
-            <div className="p-12 text-center space-y-3 bg-zinc-900/60 rounded-3xl border border-zinc-800">
-              <Ticket className="w-8 h-8 text-zinc-400 mx-auto" />
-              <p className="text-xs font-bold text-zinc-400">No active promotional coupons found.</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {coupons.map((c) => {
-                const isExpired = new Date(c.endDate) < new Date();
-                return (
-                  <div
-                    key={c._id || c.code}
-                    className="p-5 rounded-3xl bg-zinc-900/80 backdrop-blur-sm border border-zinc-800 hover:border-zinc-700 transition-all flex flex-col justify-between space-y-4 relative overflow-hidden group shadow-sm"
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className="font-mono text-base font-black text-white tracking-wider">
-                            {c.code}
-                          </span>
-                          <button
-                            onClick={() => copyToClipboard(c.code)}
-                            className="p-1 text-zinc-400 hover:text-white"
-                            title="Copy Code"
-                          >
-                            <Copy className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                        <p className="text-xs font-bold text-orange-400 mt-0.5">
-                          {c.discountType === 'percentage'
-                            ? `${c.discountValue}% OFF`
-                            : `$${c.discountValue} FLAT DISCOUNT`}
-                        </p>
-                      </div>
+          {(() => {
+            const totalPages = Math.ceil(coupons.length / pageSize) || 1;
+            const paginatedCoupons = coupons.slice((page - 1) * pageSize, page * pageSize);
 
-                      <span
-                        className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider ${
-                          isExpired
-                            ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
-                            : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                        }`}
+            if (isFetching) {
+              return (
+                <div className="p-12 text-center text-xs font-bold text-zinc-400 bg-zinc-900/60 rounded-3xl border border-zinc-800">
+                  Loading active promo campaigns...
+                </div>
+              );
+            }
+
+            if (coupons.length === 0) {
+              return (
+                <div className="p-12 text-center space-y-3 bg-zinc-900/60 rounded-3xl border border-zinc-800">
+                  <Ticket className="w-8 h-8 text-zinc-400 mx-auto" />
+                  <p className="text-xs font-bold text-zinc-400">No active promotional coupons found.</p>
+                </div>
+              );
+            }
+
+            return (
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {paginatedCoupons.map((c) => {
+                    const isExpired = new Date(c.endDate) < new Date();
+                    return (
+                      <div
+                        key={c._id || c.code}
+                        className="p-5 rounded-3xl bg-zinc-900/80 backdrop-blur-sm border border-zinc-800 hover:border-zinc-700 transition-all flex flex-col justify-between space-y-4 relative overflow-hidden group shadow-sm"
                       >
-                        {isExpired ? 'Expired' : 'Active'}
-                      </span>
-                    </div>
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="font-mono text-base font-black text-white tracking-wider">
+                                {c.code}
+                              </span>
+                              <button
+                                onClick={() => copyToClipboard(c.code)}
+                                className="p-1 text-zinc-400 hover:text-white"
+                                title="Copy Code"
+                              >
+                                <Copy className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                            <p className="text-xs font-bold text-orange-400 mt-0.5">
+                              {c.discountType === 'percentage'
+                                ? `${c.discountValue}% OFF`
+                                : `$${c.discountValue} FLAT DISCOUNT`}
+                            </p>
+                          </div>
 
-                    <div className="grid grid-cols-2 gap-2 text-[11px] pt-3 border-t border-zinc-800 text-zinc-400">
-                      <div>
-                        <span className="block text-[10px]">Usage Limit:</span>
-                        <span className="font-bold text-zinc-200">{c.usedCount || 0} / {c.usageLimit || '∞'}</span>
+                          <span
+                            className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider ${
+                              isExpired
+                                ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
+                                : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                            }`}
+                          >
+                            {isExpired ? 'Expired' : 'Active'}
+                          </span>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-2 text-[11px] pt-3 border-t border-zinc-800 text-zinc-400">
+                          <div>
+                            <span className="block text-[10px]">Usage Limit:</span>
+                            <span className="font-bold text-zinc-200">{c.usedCount || 0} / {c.usageLimit || '∞'}</span>
+                          </div>
+                          <div>
+                            <span className="block text-[10px]">Valid Until:</span>
+                            <span className="font-bold text-zinc-200">
+                              {new Date(c.endDate).toLocaleDateString()}
+                            </span>
+                          </div>
+                        </div>
                       </div>
-                      <div>
-                        <span className="block text-[10px]">Valid Until:</span>
-                        <span className="font-bold text-zinc-200">
-                          {new Date(c.endDate).toLocaleDateString()}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
+                    );
+                  })}
+                </div>
+
+                {/* Pagination Controls */}
+                <div className="bg-zinc-900/80 backdrop-blur-sm p-4 rounded-3xl border border-zinc-800">
+                  <Pagination
+                    currentPage={page}
+                    totalPages={totalPages}
+                    totalItems={coupons.length}
+                    limit={pageSize}
+                    onPageChange={setPage}
+                    variant="dark"
+                    itemLabel="coupons"
+                  />
+                </div>
+              </div>
+            );
+          })()}
         </div>
       </div>
     </div>

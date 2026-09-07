@@ -10,6 +10,8 @@ export interface PaginationProps {
   limit?: number;
   onPageChange: (page: number) => void;
   className?: string;
+  variant?: 'light' | 'dark';
+  itemLabel?: string;
 }
 
 export const Pagination: React.FC<PaginationProps> = ({
@@ -19,6 +21,8 @@ export const Pagination: React.FC<PaginationProps> = ({
   limit = 12,
   onPageChange,
   className = '',
+  variant = 'light',
+  itemLabel = 'records',
 }) => {
   if (totalItems <= limit || totalPages <= 1) {
     return null;
@@ -45,15 +49,18 @@ export const Pagination: React.FC<PaginationProps> = ({
   };
 
   const pages = getPageNumbers();
+  const isDark = variant === 'dark';
 
   return (
     <div
-      className={`flex flex-col sm:flex-row items-center justify-between gap-4 py-8 border-t border-zinc-200 ${className}`}
+      className={`flex flex-col sm:flex-row items-center justify-between gap-4 py-4 px-2 ${
+        isDark ? 'border-t border-zinc-800/80 text-zinc-400' : 'border-t border-zinc-200 text-zinc-500'
+      } ${className}`}
     >
-      <p className="text-xs font-bold text-zinc-500 order-2 sm:order-1">
-        Showing <span className="text-black font-black">{from}</span> to{' '}
-        <span className="text-black font-black">{to}</span> of{' '}
-        <span className="text-black font-black">{totalItems}</span> vehicles
+      <p className="text-xs font-semibold order-2 sm:order-1">
+        Showing <span className={`font-black ${isDark ? 'text-white' : 'text-black'}`}>{from}</span> to{' '}
+        <span className={`font-black ${isDark ? 'text-white' : 'text-black'}`}>{to}</span> of{' '}
+        <span className={`font-black ${isDark ? 'text-orange-400' : 'text-black'}`}>{totalItems}</span> {itemLabel}
       </p>
 
       <div className="flex items-center gap-1.5 order-1 sm:order-2">
@@ -66,7 +73,11 @@ export const Pagination: React.FC<PaginationProps> = ({
             }
           }}
           disabled={currentPage <= 1}
-          className="flex items-center gap-1 px-3 py-2 rounded-xl text-xs font-bold border border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50 hover:text-black disabled:opacity-40 disabled:pointer-events-none transition-all shadow-sm"
+          className={`flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold border transition-all shadow-sm disabled:opacity-30 disabled:pointer-events-none ${
+            isDark
+              ? 'bg-zinc-800/90 border-zinc-700/80 text-zinc-300 hover:bg-zinc-700 hover:text-white hover:border-zinc-600'
+              : 'bg-white border-zinc-200 text-zinc-700 hover:bg-zinc-50 hover:text-black'
+          }`}
         >
           <ChevronLeft className="w-4 h-4" />
           <span className="hidden sm:inline">Previous</span>
@@ -79,7 +90,7 @@ export const Pagination: React.FC<PaginationProps> = ({
               return (
                 <span
                   key={`ellipsis-${idx}`}
-                  className="px-2 py-1 text-xs font-bold text-zinc-400 select-none"
+                  className="px-2 py-1 text-xs font-bold text-zinc-500 select-none"
                 >
                   •••
                 </span>
@@ -94,9 +105,13 @@ export const Pagination: React.FC<PaginationProps> = ({
                 key={pageNumber}
                 type="button"
                 onClick={() => onPageChange(pageNumber)}
-                className={`h-9 w-9 rounded-xl text-xs font-black transition-all flex items-center justify-center ${
+                className={`h-8 w-8 rounded-xl text-xs font-black transition-all flex items-center justify-center ${
                   isActive
-                    ? 'bg-black text-white shadow-md scale-105'
+                    ? isDark
+                      ? 'bg-gradient-to-r from-orange-600 to-orange-500 text-white shadow-lg shadow-orange-600/30 scale-105 border border-orange-400/40'
+                      : 'bg-black text-white shadow-md scale-105'
+                    : isDark
+                    ? 'bg-zinc-900 border border-zinc-800 text-zinc-400 hover:bg-zinc-800 hover:text-white hover:border-zinc-700 shadow-sm'
                     : 'bg-white border border-zinc-200 text-zinc-600 hover:bg-zinc-100 hover:text-black hover:border-zinc-300 shadow-sm'
                 }`}
               >
@@ -115,7 +130,11 @@ export const Pagination: React.FC<PaginationProps> = ({
             }
           }}
           disabled={currentPage >= totalPages}
-          className="flex items-center gap-1 px-3 py-2 rounded-xl text-xs font-bold border border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50 hover:text-black disabled:opacity-40 disabled:pointer-events-none transition-all shadow-sm"
+          className={`flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold border transition-all shadow-sm disabled:opacity-30 disabled:pointer-events-none ${
+            isDark
+              ? 'bg-zinc-800/90 border-zinc-700/80 text-zinc-300 hover:bg-zinc-700 hover:text-white hover:border-zinc-600'
+              : 'bg-white border-zinc-200 text-zinc-700 hover:bg-zinc-50 hover:text-black'
+          }`}
         >
           <span className="hidden sm:inline">Next</span>
           <ChevronRight className="w-4 h-4" />
