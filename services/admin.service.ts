@@ -26,7 +26,12 @@ export interface AdminStatsData {
     totalRentals: number;
     totalSales: number;
     totalInquiries: number;
-    totalReviews: number;
+    totalProviders?: number;
+    totalBookings?: number;
+    totalOrders?: number;
+    pendingBookingsCount?: number;
+    pendingOrdersCount?: number;
+    pendingProvidersCount?: number;
     completedPaymentsCount: number;
   };
   analytics?: {
@@ -39,6 +44,7 @@ export interface AdminStatsData {
     };
   };
   recentBookings?: any[];
+  recentOrders?: any[];
   recentUsers: any[];
   recentCars: any[];
   recentInquiries: any[];
@@ -86,6 +92,122 @@ export interface IHealthTelemetry {
   };
 }
 
+export interface IBookingAdmin {
+  _id: string;
+  carId?: {
+    _id: string;
+    title: string;
+    slug: string;
+    brand: string;
+    model: string;
+    coverImage?: string;
+    rentalPrice?: number;
+  };
+  userId?: {
+    _id: string;
+    name: string;
+    email: string;
+    phone?: string;
+    avatar?: string;
+  };
+  providerId?: {
+    _id: string;
+    name: string;
+    email: string;
+    phone?: string;
+  };
+  startDate: string;
+  endDate: string;
+  totalDays: number;
+  dailyRate: number;
+  totalAmount: number;
+  depositAmount: number;
+  discountAmount?: number;
+  couponCode?: string;
+  pickupLocation: string;
+  returnLocation: string;
+  status: 'pending' | 'confirmed' | 'active' | 'completed' | 'cancelled';
+  paymentStatus: 'pending' | 'paid' | 'refunded' | 'failed';
+  cancellationReason?: string;
+  createdAt: string;
+}
+
+export interface IOrderAdmin {
+  _id: string;
+  carId?: {
+    _id: string;
+    title: string;
+    slug: string;
+    brand: string;
+    model: string;
+    coverImage?: string;
+    salePrice?: number;
+  };
+  userId?: {
+    _id: string;
+    name: string;
+    email: string;
+    phone?: string;
+    avatar?: string;
+  };
+  providerId?: {
+    _id: string;
+    name: string;
+    email: string;
+    phone?: string;
+  };
+  salePrice: number;
+  finalPrice: number;
+  discountAmount?: number;
+  couponCode?: string;
+  deliveryAddress: {
+    street: string;
+    city: string;
+    state?: string;
+    country: string;
+    zipCode?: string;
+  };
+  status: 'pending' | 'processing' | 'completed' | 'cancelled';
+  paymentStatus: 'pending' | 'paid' | 'refunded' | 'failed';
+  paymentMethod?: string;
+  notes?: string;
+  createdAt: string;
+}
+
+export interface IPaymentAdmin {
+  _id: string;
+  userId?: {
+    _id: string;
+    name: string;
+    email: string;
+    phone?: string;
+  };
+  orderId?: any;
+  bookingId?: any;
+  transactionId: string;
+  amount: number;
+  currency: string;
+  gateway: string;
+  status: 'pending' | 'paid' | 'failed' | 'refunded';
+  metadata?: any;
+  createdAt: string;
+}
+
+export interface IAuditLogAdmin {
+  _id: string;
+  userId?: {
+    _id: string;
+    name: string;
+    email: string;
+    role: string;
+  };
+  action: string;
+  entity: string;
+  entityId?: string;
+  details?: any;
+  createdAt: string;
+}
+
 export const adminService = {
   // ===================== OVERVIEW & TELEMETRY =====================
   async getStats(): Promise<AdminStatsData> {
@@ -101,6 +223,39 @@ export const adminService = {
   async getAuditLogs(params?: any) {
     const res: any = await apiClient.get('/admin/audit-logs', { params });
     return res.data || [];
+  },
+
+  // ===================== BOOKINGS MANAGEMENT =====================
+  async getBookings(params?: any) {
+    const res: any = await apiClient.get('/admin/bookings', { params });
+    return res.data || [];
+  },
+
+  async updateBookingStatus(bookingId: string, status: string, notes?: string) {
+    const res: any = await apiClient.put(`/admin/bookings/${bookingId}/status`, { status, notes });
+    return res.data;
+  },
+
+  // ===================== ORDERS MANAGEMENT =====================
+  async getOrders(params?: any) {
+    const res: any = await apiClient.get('/admin/orders', { params });
+    return res.data || [];
+  },
+
+  async updateOrderStatus(orderId: string, status: string, notes?: string) {
+    const res: any = await apiClient.put(`/admin/orders/${orderId}/status`, { status, notes });
+    return res.data;
+  },
+
+  // ===================== PAYMENTS & TRANSACTIONS =====================
+  async getPayments(params?: any) {
+    const res: any = await apiClient.get('/admin/payments', { params });
+    return res.data || [];
+  },
+
+  async refundPayment(paymentId: string, reason?: string) {
+    const res: any = await apiClient.post(`/payments/${paymentId}/refund`, { reason });
+    return res.data;
   },
 
   // ===================== USER MANAGEMENT & RBAC =====================
@@ -123,6 +278,16 @@ export const adminService = {
   async getCarsAdmin(params?: any) {
     const res: any = await apiClient.get('/admin/cars', { params });
     return res.data || [];
+  },
+
+  async createCarAdmin(data: any) {
+    const res: any = await apiClient.post('/cars', data);
+    return res.data;
+  },
+
+  async updateCarAdmin(carId: string, data: any) {
+    const res: any = await apiClient.put(`/cars/${carId}`, data);
+    return res.data;
   },
 
   async updateCarStatus(carId: string, status: string, reason?: string) {
@@ -169,17 +334,6 @@ export const adminService = {
 
   async deleteContactMessage(id: string) {
     const res: any = await apiClient.delete(`/admin/contacts/${id}`);
-    return res.data;
-  },
-
-  // ===================== REVIEWS & REPUTATION =====================
-  async getReviewsAdmin(params?: any) {
-    const res: any = await apiClient.get('/admin/reviews', { params });
-    return res.data || [];
-  },
-
-  async deleteReviewAdmin(reviewId: string) {
-    const res: any = await apiClient.delete(`/admin/reviews/${reviewId}`);
     return res.data;
   },
 

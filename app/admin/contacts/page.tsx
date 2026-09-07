@@ -5,7 +5,6 @@ import { adminService } from '@/services/admin.service';
 import { IContactMessageRecord } from '@/services/contact.service';
 import { confirmDialog, showToast } from '@/lib/alert';
 import { Button } from '@/components/ui/Button';
-import { Badge } from '@/components/ui/Badge';
 import {
   Mail,
   Search,
@@ -22,6 +21,7 @@ import {
   Inbox,
   AlertCircle,
   ExternalLink,
+  MessageCircle,
 } from 'lucide-react';
 
 export default function AdminContactsPage() {
@@ -61,7 +61,7 @@ export default function AdminContactsPage() {
 
   const handleStatusChange = async (messageId: string, newStatus: string) => {
     try {
-      const updated = await adminService.updateContactStatus(messageId, newStatus);
+      await adminService.updateContactStatus(messageId, newStatus);
       setMessages((prev) =>
         prev.map((m) => (m.id === messageId ? { ...m, status: newStatus as any } : m))
       );
@@ -69,7 +69,6 @@ export default function AdminContactsPage() {
         setActiveMessage((prev) => (prev ? { ...prev, status: newStatus as any } : null));
       }
       showToast(`Status updated to ${newStatus.toUpperCase()}`, 'success');
-      // Refresh stats in background
       adminService.getContactStats().then((s) => s && setStats(s)).catch(() => {});
     } catch (err: any) {
       showToast(err.message || 'Failed to update status', 'error');
@@ -94,7 +93,6 @@ export default function AdminContactsPage() {
         setActiveMessage(null);
       }
       showToast('Contact message deleted successfully', 'success');
-      // Refresh stats
       adminService.getContactStats().then((s) => s && setStats(s)).catch(() => {});
     } catch (err: any) {
       showToast(err.message || 'Failed to delete message', 'error');
@@ -103,7 +101,6 @@ export default function AdminContactsPage() {
 
   const handleOpenDetail = (msg: IContactMessageRecord) => {
     setActiveMessage(msg);
-    // If it was "new", automatically mark as "read" for convenient workflow
     if (msg.status === 'new') {
       handleStatusChange(msg.id, 'read');
     }
@@ -125,17 +122,17 @@ export default function AdminContactsPage() {
   }, [messages, statusFilter, search]);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-12">
       {/* HEADER */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 sm:p-8 rounded-3xl border border-zinc-200 shadow-sm">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-zinc-900/80 backdrop-blur-sm p-6 rounded-3xl border border-zinc-800 shadow-sm">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl sm:text-3xl font-black text-black">Contact Form Submissions</h1>
-            <span className="h-6 px-2.5 rounded-full bg-black text-white text-xs font-bold flex items-center justify-center">
-              {messages.length} Total
+            <h1 className="text-2xl font-black text-white">Contact Form Submissions</h1>
+            <span className="h-6 px-2.5 rounded-full bg-orange-600 text-white text-xs font-black flex items-center justify-center shadow-sm">
+              {messages.length} Submissions
             </span>
           </div>
-          <p className="text-xs sm:text-sm text-zinc-500 mt-1">
+          <p className="text-xs text-zinc-400 mt-1">
             General inquiries, support questions, and feedback submitted through the public Contact page.
           </p>
         </div>
@@ -143,66 +140,49 @@ export default function AdminContactsPage() {
         <button
           onClick={fetchContacts}
           disabled={isLoading}
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-zinc-100 hover:bg-zinc-200 text-zinc-800 text-xs font-bold transition-all self-start sm:self-auto disabled:opacity-50"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 text-xs font-bold transition-all self-start sm:self-auto"
         >
-          <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+          <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
           <span>Refresh</span>
         </button>
       </div>
 
-      {/* KPI METRIC TILES */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        {/* Total Inquiries */}
-        <div className="bg-white p-5 rounded-3xl border border-zinc-200 shadow-sm flex items-center justify-between">
-          <div>
-            <p className="text-[11px] font-bold uppercase tracking-wider text-zinc-400">All Messages</p>
-            <p className="text-2xl sm:text-3xl font-black text-black mt-1">{stats.total || messages.length}</p>
-            <p className="text-[11px] text-zinc-500 font-semibold mt-0.5">Stored in database</p>
-          </div>
-          <div className="h-11 w-11 rounded-2xl bg-zinc-100 text-zinc-700 flex items-center justify-center">
-            <Inbox className="w-5 h-5" />
-          </div>
+      {/* STATS TILES */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div className="p-4 rounded-2xl bg-zinc-900/60 border border-zinc-800">
+          <p className="text-[10px] font-extrabold uppercase text-zinc-400">Total Inquiries</p>
+          <p className="text-xl font-black text-white mt-1">{stats.total || messages.length}</p>
         </div>
-
-        {/* New / Unread */}
-        <div className="bg-white p-5 rounded-3xl border border-zinc-200 shadow-sm flex items-center justify-between">
-          <div>
-            <p className="text-[11px] font-bold uppercase tracking-wider text-zinc-400">New / Unread</p>
-            <p className="text-2xl sm:text-3xl font-black text-emerald-600 mt-1">
-              {stats.new ?? messages.filter((m) => m.status === 'new').length}
-            </p>
-            <p className="text-[11px] text-emerald-600/80 font-semibold mt-0.5">Awaiting review</p>
-          </div>
-          <div className="h-11 w-11 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100">
-            <Mail className="w-5 h-5" />
-          </div>
+        <div className="p-4 rounded-2xl bg-zinc-900/60 border border-zinc-800">
+          <p className="text-[10px] font-extrabold uppercase text-amber-400">New / Unread</p>
+          <p className="text-xl font-black text-amber-400 mt-1">
+            {stats.new || messages.filter((m) => m.status === 'new').length}
+          </p>
         </div>
-
-        {/* Replied */}
-        <div className="bg-white p-5 rounded-3xl border border-zinc-200 shadow-sm flex items-center justify-between">
-          <div>
-            <p className="text-[11px] font-bold uppercase tracking-wider text-zinc-400">Replied / Addressed</p>
-            <p className="text-2xl sm:text-3xl font-black text-zinc-900 mt-1">
-              {stats.replied ?? messages.filter((m) => m.status === 'replied').length}
-            </p>
-            <p className="text-[11px] text-zinc-500 font-semibold mt-0.5">Completed inquiries</p>
-          </div>
-          <div className="h-11 w-11 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center border border-purple-100">
-            <CheckCircle2 className="w-5 h-5" />
-          </div>
+        <div className="p-4 rounded-2xl bg-zinc-900/60 border border-zinc-800">
+          <p className="text-[10px] font-extrabold uppercase text-blue-400">Read / In Review</p>
+          <p className="text-xl font-black text-blue-400 mt-1">
+            {stats.read || messages.filter((m) => m.status === 'read').length}
+          </p>
+        </div>
+        <div className="p-4 rounded-2xl bg-zinc-900/60 border border-zinc-800">
+          <p className="text-[10px] font-extrabold uppercase text-emerald-400">Replied / Resolved</p>
+          <p className="text-xl font-black text-emerald-400 mt-1">
+            {stats.replied || messages.filter((m) => m.status === 'replied').length}
+          </p>
         </div>
       </div>
 
-      {/* FILTERS & SEARCH */}
-      <div className="bg-white p-5 rounded-3xl border border-zinc-200 shadow-sm flex flex-col lg:flex-row items-center gap-4">
+      {/* FILTER & SEARCH BAR */}
+      <div className="bg-zinc-900/80 backdrop-blur-sm p-4 sm:p-5 rounded-3xl border border-zinc-800 shadow-sm flex flex-col lg:flex-row items-center justify-between gap-4">
         <div className="relative flex-1 w-full">
           <Search className="w-4 h-4 text-zinc-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
-            placeholder="Search by sender name, email, phone, subject, or message keyword..."
+            placeholder="Search by sender name, email, subject, or keywords..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 rounded-2xl border border-zinc-200 text-xs font-semibold focus:outline-none focus:border-black"
+            className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-zinc-950 border border-zinc-800 text-xs font-semibold text-white focus:outline-none focus:border-orange-500 placeholder:text-zinc-400"
           />
         </div>
 
@@ -210,309 +190,208 @@ export default function AdminContactsPage() {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-3 py-2.5 rounded-2xl border border-zinc-200 bg-white text-xs font-semibold text-zinc-700 focus:outline-none focus:border-black"
+            className="px-3.5 py-2.5 rounded-2xl bg-zinc-950 border border-zinc-800 text-xs font-bold text-white focus:outline-none focus:border-orange-500"
           >
-            <option value="all">All Statuses</option>
+            <option value="all">All Submissions</option>
             <option value="new">New (Unread)</option>
-            <option value="read">Read</option>
-            <option value="replied">Replied</option>
+            <option value="read">Read (In Review)</option>
+            <option value="replied">Replied (Closed)</option>
           </select>
         </div>
       </div>
 
       {/* MESSAGES TABLE */}
-      {isLoading ? (
-        <div className="p-16 bg-white rounded-3xl border border-zinc-200 text-center space-y-4 shadow-sm">
-          <div className="h-10 w-10 border-4 border-black border-t-transparent rounded-full animate-spin mx-auto" />
-          <p className="text-xs font-bold text-zinc-500">Loading contact submissions...</p>
-        </div>
-      ) : filteredMessages.length > 0 ? (
-        <div className="bg-white rounded-3xl border border-zinc-200 shadow-sm overflow-hidden">
+      <div className="bg-zinc-900/80 backdrop-blur-sm rounded-3xl border border-zinc-800 shadow-sm overflow-hidden">
+        {isLoading ? (
+          <div className="p-12 text-center text-xs font-bold text-zinc-400">
+            <div className="h-8 w-8 border-3 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+            Loading contact submissions...
+          </div>
+        ) : filteredMessages.length === 0 ? (
+          <div className="p-12 text-center space-y-3">
+            <Inbox className="w-8 h-8 text-zinc-400 mx-auto" />
+            <p className="text-xs font-bold text-zinc-400">No contact messages found.</p>
+          </div>
+        ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-zinc-50 text-zinc-500 font-bold uppercase tracking-wider border-b border-zinc-200">
-                <tr>
-                  <th className="py-4 px-6">Sender Details</th>
-                  <th className="py-4 px-6">Subject & Received</th>
-                  <th className="py-4 px-6">Message Excerpt</th>
-                  <th className="py-4 px-6">Status</th>
-                  <th className="py-4 px-6 text-right">Actions</th>
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="border-b border-zinc-800 bg-zinc-950/70 text-[10px] font-extrabold uppercase tracking-wider text-zinc-400">
+                  <th className="py-3.5 px-4 sm:px-6">Sender</th>
+                  <th className="py-3.5 px-4">Subject & Preview</th>
+                  <th className="py-3.5 px-4">Status</th>
+                  <th className="py-3.5 px-4">Submitted</th>
+                  <th className="py-3.5 px-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-zinc-100 font-semibold text-zinc-800">
+              <tbody className="divide-y divide-zinc-800/60 text-xs font-medium">
                 {filteredMessages.map((msg) => (
                   <tr
                     key={msg.id}
-                    className={`hover:bg-zinc-50/80 transition-colors ${
-                      msg.status === 'new' ? 'bg-emerald-50/20 font-bold' : ''
+                    onClick={() => handleOpenDetail(msg)}
+                    className={`hover:bg-zinc-800/40 transition-colors cursor-pointer ${
+                      msg.status === 'new' ? 'bg-orange-500/5 font-semibold' : ''
                     }`}
                   >
-                    <td className="py-4 px-6">
-                      <div className="flex items-center gap-2">
-                        {msg.status === 'new' && (
-                          <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" title="New Message" />
-                        )}
-                        <p className="font-extrabold text-black text-sm">{msg.name}</p>
-                      </div>
-                      <a
-                        href={`mailto:${msg.email}`}
-                        className="text-[11px] text-zinc-500 hover:text-black hover:underline block mt-0.5"
-                      >
-                        {msg.email}
-                      </a>
-                      {msg.phone && (
-                        <p className="text-[10px] text-zinc-400 mt-0.5 flex items-center gap-1">
-                          <Phone className="w-3 h-3 text-zinc-400" />
-                          <span>{msg.phone}</span>
-                        </p>
-                      )}
-                    </td>
-
-                    <td className="py-4 px-6 max-w-[200px]">
-                      <p className="font-bold text-zinc-900 truncate" title={msg.subject}>
-                        {msg.subject}
-                      </p>
-                      <p className="text-[10px] text-zinc-400 mt-1 flex items-center gap-1">
-                        <Clock className="w-3 h-3 text-zinc-400" />
-                        <span>
-                          {new Date(msg.createdAt).toLocaleDateString()} at{' '}
-                          {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </span>
-                      </p>
-                    </td>
-
-                    <td className="py-4 px-6 max-w-xs cursor-pointer" onClick={() => handleOpenDetail(msg)}>
-                      <p className="text-zinc-600 line-clamp-2 hover:text-black transition-colors" title="Click to view full message">
-                        &ldquo;{msg.message}&rdquo;
-                      </p>
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleOpenDetail(msg);
-                        }}
-                        className="text-[10px] text-zinc-400 hover:text-black underline mt-0.5 block"
-                      >
-                        Read full message →
-                      </button>
-                    </td>
-
-                    <td className="py-4 px-6">
-                      <div className="flex items-center gap-2">
-                        <Badge
-                          variant={
+                    {/* Sender */}
+                    <td className="py-4 px-4 sm:px-6">
+                      <div className="flex items-center gap-2.5">
+                        <div
+                          className={`w-8 h-8 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 ${
                             msg.status === 'new'
-                              ? 'success'
-                              : msg.status === 'replied'
-                              ? 'dark'
-                              : 'slate'
-                          }
-                          size="sm"
+                              ? 'bg-orange-600 text-white shadow-sm'
+                              : 'bg-zinc-800 text-zinc-300'
+                          }`}
                         >
-                          {msg.status.toUpperCase()}
-                        </Badge>
+                          {msg.name ? msg.name.charAt(0).toUpperCase() : 'C'}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="font-bold text-white truncate">{msg.name}</p>
+                          <p className="text-[11px] text-zinc-400 truncate">{msg.email}</p>
+                        </div>
                       </div>
                     </td>
 
-                    <td className="py-4 px-6 text-right space-x-1.5">
-                      {/* View full modal */}
-                      <button
-                        type="button"
-                        onClick={() => handleOpenDetail(msg)}
-                        className="inline-flex p-2 rounded-xl text-zinc-600 hover:text-black hover:bg-zinc-100 transition-colors"
-                        title="View Full Message"
-                      >
-                        <Eye className="w-4 h-4" />
-                      </button>
+                    {/* Subject */}
+                    <td className="py-4 px-4 max-w-xs">
+                      <p className="font-bold text-zinc-200 truncate">{msg.subject || 'No Subject'}</p>
+                      <p className="text-[11px] text-zinc-400 truncate mt-0.5">{msg.message}</p>
+                    </td>
 
-                      {/* Reply via email client */}
-                      <a
-                        href={`mailto:${msg.email}?subject=${encodeURIComponent(`Re: ${msg.subject}`)}`}
-                        className="inline-flex p-2 rounded-xl text-zinc-600 hover:text-black hover:bg-zinc-100 transition-colors"
-                        title="Reply via Email Client"
-                        onClick={() => {
-                          if (msg.status !== 'replied') {
-                            handleStatusChange(msg.id, 'replied');
-                          }
-                        }}
+                    {/* Status */}
+                    <td className="py-4 px-4" onClick={(e) => e.stopPropagation()}>
+                      <select
+                        value={msg.status}
+                        onChange={(e) => handleStatusChange(msg.id, e.target.value)}
+                        className={`px-2.5 py-1.5 rounded-xl text-xs font-bold border focus:outline-none transition-all ${
+                          msg.status === 'new'
+                            ? 'bg-amber-500/10 text-amber-400 border-amber-500/30'
+                            : msg.status === 'read'
+                            ? 'bg-blue-500/10 text-blue-400 border-blue-500/30'
+                            : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
+                        }`}
                       >
-                        <Mail className="w-4 h-4" />
-                      </a>
+                        <option value="new">New</option>
+                        <option value="read">Read</option>
+                        <option value="replied">Replied</option>
+                      </select>
+                    </td>
 
-                      {/* Delete */}
-                      <button
-                        type="button"
-                        onClick={() => handleDelete(msg.id)}
-                        className="inline-flex p-2 rounded-xl text-rose-500 hover:text-rose-700 hover:bg-rose-50 transition-colors"
-                        title="Delete Contact Record"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                    {/* Submitted */}
+                    <td className="py-4 px-4 text-zinc-400 text-[11px]">
+                      {new Date(msg.createdAt).toLocaleDateString()}
+                    </td>
+
+                    {/* Actions */}
+                    <td className="py-4 px-4 text-right" onClick={(e) => e.stopPropagation()}>
+                      <div className="flex items-center justify-end gap-1.5">
+                        <button
+                          onClick={() => handleOpenDetail(msg)}
+                          className="p-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white transition-colors"
+                          title="View Submission"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(msg.id)}
+                          className="p-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 transition-colors"
+                          title="Delete Submission"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-        </div>
-      ) : (
-        <div className="p-16 bg-white rounded-3xl border border-zinc-200 text-center space-y-4 shadow-sm">
-          <Inbox className="w-12 h-12 text-zinc-300 mx-auto" />
-          <h3 className="text-lg font-black text-black">No Messages Found</h3>
-          <p className="text-xs text-zinc-500 max-w-sm mx-auto">
-            No contact submissions matched your search query or filter.
-          </p>
-        </div>
-      )}
+        )}
+      </div>
 
-      {/* DETAIL MODAL */}
+      {/* MESSAGE DETAIL MODAL */}
       {activeMessage && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="bg-white rounded-3xl max-w-xl w-full border border-zinc-200 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-            {/* Modal Header */}
-            <div className="p-6 border-b border-zinc-100 flex items-center justify-between">
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-3xl w-full max-w-xl p-6 sm:p-8 space-y-6 shadow-2xl my-8">
+            <div className="flex items-center justify-between border-b border-zinc-800 pb-4">
               <div className="flex items-center gap-2.5">
-                <div className="h-9 w-9 rounded-2xl bg-zinc-900 text-white flex items-center justify-center">
-                  <Mail className="w-4 h-4" />
+                <div className="p-2 rounded-xl bg-orange-600/20 text-orange-400">
+                  <Mail className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-base font-black text-black">Customer Inquiry Details</h3>
-                  <p className="text-[11px] text-zinc-400">
-                    Received on {new Date(activeMessage.createdAt).toLocaleString()}
-                  </p>
+                  <h2 className="text-lg font-black text-white">{activeMessage.subject || 'Contact Submission'}</h2>
+                  <p className="text-[11px] text-zinc-400">Submitted on {new Date(activeMessage.createdAt).toLocaleString()}</p>
                 </div>
               </div>
-
               <button
                 onClick={() => setActiveMessage(null)}
-                className="p-2 rounded-xl text-zinc-400 hover:text-black hover:bg-zinc-100 transition-colors"
+                className="p-2 rounded-xl text-zinc-400 hover:text-white hover:bg-zinc-800"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            {/* Modal Body */}
-            <div className="p-6 space-y-5 overflow-y-auto">
-              {/* Sender info box */}
-              <div className="p-4 rounded-2xl bg-zinc-50 border border-zinc-200/80 grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                <div>
-                  <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block">Sender Name</span>
-                  <span className="font-extrabold text-black text-sm">{activeMessage.name}</span>
+            <div className="space-y-4 text-xs">
+              <div className="p-4 rounded-2xl bg-zinc-950 border border-zinc-800 space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-zinc-400">From:</span>
+                  <span className="font-bold text-white">{activeMessage.name}</span>
                 </div>
-
-                <div>
-                  <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block">Email Address</span>
-                  <a href={`mailto:${activeMessage.email}`} className="font-bold text-zinc-800 hover:underline">
-                    {activeMessage.email}
-                  </a>
+                <div className="flex justify-between">
+                  <span className="text-zinc-400">Email:</span>
+                  <span className="font-bold text-zinc-200">{activeMessage.email}</span>
                 </div>
-
                 {activeMessage.phone && (
-                  <div>
-                    <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block">Phone Number</span>
-                    <a href={`tel:${activeMessage.phone}`} className="font-bold text-zinc-800 hover:underline">
-                      {activeMessage.phone}
-                    </a>
+                  <div className="flex justify-between">
+                    <span className="text-zinc-400">Phone:</span>
+                    <span className="font-bold text-zinc-200">{activeMessage.phone}</span>
                   </div>
                 )}
-
-                <div>
-                  <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block">Current Status</span>
-                  <Badge
-                    variant={
-                      activeMessage.status === 'new'
-                        ? 'success'
-                        : activeMessage.status === 'replied'
-                        ? 'dark'
-                        : 'slate'
-                    }
-                    size="sm"
-                    className="mt-1"
-                  >
-                    {activeMessage.status.toUpperCase()}
-                  </Badge>
+                <div className="flex justify-between">
+                  <span className="text-zinc-400">Status:</span>
+                  <span className="font-bold uppercase text-orange-400">{activeMessage.status}</span>
                 </div>
               </div>
 
-              {/* Subject */}
-              <div className="space-y-1">
-                <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Subject</span>
-                <p className="text-sm font-black text-black bg-zinc-100/60 p-3 rounded-2xl border border-zinc-200/60">
-                  {activeMessage.subject}
+              <div className="p-4 rounded-2xl bg-zinc-950 border border-zinc-800 space-y-2">
+                <p className="text-[10px] font-extrabold uppercase text-zinc-400">Message Content</p>
+                <p className="text-zinc-300 leading-relaxed font-normal whitespace-pre-wrap">
+                  {activeMessage.message}
                 </p>
               </div>
 
-              {/* Message Body */}
-              <div className="space-y-1">
-                <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Message Content</span>
-                <div className="p-4 rounded-2xl bg-white border border-zinc-200 text-xs text-zinc-800 leading-relaxed whitespace-pre-wrap font-medium shadow-inner">
-                  {activeMessage.message}
-                </div>
-              </div>
-
-              {/* Status Updater */}
-              <div className="pt-2 border-t border-zinc-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
-                <span className="text-zinc-500 font-bold">Mark status as:</span>
+              {/* Reply Channels */}
+              <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
                 <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => handleStatusChange(activeMessage.id, 'new')}
-                    className={`px-3 py-1.5 rounded-xl font-bold transition-all ${
-                      activeMessage.status === 'new'
-                        ? 'bg-emerald-600 text-white'
-                        : 'bg-zinc-100 text-zinc-700 hover:bg-zinc-200'
-                    }`}
+                  <a
+                    href={`mailto:${activeMessage.email}?subject=Re: ${encodeURIComponent(activeMessage.subject || 'Your inquiry with Carketo')}`}
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs shadow-md transition-all"
                   >
-                    New
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleStatusChange(activeMessage.id, 'read')}
-                    className={`px-3 py-1.5 rounded-xl font-bold transition-all ${
-                      activeMessage.status === 'read'
-                        ? 'bg-zinc-800 text-white'
-                        : 'bg-zinc-100 text-zinc-700 hover:bg-zinc-200'
-                    }`}
-                  >
-                    Read
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleStatusChange(activeMessage.id, 'replied')}
-                    className={`px-3 py-1.5 rounded-xl font-bold transition-all ${
-                      activeMessage.status === 'replied'
-                        ? 'bg-black text-white'
-                        : 'bg-zinc-100 text-zinc-700 hover:bg-zinc-200'
-                    }`}
-                  >
-                    Replied
-                  </button>
+                    <Send className="w-3.5 h-3.5" />
+                    <span>Reply via Email</span>
+                  </a>
+
+                  {activeMessage.phone && (
+                    <a
+                      href={`tel:${activeMessage.phone}`}
+                      className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-bold text-xs transition-colors"
+                    >
+                      <Phone className="w-3.5 h-3.5 text-emerald-400" />
+                      <span>Call Sender</span>
+                    </a>
+                  )}
                 </div>
-              </div>
-            </div>
 
-            {/* Modal Footer */}
-            <div className="p-4 border-t border-zinc-100 bg-zinc-50 flex items-center justify-between">
-              <button
-                type="button"
-                onClick={() => handleDelete(activeMessage.id)}
-                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold text-rose-600 hover:bg-rose-50 transition-colors"
-              >
-                <Trash2 className="w-4 h-4" />
-                <span>Delete Message</span>
-              </button>
-
-              <div className="flex items-center gap-2">
-                <a
-                  href={`mailto:${activeMessage.email}?subject=${encodeURIComponent(`Re: ${activeMessage.subject}`)}`}
+                <Button
+                  variant="outline"
                   onClick={() => {
                     handleStatusChange(activeMessage.id, 'replied');
+                    setActiveMessage(null);
                   }}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-black text-white hover:bg-zinc-800 transition-colors shadow-sm"
+                  className="bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border-emerald-500/30 rounded-xl text-xs font-bold"
                 >
-                  <Send className="w-3.5 h-3.5" />
-                  <span>Reply via Email Client</span>
-                </a>
+                  Mark as Resolved
+                </Button>
               </div>
             </div>
           </div>

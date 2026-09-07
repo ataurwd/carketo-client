@@ -6,9 +6,7 @@ import { adminService } from '@/services/admin.service';
 import { confirmDialog, showToast } from '@/lib/alert';
 import { IInquiry } from '@/services/inquiry.service';
 import { Button } from '@/components/ui/Button';
-import { Badge } from '@/components/ui/Badge';
 import {
-  ArrowLeft,
   MessageSquare,
   Search,
   Trash2,
@@ -18,6 +16,10 @@ import {
   Clock,
   Car,
   ShieldCheck,
+  CheckCircle2,
+  XCircle,
+  Calendar,
+  MessageCircle,
 } from 'lucide-react';
 
 export default function AdminInquiriesPage() {
@@ -27,13 +29,19 @@ export default function AdminInquiriesPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    fetchInquiries();
+  }, []);
+
+  const fetchInquiries = () => {
+    setIsLoading(true);
     adminService
       .getInquiriesAdmin()
       .then((res) => {
         setInquiries(res || []);
       })
+      .catch((err) => console.error('Failed to load inquiries:', err))
       .finally(() => setIsLoading(false));
-  }, []);
+  };
 
   const handleDelete = async (inquiryId: string) => {
     const isConfirmed = await confirmDialog({
@@ -69,153 +77,163 @@ export default function AdminInquiriesPage() {
   });
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-zinc-200 shadow-sm">
+    <div className="space-y-6 pb-12">
+      {/* HEADER */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-zinc-900/80 backdrop-blur-sm p-6 rounded-3xl border border-zinc-800 shadow-sm">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl sm:text-3xl font-black text-black">Global Inquiries & Leads</h1>
-            <span className="h-6 px-2.5 rounded-full bg-black text-white text-xs font-bold flex items-center justify-center">
+            <h1 className="text-2xl font-black text-white">Car Inquiries & Customer Leads</h1>
+            <span className="h-6 px-2.5 rounded-full bg-orange-600 text-white text-xs font-black flex items-center justify-center shadow-sm">
               {inquiries.length} Leads
             </span>
           </div>
-          <p className="text-xs sm:text-sm text-zinc-500 mt-1">
-            Inspect all contact requests, lead messages, and seller inquiries sent across the platform.
+          <p className="text-xs text-zinc-400 mt-1">
+            Review all vehicle buyer questions, test drive requests, and contact inquiries.
           </p>
         </div>
       </div>
 
-        {/* Filters */}
-        <div className="bg-white p-5 rounded-3xl border border-zinc-200 shadow-sm flex flex-col lg:flex-row items-center gap-4">
-          <div className="relative flex-1 w-full">
-            <Search className="w-4 h-4 text-zinc-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              placeholder="Search by sender name, email, phone, or car title..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 rounded-2xl border border-zinc-200 text-xs font-semibold focus:outline-none focus:border-black"
-            />
-          </div>
-
-          <div className="flex items-center gap-3 w-full lg:w-auto">
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-3 py-2.5 rounded-2xl border border-zinc-200 bg-white text-xs font-semibold text-zinc-700 focus:outline-none focus:border-black"
-            >
-              <option value="all">All Inquiry Statuses</option>
-              <option value="new">New Inquiries</option>
-              <option value="replied">Replied Inquiries</option>
-              <option value="closed">Closed Inquiries</option>
-            </select>
-          </div>
+      {/* SEARCH & FILTERS */}
+      <div className="bg-zinc-900/80 backdrop-blur-sm p-4 sm:p-5 rounded-3xl border border-zinc-800 shadow-sm flex flex-col lg:flex-row items-center justify-between gap-4">
+        <div className="relative flex-1 w-full">
+          <Search className="w-4 h-4 text-zinc-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <input
+            type="text"
+            placeholder="Search by sender name, email, phone, or car title..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-zinc-950 border border-zinc-800 text-xs font-semibold text-white focus:outline-none focus:border-orange-500 placeholder:text-zinc-400"
+          />
         </div>
 
-        {/* Inquiries Table */}
-        {isLoading ? (
-          <div className="p-16 bg-white rounded-3xl border border-zinc-200 text-center space-y-4 shadow-sm">
-            <div className="h-10 w-10 border-4 border-black border-t-transparent rounded-full animate-spin mx-auto" />
-            <p className="text-xs font-bold text-zinc-500">Loading global inquiries queue...</p>
-          </div>
-        ) : filteredInquiries.length > 0 ? (
-          <div className="bg-white rounded-3xl border border-zinc-200 shadow-sm overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
-                <thead className="bg-zinc-50 text-zinc-500 font-bold uppercase tracking-wider border-b border-zinc-200">
-                  <tr>
-                    <th className="py-4 px-6">Sender Details</th>
-                    <th className="py-4 px-6">Target Vehicle</th>
-                    <th className="py-4 px-6">Seller Reference</th>
-                    <th className="py-4 px-6">Message Excerpt</th>
-                    <th className="py-4 px-6">Status</th>
-                    <th className="py-4 px-6 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-zinc-100 font-semibold text-zinc-800">
-                  {filteredInquiries.map((inq) => (
-                    <tr key={inq._id} className="hover:bg-zinc-50/80 transition-colors">
-                      <td className="py-4 px-6">
-                        <p className="font-extrabold text-black text-sm">{inq.senderName}</p>
-                        <p className="text-[11px] text-zinc-500">{inq.senderPhone}</p>
-                        <p className="text-[10px] text-zinc-400">{inq.senderEmail}</p>
-                      </td>
+        <div className="flex items-center gap-3 w-full lg:w-auto">
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="px-3.5 py-2.5 rounded-2xl bg-zinc-950 border border-zinc-800 text-xs font-bold text-white focus:outline-none focus:border-orange-500"
+          >
+            <option value="all">All Inquiry Statuses</option>
+            <option value="new">New</option>
+            <option value="replied">Replied</option>
+            <option value="closed">Closed</option>
+          </select>
+        </div>
+      </div>
 
-                      <td className="py-4 px-6">
-                        {inq.carId ? (
+      {/* INQUIRIES LIST */}
+      <div className="space-y-4">
+        {isLoading ? (
+          <div className="p-12 text-center text-xs font-bold text-zinc-400">
+            <div className="h-8 w-8 border-3 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+            Loading customer leads...
+          </div>
+        ) : filteredInquiries.length === 0 ? (
+          <div className="p-12 text-center space-y-3 bg-zinc-900/60 rounded-3xl border border-zinc-800">
+            <MessageSquare className="w-8 h-8 text-zinc-400 mx-auto" />
+            <p className="text-xs font-bold text-zinc-400">No buyer inquiries found matching filters.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {filteredInquiries.map((inq) => {
+              const cleanPhone = inq.senderPhone?.replace(/[^0-9]/g, '');
+              const whatsappUrl = cleanPhone ? `https://wa.me/${cleanPhone}` : null;
+
+              return (
+                <div
+                  key={inq._id}
+                  className="p-6 rounded-3xl bg-zinc-900/80 backdrop-blur-sm border border-zinc-800 hover:border-zinc-700 transition-all flex flex-col justify-between space-y-4 shadow-sm"
+                >
+                  <div className="space-y-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <h3 className="font-bold text-white text-sm">{inq.senderName}</h3>
+                        <p className="text-[11px] text-zinc-400">{inq.senderEmail}</p>
+                      </div>
+
+                      <span
+                        className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${
+                          inq.status === 'replied' || inq.status === 'closed'
+                            ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                            : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+                        }`}
+                      >
+                        {inq.status || 'new'}
+                      </span>
+                    </div>
+
+                    {/* Associated Car */}
+                    {inq.carId && (
+                      <div className="flex items-center gap-2 p-2.5 rounded-xl bg-zinc-950 border border-zinc-800 text-xs">
+                        <Car className="w-4 h-4 text-orange-400 shrink-0" />
+                        <span className="font-bold text-zinc-200 truncate">{inq.carId.title}</span>
+                        {inq.carId.slug && (
                           <Link
                             href={`/cars/${inq.carId.slug}`}
                             target="_blank"
-                            className="flex items-center gap-2 hover:underline text-black font-bold"
+                            className="ml-auto text-zinc-400 hover:text-white"
                           >
-                            <span className="truncate max-w-[160px]">{inq.carId.title}</span>
-                            <ExternalLink className="w-3 h-3 text-zinc-400 shrink-0" />
+                            <ExternalLink className="w-3.5 h-3.5" />
                           </Link>
-                        ) : (
-                          <span className="text-zinc-400">N/A</span>
                         )}
-                      </td>
+                      </div>
+                    )}
 
-                      <td className="py-4 px-6">
-                        <p className="font-bold text-zinc-900">{inq.sellerId?.name || 'Owner'}</p>
-                        <p className="text-[11px] text-zinc-400">{inq.sellerId?.phone || inq.sellerId?.email || 'N/A'}</p>
-                      </td>
+                    {/* Message Body */}
+                    <div className="p-3.5 rounded-2xl bg-zinc-950/60 border border-zinc-800/80 text-xs text-zinc-300">
+                      <p className="leading-relaxed">&ldquo;{inq.message}&rdquo;</p>
+                    </div>
+                  </div>
 
-                      <td className="py-4 px-6 max-w-xs">
-                        <p className="text-zinc-700 truncate" title={inq.message}>
-                          &ldquo;{inq.message}&rdquo;
-                        </p>
-                        <p className="text-[10px] text-zinc-400 mt-0.5">
-                          {new Date(inq.createdAt).toLocaleDateString()}
-                        </p>
-                      </td>
-
-                      <td className="py-4 px-6">
-                        <Badge
-                          variant={
-                            inq.status === 'new'
-                              ? 'brand'
-                              : inq.status === 'replied'
-                              ? 'dark'
-                              : 'slate'
-                          }
-                          size="sm"
+                  {/* Actions & Channels */}
+                  <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-zinc-800/80 text-xs">
+                    <div className="flex items-center gap-2">
+                      {inq.senderEmail && (
+                        <a
+                          href={`mailto:${inq.senderEmail}?subject=Regarding ${inq.carId?.title || 'your inquiry'}`}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-bold text-[11px] transition-colors"
                         >
-                          {inq.status.toUpperCase()}
-                        </Badge>
-                      </td>
+                          <Mail className="w-3.5 h-3.5 text-blue-400" />
+                          <span>Email</span>
+                        </a>
+                      )}
 
-                      <td className="py-4 px-6 text-right space-x-2">
+                      {inq.senderPhone && (
                         <a
                           href={`tel:${inq.senderPhone}`}
-                          className="inline-flex p-2 rounded-xl text-zinc-500 hover:text-black hover:bg-zinc-100 transition-colors"
-                          title="Call Buyer"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-bold text-[11px] transition-colors"
                         >
-                          <Phone className="w-4 h-4" />
+                          <Phone className="w-3.5 h-3.5 text-emerald-400" />
+                          <span>Call</span>
                         </a>
-                        <button
-                          type="button"
-                          onClick={() => handleDelete(inq._id)}
-                          className="inline-flex p-2 rounded-xl text-rose-500 hover:text-rose-700 hover:bg-rose-50 transition-colors"
-                          title="Delete Lead Record"
+                      )}
+
+                      {whatsappUrl && (
+                        <a
+                          href={whatsappUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 font-bold text-[11px] transition-colors border border-emerald-500/30"
                         >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        ) : (
-          <div className="p-16 bg-white rounded-3xl border border-zinc-200 text-center space-y-4 shadow-sm">
-            <MessageSquare className="w-12 h-12 text-zinc-300 mx-auto" />
-            <h3 className="text-lg font-black text-black">No Inquiries Found</h3>
-            <p className="text-xs text-zinc-500 max-w-sm mx-auto">
-              No buyer/renter inquiries matched your search criteria.
-            </p>
+                          <MessageCircle className="w-3.5 h-3.5" />
+                          <span>WhatsApp</span>
+                        </a>
+                      )}
+                    </div>
+
+                    <button
+                      onClick={() => handleDelete(inq._id)}
+                      className="p-2 rounded-xl text-rose-400 hover:bg-rose-500/10 transition-colors"
+                      title="Delete Inquiry"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         )}
+      </div>
     </div>
   );
 }

@@ -7,6 +7,9 @@ import { formatPrice } from '@/lib/utils';
 import {
   Users,
   Car,
+  CalendarCheck2,
+  ShoppingBag,
+  CreditCard,
   MessageSquare,
   Star,
   TrendingUp,
@@ -22,6 +25,12 @@ import {
   Tag,
   Eye,
   Mail,
+  AlertTriangle,
+  Clock,
+  DollarSign,
+  Building2,
+  Ticket,
+  ChevronRight,
 } from 'lucide-react';
 
 export default function AdminOverviewPage() {
@@ -61,6 +70,8 @@ export default function AdminOverviewPage() {
   }, [timeSeriesData, selectedMetric]);
 
   const metrics = data?.metrics || {
+    totalRevenue: 0,
+    grossFleetValue: 0,
     totalUsers: 0,
     totalAdmins: 0,
     totalCars: 0,
@@ -68,9 +79,12 @@ export default function AdminOverviewPage() {
     totalRentals: 0,
     totalSales: 0,
     totalInquiries: 0,
-    totalReviews: 0,
-    totalRevenue: 0,
-    grossFleetValue: 0,
+    totalProviders: 0,
+    totalBookings: 0,
+    totalOrders: 0,
+    pendingBookingsCount: 0,
+    pendingOrdersCount: 0,
+    pendingProvidersCount: 0,
     completedPaymentsCount: 0,
   };
 
@@ -84,665 +98,737 @@ export default function AdminOverviewPage() {
   const rentPercent = Math.round((listingBreakdown.rent / totalListingsCount) * 100);
   const salePercent = Math.round((listingBreakdown.sale / totalListingsCount) * 100);
 
+  const hasUrgentActions =
+    (metrics.pendingBookingsCount || 0) > 0 ||
+    (metrics.pendingOrdersCount || 0) > 0 ||
+    (metrics.pendingProvidersCount || 0) > 0;
+
   return (
     <div className="space-y-8 pb-12">
       {/* PAGE HEADER & CONTROLS */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 sm:p-8 rounded-3xl border border-zinc-200 shadow-sm">
-        <div>
-          <div className="flex items-center gap-2.5">
-            <h1 className="text-xl sm:text-2xl font-black text-black tracking-tight">
-              Website Analytics & Activity
-            </h1>
-            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-200">
-              Live DB Synced
-            </span>
-          </div>
-          <p className="text-xs sm:text-sm text-zinc-500 mt-1">
-            Real-time track of user registrations, car listing posts, customer inquiries, and fleet inventory.
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-gradient-to-br from-zinc-900 via-zinc-900/90 to-zinc-950 p-6 sm:p-8 rounded-3xl border border-zinc-800 shadow-xl relative overflow-hidden">
+        <div className="absolute right-0 top-0 w-96 h-96 bg-orange-600/10 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="relative z-10">
+          <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight">
+            Executive Analytics & Fleet Control
+          </h1>
+          <p className="text-xs sm:text-sm text-zinc-400 mt-1">
+            Holistic performance metrics, customer bookings, revenue telemetry, and inventory management.
           </p>
         </div>
 
-        <div className="flex items-center gap-2 self-start sm:self-auto">
+        {/* Quick Launcher Pills */}
+        <div className="relative z-10 flex flex-wrap items-center gap-2">
           <Link
-            href="/admin/contacts"
-            className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-2xl bg-zinc-100 hover:bg-zinc-200 text-zinc-800 text-xs font-bold transition-all border border-zinc-200 shadow-sm"
+            href="/admin/cars"
+            className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-orange-600 hover:bg-orange-500 text-white text-xs font-bold transition-all shadow-lg shadow-orange-600/25"
           >
-            <Mail className="w-4 h-4 text-zinc-600" />
-            <span>Contact Messages</span>
+            <Plus className="w-3.5 h-3.5" />
+            <span>Add Vehicle</span>
           </Link>
+
           <Link
-            href="/provider/cars/create"
-            className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-2xl bg-black text-white text-xs font-bold hover:bg-zinc-800 transition-all shadow-sm"
+            href="/admin/bookings"
+            className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 text-xs font-bold transition-all"
           >
-            <Plus className="w-4 h-4" />
-            <span>List New Car</span>
+            <CalendarCheck2 className="w-3.5 h-3.5 text-orange-400" />
+            <span>Bookings</span>
+          </Link>
+
+          <Link
+            href="/admin/orders"
+            className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 text-xs font-bold transition-all"
+          >
+            <ShoppingBag className="w-3.5 h-3.5 text-blue-400" />
+            <span>Orders</span>
           </Link>
         </div>
       </div>
 
-      {/* 1. TOP 4 CORE WEBSITE STAT CARDS */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        {/* Card 1: Registered Accounts */}
-        <div className="bg-white p-6 rounded-3xl border border-zinc-200 shadow-sm space-y-4 hover:border-zinc-300 transition-all">
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold tracking-wider text-zinc-500 uppercase">
-              User Accounts
-            </span>
-            <div className="h-9 w-9 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100">
-              <Users className="w-4 h-4" />
+      {/* URGENT ACTION ALERT BANNER */}
+      {hasUrgentActions && (
+        <div className="p-4 sm:p-5 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-amber-500/20 text-amber-400 shrink-0">
+              <AlertTriangle className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="text-xs sm:text-sm font-black text-amber-300">
+                Action Required: Pending Items Waiting for Moderation
+              </p>
+              <p className="text-[11px] sm:text-xs text-zinc-400 mt-0.5">
+                {[
+                  metrics.pendingBookingsCount ? `${metrics.pendingBookingsCount} pending rental booking(s)` : null,
+                  metrics.pendingOrdersCount ? `${metrics.pendingOrdersCount} pending car sales order(s)` : null,
+                  metrics.pendingProvidersCount ? `${metrics.pendingProvidersCount} unverified dealership(s)` : null,
+                ]
+                  .filter(Boolean)
+                  .join(' • ')}
+              </p>
             </div>
           </div>
 
-          <div>
-            <p className="text-3xl sm:text-4xl font-black text-black tracking-tight">
-              {metrics.totalUsers + metrics.totalAdmins}
-            </p>
-            <p className="text-[11px] text-zinc-500 font-semibold mt-1">
-              {metrics.totalUsers} Standard Users • {metrics.totalAdmins} Admins
-            </p>
+          <div className="flex items-center gap-2">
+            {metrics.pendingBookingsCount ? (
+              <Link
+                href="/admin/bookings"
+                className="px-3 py-1.5 rounded-xl bg-amber-500 text-black font-extrabold text-xs hover:bg-amber-400 transition-colors"
+              >
+                Review Bookings
+              </Link>
+            ) : null}
+            {metrics.pendingOrdersCount ? (
+              <Link
+                href="/admin/orders"
+                className="px-3 py-1.5 rounded-xl bg-amber-500 text-black font-extrabold text-xs hover:bg-amber-400 transition-colors"
+              >
+                Review Orders
+              </Link>
+            ) : null}
           </div>
+        </div>
+      )}
 
-          <div className="pt-2 border-t border-zinc-100 flex items-center justify-between text-xs">
-            <span className="text-zinc-500 font-medium">Growth status:</span>
-            <span className="font-bold text-emerald-600 inline-flex items-center gap-1">
-              <TrendingUp className="w-3.5 h-3.5" />
-              Active
+      {/* 8-METRIC EXECUTIVE KPI GRID */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+        {/* Metric 1: Total Revenue */}
+        <div className="bg-zinc-900/80 backdrop-blur-sm p-5 sm:p-6 rounded-3xl border border-zinc-800 shadow-sm relative overflow-hidden group hover:border-zinc-700 transition-all">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-extrabold uppercase tracking-wider text-zinc-400">
+              Platform Gross Revenue
             </span>
+            <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+              <DollarSign className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="mt-3">
+            <h3 className="text-2xl sm:text-3xl font-black text-white">
+              {formatPrice(metrics.totalRevenue)}
+            </h3>
+            <p className="text-[11px] text-zinc-400 mt-1 flex items-center gap-1.5">
+              <span className="text-emerald-400 font-bold">{metrics.completedPaymentsCount}</span> paid transactions
+            </p>
           </div>
         </div>
 
-        {/* Card 2: Vehicle Listings (Posts) */}
-        <div className="bg-white p-6 rounded-3xl border border-zinc-200 shadow-sm space-y-4 hover:border-zinc-300 transition-all">
+        {/* Metric 2: Gross Fleet Asset Valuation */}
+        <div className="bg-zinc-900/80 backdrop-blur-sm p-5 sm:p-6 rounded-3xl border border-zinc-800 shadow-sm relative overflow-hidden group hover:border-zinc-700 transition-all">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold tracking-wider text-zinc-500 uppercase">
-              Total Cars Posted
+            <span className="text-[11px] font-extrabold uppercase tracking-wider text-zinc-400">
+              Fleet Valuation (AUM)
             </span>
-            <div className="h-9 w-9 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100">
+            <div className="p-2 rounded-xl bg-orange-500/10 text-orange-400 border border-orange-500/20">
+              <TrendingUp className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="mt-3">
+            <h3 className="text-2xl sm:text-3xl font-black text-white">
+              {formatPrice(metrics.grossFleetValue)}
+            </h3>
+            <p className="text-[11px] text-zinc-400 mt-1 flex items-center gap-1.5">
+              <span className="text-orange-400 font-bold">{metrics.totalCars}</span> total inventory assets
+            </p>
+          </div>
+        </div>
+
+        {/* Metric 3: Active Fleet Vehicles */}
+        <div className="bg-zinc-900/80 backdrop-blur-sm p-5 sm:p-6 rounded-3xl border border-zinc-800 shadow-sm relative overflow-hidden group hover:border-zinc-700 transition-all">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-extrabold uppercase tracking-wider text-zinc-400">
+              Active Fleet Units
+            </span>
+            <div className="p-2 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20">
               <Car className="w-4 h-4" />
             </div>
           </div>
-
-          <div>
-            <p className="text-3xl sm:text-4xl font-black text-black tracking-tight">
-              {metrics.totalCars}
+          <div className="mt-3">
+            <h3 className="text-2xl sm:text-3xl font-black text-white">
+              {metrics.activeFleet}
+            </h3>
+            <p className="text-[11px] text-zinc-400 mt-1 flex items-center gap-1.5">
+              <span className="text-blue-400 font-bold">{metrics.totalRentals}</span> rentals •{' '}
+              <span className="text-indigo-400 font-bold">{metrics.totalSales}</span> for sale
             </p>
-            <p className="text-[11px] text-zinc-500 font-semibold mt-1">
-              {metrics.totalRentals} For Rent • {metrics.totalSales} For Sale
-            </p>
-          </div>
-
-          <div className="pt-2 border-t border-zinc-100 flex items-center justify-between text-xs">
-            <span className="text-zinc-500 font-medium">Published live:</span>
-            <span className="font-bold text-black">{metrics.activeFleet} Active</span>
           </div>
         </div>
 
-        {/* Card 3: Inquiries Received */}
-        <div className="bg-white p-6 rounded-3xl border border-zinc-200 shadow-sm space-y-4 hover:border-zinc-300 transition-all">
+        {/* Metric 4: Rental Reservations */}
+        <div className="bg-zinc-900/80 backdrop-blur-sm p-5 sm:p-6 rounded-3xl border border-zinc-800 shadow-sm relative overflow-hidden group hover:border-zinc-700 transition-all">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold tracking-wider text-zinc-500 uppercase">
-              Customer Inquiries
+            <span className="text-[11px] font-extrabold uppercase tracking-wider text-zinc-400">
+              Rental Bookings
             </span>
-            <div className="h-9 w-9 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center border border-purple-100">
+            <div className="p-2 rounded-xl bg-purple-500/10 text-purple-400 border border-purple-500/20">
+              <CalendarCheck2 className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="mt-3">
+            <h3 className="text-2xl sm:text-3xl font-black text-white">
+              {metrics.totalBookings || 0}
+            </h3>
+            <p className="text-[11px] text-zinc-400 mt-1 flex items-center gap-1.5">
+              <span className="text-amber-400 font-bold">{metrics.pendingBookingsCount || 0}</span> pending confirmation
+            </p>
+          </div>
+        </div>
+
+        {/* Metric 5: Car Sales Orders */}
+        <div className="bg-zinc-900/80 backdrop-blur-sm p-5 sm:p-6 rounded-3xl border border-zinc-800 shadow-sm relative overflow-hidden group hover:border-zinc-700 transition-all">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-extrabold uppercase tracking-wider text-zinc-400">
+              Car Sales Orders
+            </span>
+            <div className="p-2 rounded-xl bg-rose-500/10 text-rose-400 border border-rose-500/20">
+              <ShoppingBag className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="mt-3">
+            <h3 className="text-2xl sm:text-3xl font-black text-white">
+              {metrics.totalOrders || 0}
+            </h3>
+            <p className="text-[11px] text-zinc-400 mt-1 flex items-center gap-1.5">
+              <span className="text-rose-400 font-bold">{metrics.pendingOrdersCount || 0}</span> pending processing
+            </p>
+          </div>
+        </div>
+
+        {/* Metric 6: Platform Users */}
+        <div className="bg-zinc-900/80 backdrop-blur-sm p-5 sm:p-6 rounded-3xl border border-zinc-800 shadow-sm relative overflow-hidden group hover:border-zinc-700 transition-all">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-extrabold uppercase tracking-wider text-zinc-400">
+              Platform Accounts
+            </span>
+            <div className="p-2 rounded-xl bg-teal-500/10 text-teal-400 border border-teal-500/20">
+              <Users className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="mt-3">
+            <h3 className="text-2xl sm:text-3xl font-black text-white">
+              {metrics.totalUsers}
+            </h3>
+            <p className="text-[11px] text-zinc-400 mt-1 flex items-center gap-1.5">
+              <span className="text-teal-400 font-bold">{metrics.totalAdmins}</span> administrators
+            </p>
+          </div>
+        </div>
+
+        {/* Metric 7: Inquiries & Leads */}
+        <div className="bg-zinc-900/80 backdrop-blur-sm p-5 sm:p-6 rounded-3xl border border-zinc-800 shadow-sm relative overflow-hidden group hover:border-zinc-700 transition-all">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-extrabold uppercase tracking-wider text-zinc-400">
+              Customer Leads
+            </span>
+            <div className="p-2 rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
               <MessageSquare className="w-4 h-4" />
             </div>
           </div>
-
-          <div>
-            <p className="text-3xl sm:text-4xl font-black text-black tracking-tight">
+          <div className="mt-3">
+            <h3 className="text-2xl sm:text-3xl font-black text-white">
               {metrics.totalInquiries}
+            </h3>
+            <p className="text-[11px] text-zinc-400 mt-1 flex items-center gap-1.5">
+              Direct vehicle buyer inquiries
             </p>
-            <p className="text-[11px] text-zinc-500 font-semibold mt-1">
-              Direct seller & rental inquiries
-            </p>
-          </div>
-
-          <div className="pt-2 border-t border-zinc-100 flex items-center justify-between text-xs">
-            <span className="text-zinc-500 font-medium">Lead inquiries:</span>
-            <Link
-              href="/admin/inquiries"
-              className="font-bold text-purple-600 hover:underline inline-flex items-center gap-1"
-            >
-              <span>View inbox</span>
-              <ArrowRight className="w-3 h-3" />
-            </Link>
           </div>
         </div>
 
-        {/* Card 4: Coupons & Discounts */}
-        <div className="bg-white p-6 rounded-3xl border border-zinc-200 shadow-sm space-y-4 hover:border-zinc-300 transition-all">
+        {/* Metric 8: Dealership Partners */}
+        <div className="bg-zinc-900/80 backdrop-blur-sm p-5 sm:p-6 rounded-3xl border border-zinc-800 shadow-sm relative overflow-hidden group hover:border-zinc-700 transition-all">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold tracking-wider text-zinc-500 uppercase">
-              Promotions & Coupons
+            <span className="text-[11px] font-extrabold uppercase tracking-wider text-zinc-400">
+              Dealership Partners
             </span>
-            <div className="h-9 w-9 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center border border-amber-100">
-              <Tag className="w-4 h-4" />
+            <div className="p-2 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
+              <Building2 className="w-4 h-4" />
             </div>
           </div>
-
-          <div>
-            <p className="text-3xl sm:text-4xl font-black text-black tracking-tight">
-              Active
+          <div className="mt-3">
+            <h3 className="text-2xl sm:text-3xl font-black text-white">
+              {metrics.totalProviders || (metrics.pendingProvidersCount || 0) + 1}
+            </h3>
+            <p className="text-[11px] text-zinc-400 mt-1 flex items-center gap-1.5">
+              <span className="text-amber-400 font-bold">{metrics.pendingProvidersCount || 0}</span> awaiting verification
             </p>
-            <p className="text-[11px] text-zinc-500 font-semibold mt-1">
-              Seasonal discounts & promo codes
-            </p>
-          </div>
-
-          <div className="pt-2 border-t border-zinc-100 flex items-center justify-between text-xs">
-            <span className="text-zinc-500 font-medium">Coupon codes:</span>
-            <Link
-              href="/admin/coupons"
-              className="font-bold text-amber-600 hover:underline inline-flex items-center gap-1"
-            >
-              <span>Manage coupons</span>
-              <ArrowRight className="w-3 h-3" />
-            </Link>
           </div>
         </div>
       </div>
 
-      {/* 2. INTERACTIVE TIMELINE ANALYTICS CHART */}
-      <div className="bg-white p-6 sm:p-8 rounded-3xl border border-zinc-200 shadow-sm space-y-6">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-zinc-100 pb-5">
+      {/* INTERACTIVE TIME-SERIES ANALYTICS CHART */}
+      <div className="bg-zinc-900/80 backdrop-blur-sm p-6 sm:p-8 rounded-3xl border border-zinc-800 shadow-sm space-y-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-black" />
-              <h2 className="text-base font-black text-black">
-                {timeframe === 'daily' ? 'Daily Growth & Traffic Analytics (Last 7 Days)' : 'Monthly Growth & Traffic Analytics (Last 6 Months)'}
+              <TrendingUp className="w-4 h-4 text-orange-400" />
+              <h2 className="text-base sm:text-lg font-black text-white">
+                Platform Activity & Growth Telemetry
               </h2>
             </div>
             <p className="text-xs text-zinc-400 mt-0.5">
-              Volume breakdown for user registrations, vehicle listings, and customer inquiries.
+              Continuous multi-metric activity timeline of user signups, fleet ingestion, and lead inquiries.
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2.5">
-            {/* Timeframe Switcher */}
-            <div className="flex items-center p-1 bg-zinc-100 rounded-2xl border border-zinc-200">
-              <button
-                type="button"
-                onClick={() => setTimeframe('daily')}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                  timeframe === 'daily'
-                    ? 'bg-white text-black shadow-sm'
-                    : 'text-zinc-500 hover:text-black'
-                }`}
-              >
-                Day-wise (7D)
-              </button>
-              <button
-                type="button"
-                onClick={() => setTimeframe('monthly')}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                  timeframe === 'monthly'
-                    ? 'bg-white text-black shadow-sm'
-                    : 'text-zinc-500 hover:text-black'
-                }`}
-              >
-                Month-wise (6M)
-              </button>
+          <div className="flex flex-wrap items-center gap-3">
+            {/* Metric Filter Tabs */}
+            <div className="flex items-center p-1 bg-zinc-950 rounded-2xl border border-zinc-800">
+              {[
+                { id: 'all', label: 'All' },
+                { id: 'users', label: 'Users' },
+                { id: 'cars', label: 'Cars' },
+                { id: 'inquiries', label: 'Leads' },
+              ].map((m) => (
+                <button
+                  key={m.id}
+                  onClick={() => setSelectedMetric(m.id as any)}
+                  className={`px-3 py-1 rounded-xl text-xs font-bold transition-all ${
+                    selectedMetric === m.id
+                      ? 'bg-orange-600 text-white shadow-sm'
+                      : 'text-zinc-400 hover:text-white'
+                  }`}
+                >
+                  {m.label}
+                </button>
+              ))}
             </div>
 
-            {/* Metric Filter */}
-            <div className="flex items-center p-1 bg-zinc-100 rounded-2xl border border-zinc-200">
+            {/* Timeframe Switcher */}
+            <div className="flex items-center p-1 bg-zinc-950 rounded-2xl border border-zinc-800">
               <button
-                type="button"
-                onClick={() => setSelectedMetric('all')}
-                className={`px-2.5 py-1.5 rounded-xl text-[11px] font-bold transition-all ${
-                  selectedMetric === 'all'
-                    ? 'bg-black text-white shadow-sm'
-                    : 'text-zinc-500 hover:text-black'
+                onClick={() => setTimeframe('daily')}
+                className={`px-3 py-1 rounded-xl text-xs font-bold transition-all ${
+                  timeframe === 'daily'
+                    ? 'bg-zinc-800 text-white shadow-sm'
+                    : 'text-zinc-400 hover:text-white'
                 }`}
               >
-                All Metrics
+                7 Days
               </button>
               <button
-                type="button"
-                onClick={() => setSelectedMetric('users')}
-                className={`px-2.5 py-1.5 rounded-xl text-[11px] font-bold transition-all ${
-                  selectedMetric === 'users'
-                    ? 'bg-emerald-600 text-white shadow-sm'
-                    : 'text-zinc-500 hover:text-emerald-700'
+                onClick={() => setTimeframe('monthly')}
+                className={`px-3 py-1 rounded-xl text-xs font-bold transition-all ${
+                  timeframe === 'monthly'
+                    ? 'bg-zinc-800 text-white shadow-sm'
+                    : 'text-zinc-400 hover:text-white'
                 }`}
               >
-                Users
-              </button>
-              <button
-                type="button"
-                onClick={() => setSelectedMetric('cars')}
-                className={`px-2.5 py-1.5 rounded-xl text-[11px] font-bold transition-all ${
-                  selectedMetric === 'cars'
-                    ? 'bg-blue-600 text-white shadow-sm'
-                    : 'text-zinc-500 hover:text-blue-700'
-                }`}
-              >
-                Cars
-              </button>
-              <button
-                type="button"
-                onClick={() => setSelectedMetric('inquiries')}
-                className={`px-2.5 py-1.5 rounded-xl text-[11px] font-bold transition-all ${
-                  selectedMetric === 'inquiries'
-                    ? 'bg-purple-600 text-white shadow-sm'
-                    : 'text-zinc-500 hover:text-purple-700'
-                }`}
-              >
-                Inquiries
+                6 Months
               </button>
             </div>
           </div>
         </div>
 
-        {/* Legend */}
-        <div className="flex flex-wrap items-center gap-5 text-xs font-bold">
-          {(selectedMetric === 'all' || selectedMetric === 'users') && (
-            <div className="flex items-center gap-2">
-              <span className="h-3 w-3 rounded-full bg-emerald-500 ring-2 ring-emerald-200" />
-              <span className="text-zinc-700">New User Signups</span>
-            </div>
-          )}
-          {(selectedMetric === 'all' || selectedMetric === 'cars') && (
-            <div className="flex items-center gap-2">
-              <span className="h-3 w-3 rounded-full bg-blue-500 ring-2 ring-blue-200" />
-              <span className="text-zinc-700">Car Listings Posted</span>
-            </div>
-          )}
-          {(selectedMetric === 'all' || selectedMetric === 'inquiries') && (
-            <div className="flex items-center gap-2">
-              <span className="h-3 w-3 rounded-full bg-purple-500 ring-2 ring-purple-200" />
-              <span className="text-zinc-700">Inquiries Received</span>
-            </div>
-          )}
-        </div>
-
-        {/* Visual Chart Bars Container */}
-        <div className="pt-4 pb-2">
-          {timeSeriesData.length > 0 ? (
-            <div className="grid grid-flow-col auto-cols-fr gap-2 sm:gap-4 items-end h-64 sm:h-72 border-b border-zinc-100 pb-4 px-2">
-              {timeSeriesData.map((point, index) => {
-                const userH = Math.max(Math.round((point.users / maxChartValue) * 100), point.users > 0 ? 8 : 2);
-                const carH = Math.max(Math.round((point.cars / maxChartValue) * 100), point.cars > 0 ? 8 : 2);
-                const inqH = Math.max(Math.round((point.inquiries / maxChartValue) * 100), point.inquiries > 0 ? 8 : 2);
-                const isHovered = hoveredIndex === index;
-
-                return (
-                  <div
-                    key={point.date || point.month || index}
-                    className="flex flex-col items-center justify-end h-full group relative cursor-pointer"
-                    onMouseEnter={() => setHoveredIndex(index)}
-                    onMouseLeave={() => setHoveredIndex(null)}
-                  >
-                    {/* Hover Tooltip Popup */}
-                    {isHovered && (
-                      <div className="absolute -top-20 z-30 bg-zinc-900 text-white px-3 py-2 rounded-2xl shadow-xl border border-zinc-700 text-center pointer-events-none min-w-[120px] animate-fade-in">
-                        <p className="text-[10px] font-bold text-zinc-400 mb-1">{point.label}</p>
-                        <div className="space-y-0.5 text-[11px] font-black text-left">
-                          <p className="text-emerald-400">👤 {point.users} Users</p>
-                          <p className="text-blue-400">🚘 {point.cars} Cars</p>
-                          <p className="text-purple-400">💬 {point.inquiries} Inquiries</p>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Bar Cluster */}
-                    <div className="w-full flex items-end justify-center gap-1 sm:gap-1.5 h-full px-1">
-                      {(selectedMetric === 'all' || selectedMetric === 'users') && (
-                        <div
-                          style={{ height: `${userH}%` }}
-                          className={`w-full max-w-[18px] rounded-t-lg transition-all duration-300 ${
-                            point.users > 0
-                              ? 'bg-emerald-500 group-hover:bg-emerald-400 shadow-sm'
-                              : 'bg-zinc-100'
-                          }`}
-                        />
-                      )}
-                      {(selectedMetric === 'all' || selectedMetric === 'cars') && (
-                        <div
-                          style={{ height: `${carH}%` }}
-                          className={`w-full max-w-[18px] rounded-t-lg transition-all duration-300 ${
-                            point.cars > 0
-                              ? 'bg-blue-500 group-hover:bg-blue-400 shadow-sm'
-                              : 'bg-zinc-100'
-                          }`}
-                        />
-                      )}
-                      {(selectedMetric === 'all' || selectedMetric === 'inquiries') && (
-                        <div
-                          style={{ height: `${inqH}%` }}
-                          className={`w-full max-w-[18px] rounded-t-lg transition-all duration-300 ${
-                            point.inquiries > 0
-                              ? 'bg-purple-500 group-hover:bg-purple-400 shadow-sm'
-                              : 'bg-zinc-100'
-                          }`}
-                        />
-                      )}
-                    </div>
-
-                    {/* Axis Label */}
-                    <span className="mt-3 text-[11px] font-bold text-zinc-500 group-hover:text-black transition-colors truncate">
-                      {point.label}
-                    </span>
-                  </div>
-                );
-              })}
+        {/* Visual Multi-Bar Chart */}
+        <div className="pt-6 pb-2">
+          {timeSeriesData.length === 0 ? (
+            <div className="h-56 flex items-center justify-center text-xs font-bold text-zinc-400">
+              No historical data available for this timeframe.
             </div>
           ) : (
-            <div className="h-48 flex items-center justify-center text-zinc-400 text-xs font-semibold">
-              Loading platform timeline data...
-            </div>
-          )}
-        </div>
-      </div>
+            <div className="space-y-4">
+              <div className="h-56 flex items-end justify-between gap-2 sm:gap-4 pt-6 px-2 border-b border-zinc-800/80 relative">
+                {timeSeriesData.map((point, idx) => {
+                  const userHeight = Math.max(Math.round((point.users / maxChartValue) * 100), 4);
+                  const carHeight = Math.max(Math.round((point.cars / maxChartValue) * 100), 4);
+                  const inqHeight = Math.max(Math.round((point.inquiries / maxChartValue) * 100), 4);
 
-      {/* 3. PLATFORM INVENTORY & BRANDS DISTRIBUTION (2 COLUMNS) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left: Inventory Breakdown by Listing Type & Top Brands */}
-        <div className="lg:col-span-6 bg-white p-6 sm:p-8 rounded-3xl border border-zinc-200 shadow-sm space-y-6">
-          <div className="flex items-center justify-between border-b border-zinc-100 pb-4">
-            <div>
-              <h3 className="text-base font-black text-black">Inventory Distribution</h3>
-              <p className="text-xs text-zinc-400 mt-0.5">
-                Rental fleet vs Outright sale breakdown
-              </p>
-            </div>
-            <Link
-              href="/admin/cars"
-              className="text-xs font-bold text-black hover:text-zinc-600 inline-flex items-center gap-1"
-            >
-              <span>Manage Cars</span>
-              <ArrowUpRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-
-          {/* Progress Bar Proportion */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-xs font-bold">
-              <span className="text-emerald-700">Rentals ({listingBreakdown.rent} cars • {rentPercent}%)</span>
-              <span className="text-blue-700">For Sale ({listingBreakdown.sale} cars • {salePercent}%)</span>
-            </div>
-            <div className="h-3.5 rounded-full bg-zinc-100 overflow-hidden flex p-0.5 border border-zinc-200">
-              <div
-                style={{ width: `${rentPercent}%` }}
-                className="bg-emerald-500 rounded-l-full h-full transition-all duration-500"
-              />
-              <div
-                style={{ width: `${salePercent}%` }}
-                className="bg-blue-500 rounded-r-full h-full transition-all duration-500"
-              />
-            </div>
-          </div>
-
-          {/* Top Brands Breakdown */}
-          <div className="space-y-3 pt-2">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-500">
-              Top Represented Brands
-            </h4>
-            <div className="space-y-2.5">
-              {topBrands.length > 0 ? (
-                topBrands.map((b) => (
-                  <div key={b.brand} className="flex items-center justify-between p-3 rounded-2xl bg-zinc-50 border border-zinc-100">
-                    <div className="flex items-center gap-3">
-                      <div className="h-8 w-8 rounded-xl bg-black text-white font-black text-[11px] flex items-center justify-center">
-                        {b.brand.slice(0, 3).toUpperCase()}
-                      </div>
-                      <div>
-                        <p className="text-xs font-black text-black">{b.brand}</p>
-                        <p className="text-[10px] text-zinc-400">{b.count} registered vehicles</p>
-                      </div>
-                    </div>
-                    <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-zinc-200/70 text-zinc-800">
-                      {b.percentage}% of Fleet
-                    </span>
-                  </div>
-                ))
-              ) : (
-                <p className="text-xs text-zinc-400">No brand distribution yet.</p>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Right: Platform Quick Operations & Links */}
-        <div className="lg:col-span-6 bg-white p-6 sm:p-8 rounded-3xl border border-zinc-200 shadow-sm space-y-6 flex flex-col justify-between">
-          <div className="space-y-5">
-            <div className="border-b border-zinc-100 pb-4">
-              <h3 className="text-base font-black text-black">Administrative Shortkeys</h3>
-              <p className="text-xs text-zinc-400 mt-0.5">
-                Fast operational access for website management
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <Link
-                href="/admin/cars"
-                className="p-4 rounded-2xl bg-zinc-50 hover:bg-zinc-100 border border-zinc-200/80 transition-all flex items-start gap-3 group"
-              >
-                <div className="h-9 w-9 rounded-xl bg-black text-white flex items-center justify-center shrink-0">
-                  <Car className="w-4 h-4" />
-                </div>
-                <div>
-                  <h4 className="text-xs font-bold text-black group-hover:text-zinc-600 transition-colors">
-                    Car Fleet Registry
-                  </h4>
-                  <p className="text-[11px] text-zinc-400 mt-0.5">Edit, feature or archive posts</p>
-                </div>
-              </Link>
-
-              <Link
-                href="/admin/users"
-                className="p-4 rounded-2xl bg-zinc-50 hover:bg-zinc-100 border border-zinc-200/80 transition-all flex items-start gap-3 group"
-              >
-                <div className="h-9 w-9 rounded-xl bg-black text-white flex items-center justify-center shrink-0">
-                  <Users className="w-4 h-4" />
-                </div>
-                <div>
-                  <h4 className="text-xs font-bold text-black group-hover:text-zinc-600 transition-colors">
-                    User Accounts
-                  </h4>
-                  <p className="text-[11px] text-zinc-400 mt-0.5">Role management & ban controls</p>
-                </div>
-              </Link>
-
-              <Link
-                href="/admin/inquiries"
-                className="p-4 rounded-2xl bg-zinc-50 hover:bg-zinc-100 border border-zinc-200/80 transition-all flex items-start gap-3 group"
-              >
-                <div className="h-9 w-9 rounded-xl bg-black text-white flex items-center justify-center shrink-0">
-                  <MessageSquare className="w-4 h-4" />
-                </div>
-                <div>
-                  <h4 className="text-xs font-bold text-black group-hover:text-zinc-600 transition-colors">
-                    Leads Inbox
-                  </h4>
-                  <p className="text-[11px] text-zinc-400 mt-0.5">Customer car direct messages</p>
-                </div>
-              </Link>
-
-              <Link
-                href="/admin/coupons"
-                className="p-4 rounded-2xl bg-zinc-50 hover:bg-zinc-100 border border-zinc-200/80 transition-all flex items-start gap-3 group"
-              >
-                <div className="h-9 w-9 rounded-xl bg-black text-white flex items-center justify-center shrink-0">
-                  <Tag className="w-4 h-4" />
-                </div>
-                <div>
-                  <h4 className="text-xs font-bold text-black group-hover:text-zinc-600 transition-colors">
-                    Promo Discounts
-                  </h4>
-                  <p className="text-[11px] text-zinc-400 mt-0.5">Create vouchers & campaigns</p>
-                </div>
-              </Link>
-            </div>
-          </div>
-
-          <div className="p-4 rounded-2xl bg-zinc-900 text-white flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="h-9 w-9 rounded-xl bg-rose-500 text-white flex items-center justify-center">
-                <ShieldCheck className="w-5 h-5" />
-              </div>
-              <div>
-                <p className="text-xs font-black">System Status: Online</p>
-                <p className="text-[10px] text-zinc-400">Database & R2 Storage healthy</p>
-              </div>
-            </div>
-            <Link
-              href="/admin/health"
-              className="px-3 py-1.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-[11px] font-bold text-white transition-colors"
-            >
-              Diagnostics
-            </Link>
-          </div>
-        </div>
-      </div>
-
-      {/* 4. REAL RECENT CAR LISTINGS & USER ACCOUNTS */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* Left: Recently Posted Vehicles (8 Cols) */}
-        <div className="lg:col-span-8 bg-white p-6 sm:p-8 rounded-3xl border border-zinc-200 shadow-sm space-y-6">
-          <div className="flex items-center justify-between border-b border-zinc-100 pb-4">
-            <div>
-              <h3 className="text-base font-black text-black">Latest Car Listings</h3>
-              <p className="text-xs text-zinc-400 mt-0.5">
-                Vehicles recently added to the marketplace
-              </p>
-            </div>
-            <Link
-              href="/admin/cars"
-              className="inline-flex items-center gap-1 text-xs font-bold text-black hover:text-zinc-600 transition-colors"
-            >
-              <span>View All ({metrics.totalCars})</span>
-              <ArrowUpRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="text-zinc-400 font-bold uppercase tracking-wider text-[10px] border-b border-zinc-100">
-                <tr>
-                  <th className="py-3 px-3">Vehicle</th>
-                  <th className="py-3 px-4">Type</th>
-                  <th className="py-3 px-4">Rate / Price</th>
-                  <th className="py-3 px-4">Status</th>
-                  <th className="py-3 px-3 text-right">View</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-zinc-100 font-semibold text-zinc-800">
-                {data?.recentCars && data.recentCars.length > 0 ? (
-                  data.recentCars.map((car: any) => (
-                    <tr key={car._id} className="hover:bg-zinc-50/80 transition-colors">
-                      <td className="py-3.5 px-3">
-                        <div className="flex items-center gap-3">
-                          <img
-                            src={car.coverImage}
-                            alt={car.title}
-                            className="w-12 h-8 object-cover rounded-lg border border-zinc-200 shrink-0 bg-zinc-100"
-                          />
-                          <div className="min-w-0">
-                            <p className="font-black text-black text-xs truncate max-w-[200px]">
-                              {car.title}
+                  return (
+                    <div
+                      key={idx}
+                      className="flex-1 flex flex-col items-center h-full justify-end group relative cursor-pointer"
+                      onMouseEnter={() => setHoveredIndex(idx)}
+                      onMouseLeave={() => setHoveredIndex(null)}
+                    >
+                      {/* Tooltip Card on Hover */}
+                      {hoveredIndex === idx && (
+                        <div className="absolute bottom-full mb-3 z-30 bg-zinc-950 border border-zinc-700 text-white text-[11px] p-3 rounded-2xl shadow-2xl min-w-[130px] pointer-events-none">
+                          <p className="font-black text-orange-400 border-b border-zinc-800 pb-1 mb-1.5">
+                            {point.label}
+                          </p>
+                          <div className="space-y-1 font-semibold">
+                            <p className="flex items-center justify-between text-teal-400">
+                              <span>Users:</span> <span>+{point.users}</span>
                             </p>
-                            <p className="text-[10px] text-zinc-400">
-                              {car.brand} • {car.year}
+                            <p className="flex items-center justify-between text-orange-400">
+                              <span>Cars:</span> <span>+{point.cars}</span>
+                            </p>
+                            <p className="flex items-center justify-between text-cyan-400">
+                              <span>Leads:</span> <span>+{point.inquiries}</span>
                             </p>
                           </div>
                         </div>
-                      </td>
-                      <td className="py-3.5 px-4">
-                        <span
-                          className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold capitalize ${
-                            car.listingType === 'rent'
-                              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                              : 'bg-blue-50 text-blue-700 border border-blue-200'
-                          }`}
-                        >
-                          For {car.listingType}
-                        </span>
-                      </td>
-                      <td className="py-3.5 px-4 font-black text-black">
-                        {car.listingType === 'rent'
-                          ? `$${car.rentalPrice || 0}/day`
-                          : formatPrice(car.salePrice || 0)}
-                      </td>
-                      <td className="py-3.5 px-4">
-                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-zinc-100 text-zinc-800 capitalize">
-                          {car.status}
-                        </span>
-                      </td>
-                      <td className="py-3.5 px-3 text-right">
-                        <Link
-                          href={`/cars/${car.slug}`}
-                          target="_blank"
-                          className="inline-flex p-1.5 rounded-lg text-zinc-400 hover:text-black hover:bg-zinc-100 transition-colors"
-                          title="Open public listing"
-                        >
-                          <ExternalLink className="w-4 h-4" />
-                        </Link>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={5} className="py-8 text-center text-zinc-400 text-xs">
-                      No car listings registered yet.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
+                      )}
 
-        {/* Right: Recent Registered Users (4 Cols) */}
-        <div className="lg:col-span-4 bg-white p-6 sm:p-8 rounded-3xl border border-zinc-200 shadow-sm space-y-6">
-          <div className="flex items-center justify-between border-b border-zinc-100 pb-4">
+                      {/* Bar Group */}
+                      <div className="w-full max-w-[48px] flex items-end justify-center gap-1 h-full pb-1">
+                        {(selectedMetric === 'all' || selectedMetric === 'users') && (
+                          <div
+                            style={{ height: `${userHeight}%` }}
+                            className="w-full rounded-t-md bg-gradient-to-t from-teal-600 to-teal-400 opacity-90 group-hover:opacity-100 transition-all"
+                          />
+                        )}
+                        {(selectedMetric === 'all' || selectedMetric === 'cars') && (
+                          <div
+                            style={{ height: `${carHeight}%` }}
+                            className="w-full rounded-t-md bg-gradient-to-t from-orange-600 to-amber-400 opacity-90 group-hover:opacity-100 transition-all"
+                          />
+                        )}
+                        {(selectedMetric === 'all' || selectedMetric === 'inquiries') && (
+                          <div
+                            style={{ height: `${inqHeight}%` }}
+                            className="w-full rounded-t-md bg-gradient-to-t from-cyan-600 to-sky-400 opacity-90 group-hover:opacity-100 transition-all"
+                          />
+                        )}
+                      </div>
+
+                      {/* X-Axis Date Label */}
+                      <span className="text-[10px] font-bold text-zinc-400 mt-2 truncate max-w-full">
+                        {point.label}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Legend */}
+              <div className="flex flex-wrap items-center justify-center gap-6 pt-2 text-xs font-semibold text-zinc-400">
+                <div className="flex items-center gap-2">
+                  <span className="h-3 w-3 rounded-full bg-teal-400" />
+                  <span>User Registrations</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="h-3 w-3 rounded-full bg-orange-500" />
+                  <span>Fleet Listings Added</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="h-3 w-3 rounded-full bg-cyan-400" />
+                  <span>Buyer Inquiries</span>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* 2-COLUMN DISTRIBUTION & MARKET INTELLIGENCE */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Widget 1: Fleet Distribution (Rent vs Sale) */}
+        <div className="bg-zinc-900/80 backdrop-blur-sm p-6 sm:p-7 rounded-3xl border border-zinc-800 shadow-sm space-y-5">
+          <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-base font-black text-black">New Accounts</h3>
-              <p className="text-xs text-zinc-400 mt-0.5">Recently registered users</p>
+              <h2 className="text-base font-black text-white">Fleet Business Model Split</h2>
+              <p className="text-xs text-zinc-400">Inventory proportion for car rentals vs outright sales</p>
             </div>
             <Link
-              href="/admin/users"
-              className="text-xs font-bold text-black hover:text-zinc-600 inline-flex items-center gap-1"
+              href="/admin/cars"
+              className="text-xs font-bold text-orange-400 hover:text-orange-300 flex items-center gap-1"
             >
-              <span>View All</span>
-              <ArrowUpRight className="w-3.5 h-3.5" />
+              <span>Manage</span>
+              <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
 
-          <div className="divide-y divide-zinc-100">
-            {data?.recentUsers && data.recentUsers.length > 0 ? (
-              data.recentUsers.map((u: any) => (
-                <div key={u._id} className="py-3 flex items-center justify-between gap-3">
+          <div className="space-y-4">
+            {/* Visual Ratio Bar */}
+            <div className="h-4 rounded-full bg-zinc-950 overflow-hidden flex p-0.5 border border-zinc-800">
+              <div
+                style={{ width: `${rentPercent}%` }}
+                className="h-full rounded-l-full bg-gradient-to-r from-orange-600 to-amber-500 transition-all duration-500"
+              />
+              <div
+                style={{ width: `${salePercent}%` }}
+                className="h-full rounded-r-full bg-gradient-to-r from-blue-600 to-indigo-500 transition-all duration-500"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 pt-2">
+              <div className="p-4 rounded-2xl bg-zinc-950/60 border border-zinc-800/80">
+                <div className="flex items-center gap-2">
+                  <span className="h-2.5 w-2.5 rounded-full bg-orange-500" />
+                  <span className="text-xs font-bold text-zinc-400">Rental Fleet</span>
+                </div>
+                <p className="text-xl font-black text-white mt-1.5">{metrics.totalRentals}</p>
+                <p className="text-[10px] text-zinc-400 font-semibold">{rentPercent}% of all inventory</p>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-zinc-950/60 border border-zinc-800/80">
+                <div className="flex items-center gap-2">
+                  <span className="h-2.5 w-2.5 rounded-full bg-blue-500" />
+                  <span className="text-xs font-bold text-zinc-400">Direct Sales</span>
+                </div>
+                <p className="text-xl font-black text-white mt-1.5">{metrics.totalSales}</p>
+                <p className="text-[10px] text-zinc-400 font-semibold">{salePercent}% of all inventory</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Widget 2: Top Brands Breakdown */}
+        <div className="bg-zinc-900/80 backdrop-blur-sm p-6 sm:p-7 rounded-3xl border border-zinc-800 shadow-sm space-y-5">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-base font-black text-white">Top Inventory Makes</h2>
+              <p className="text-xs text-zinc-400">Top car manufacturers represented in active fleet</p>
+            </div>
+            <Link
+              href="/admin/taxonomy"
+              className="text-xs font-bold text-orange-400 hover:text-orange-300 flex items-center gap-1"
+            >
+              <span>Taxonomy</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+
+          <div className="space-y-3">
+            {topBrands.length === 0 ? (
+              <p className="text-xs text-zinc-400 py-6 text-center">No brand data available yet.</p>
+            ) : (
+              topBrands.map((b, i) => (
+                <div key={b.brand} className="space-y-1.5">
+                  <div className="flex items-center justify-between text-xs font-bold">
+                    <span className="text-zinc-200">
+                      {i + 1}. {b.brand}
+                    </span>
+                    <span className="text-zinc-400 font-mono text-[11px]">
+                      {b.count} cars ({b.percentage}%)
+                    </span>
+                  </div>
+                  <div className="h-2 rounded-full bg-zinc-950 overflow-hidden border border-zinc-800">
+                    <div
+                      style={{ width: `${Math.max(b.percentage, 4)}%` }}
+                      className="h-full rounded-full bg-gradient-to-r from-orange-500 to-amber-400"
+                    />
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* 4-GRID LIVE ACTIVITY FEEDS */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Feed 1: Recent Rental Bookings */}
+        <div className="bg-zinc-900/80 backdrop-blur-sm p-6 rounded-3xl border border-zinc-800 shadow-sm space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <CalendarCheck2 className="w-4 h-4 text-purple-400" />
+              <h2 className="text-base font-black text-white">Recent Rental Bookings</h2>
+            </div>
+            <Link
+              href="/admin/bookings"
+              className="text-xs font-bold text-orange-400 hover:text-orange-300 flex items-center gap-1"
+            >
+              <span>View All</span>
+              <ChevronRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+
+          <div className="space-y-3">
+            {(!data?.recentBookings || data.recentBookings.length === 0) ? (
+              <p className="text-xs text-zinc-400 py-4 text-center">No rental bookings recorded yet.</p>
+            ) : (
+              data.recentBookings.map((b: any) => (
+                <div
+                  key={b._id}
+                  className="p-3.5 rounded-2xl bg-zinc-950/60 border border-zinc-800/80 flex items-center justify-between gap-3"
+                >
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="h-9 w-9 rounded-xl bg-black text-white flex items-center justify-center font-black text-xs shrink-0">
-                      {u.name?.charAt(0).toUpperCase() || 'U'}
+                    {b.carId?.coverImage ? (
+                      <img
+                        src={b.carId.coverImage}
+                        alt=""
+                        className="w-11 h-9 rounded-xl object-cover bg-zinc-800 shrink-0"
+                      />
+                    ) : (
+                      <div className="w-11 h-9 rounded-xl bg-zinc-800 flex items-center justify-center shrink-0">
+                        <Car className="w-4 h-4 text-zinc-400" />
+                      </div>
+                    )}
+                    <div className="min-w-0">
+                      <p className="text-xs font-bold text-white truncate">
+                        {b.carId?.title || 'Rental Vehicle'}
+                      </p>
+                      <p className="text-[10px] text-zinc-400 truncate">
+                        {b.userId?.name || b.userId?.email || 'Customer'} • {formatPrice(b.totalAmount || 0)}
+                      </p>
+                    </div>
+                  </div>
+
+                  <span
+                    className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider shrink-0 ${
+                      b.status === 'confirmed' || b.status === 'active'
+                        ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                        : b.status === 'pending'
+                        ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+                        : 'bg-zinc-800 text-zinc-400'
+                    }`}
+                  >
+                    {b.status}
+                  </span>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+
+        {/* Feed 2: Recent Car Sales Orders */}
+        <div className="bg-zinc-900/80 backdrop-blur-sm p-6 rounded-3xl border border-zinc-800 shadow-sm space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <ShoppingBag className="w-4 h-4 text-rose-400" />
+              <h2 className="text-base font-black text-white">Recent Sales Orders</h2>
+            </div>
+            <Link
+              href="/admin/orders"
+              className="text-xs font-bold text-orange-400 hover:text-orange-300 flex items-center gap-1"
+            >
+              <span>View All</span>
+              <ChevronRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+
+          <div className="space-y-3">
+            {(!data?.recentOrders || data.recentOrders.length === 0) ? (
+              <p className="text-xs text-zinc-400 py-4 text-center">No car sales orders recorded yet.</p>
+            ) : (
+              data.recentOrders.map((o: any) => (
+                <div
+                  key={o._id}
+                  className="p-3.5 rounded-2xl bg-zinc-950/60 border border-zinc-800/80 flex items-center justify-between gap-3"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    {o.carId?.coverImage ? (
+                      <img
+                        src={o.carId.coverImage}
+                        alt=""
+                        className="w-11 h-9 rounded-xl object-cover bg-zinc-800 shrink-0"
+                      />
+                    ) : (
+                      <div className="w-11 h-9 rounded-xl bg-zinc-800 flex items-center justify-center shrink-0">
+                        <ShoppingBag className="w-4 h-4 text-zinc-400" />
+                      </div>
+                    )}
+                    <div className="min-w-0">
+                      <p className="text-xs font-bold text-white truncate">
+                        {o.carId?.title || 'Purchase Listing'}
+                      </p>
+                      <p className="text-[10px] text-zinc-400 truncate">
+                        {o.userId?.name || o.userId?.email || 'Buyer'} • {formatPrice(o.finalPrice || o.salePrice || 0)}
+                      </p>
+                    </div>
+                  </div>
+
+                  <span
+                    className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider shrink-0 ${
+                      o.status === 'completed'
+                        ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                        : o.status === 'processing'
+                        ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                        : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+                    }`}
+                  >
+                    {o.status}
+                  </span>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+
+        {/* Feed 3: Recent Car Inquiries */}
+        <div className="bg-zinc-900/80 backdrop-blur-sm p-6 rounded-3xl border border-zinc-800 shadow-sm space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <MessageSquare className="w-4 h-4 text-cyan-400" />
+              <h2 className="text-base font-black text-white">Recent Buyer Inquiries</h2>
+            </div>
+            <Link
+              href="/admin/inquiries"
+              className="text-xs font-bold text-orange-400 hover:text-orange-300 flex items-center gap-1"
+            >
+              <span>View All</span>
+              <ChevronRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+
+          <div className="space-y-3">
+            {(!data?.recentInquiries || data.recentInquiries.length === 0) ? (
+              <p className="text-xs text-zinc-400 py-4 text-center">No customer inquiries yet.</p>
+            ) : (
+              data.recentInquiries.map((inq: any) => (
+                <div
+                  key={inq._id}
+                  className="p-3.5 rounded-2xl bg-zinc-950/60 border border-zinc-800/80 flex items-center justify-between gap-3"
+                >
+                  <div className="min-w-0">
+                    <p className="text-xs font-bold text-white truncate">
+                      {inq.senderName} ({inq.senderPhone || inq.senderEmail})
+                    </p>
+                    <p className="text-[10px] text-zinc-400 truncate">
+                      Re: {inq.carId?.title || 'Vehicle Listing'} • &ldquo;{inq.message?.slice(0, 40)}...&rdquo;
+                    </p>
+                  </div>
+                  <Link
+                    href={`/admin/inquiries`}
+                    className="p-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white transition-colors shrink-0"
+                  >
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </Link>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+
+        {/* Feed 4: Recent Registered Users */}
+        <div className="bg-zinc-900/80 backdrop-blur-sm p-6 rounded-3xl border border-zinc-800 shadow-sm space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Users className="w-4 h-4 text-teal-400" />
+              <h2 className="text-base font-black text-white">Recent User Signups</h2>
+            </div>
+            <Link
+              href="/admin/users"
+              className="text-xs font-bold text-orange-400 hover:text-orange-300 flex items-center gap-1"
+            >
+              <span>View All</span>
+              <ChevronRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+
+          <div className="space-y-3">
+            {(!data?.recentUsers || data.recentUsers.length === 0) ? (
+              <p className="text-xs text-zinc-400 py-4 text-center">No user accounts found.</p>
+            ) : (
+              data.recentUsers.map((u: any) => (
+                <div
+                  key={u._id}
+                  className="p-3.5 rounded-2xl bg-zinc-950/60 border border-zinc-800/80 flex items-center justify-between gap-3"
+                >
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-zinc-800 to-zinc-700 border border-zinc-700 text-white flex items-center justify-center font-bold text-xs shrink-0">
+                      {u.name ? u.name.charAt(0).toUpperCase() : 'U'}
                     </div>
                     <div className="min-w-0">
-                      <p className="text-xs font-black text-black truncate">{u.name}</p>
+                      <p className="text-xs font-bold text-white truncate">{u.name || 'User'}</p>
                       <p className="text-[10px] text-zinc-400 truncate">{u.email}</p>
                     </div>
                   </div>
+
                   <span
-                    className={`text-[10px] font-bold px-2 py-0.5 rounded-full capitalize shrink-0 ${
+                    className={`px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider ${
                       u.role === 'admin'
-                        ? 'bg-rose-100 text-rose-800'
-                        : 'bg-zinc-100 text-zinc-700'
+                        ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30'
+                        : 'bg-zinc-800 text-zinc-400'
                     }`}
                   >
                     {u.role}
                   </span>
                 </div>
               ))
-            ) : (
-              <p className="text-xs text-zinc-400 py-4 text-center">No user accounts found.</p>
             )}
           </div>
-
-          <Link href="/admin/users" className="block pt-2">
-            <button className="w-full py-2.5 rounded-2xl border border-zinc-200 bg-zinc-50 hover:bg-zinc-100 text-xs font-bold text-black transition-colors shadow-sm">
-              Manage All Users & Roles
-            </button>
-          </Link>
         </div>
       </div>
     </div>
