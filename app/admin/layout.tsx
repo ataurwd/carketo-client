@@ -6,6 +6,8 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/auth.store';
 import { Logo } from '@/components/ui/Logo';
 import { adminService } from '@/services/admin.service';
+import { AdminThemeProvider, useAdminTheme } from '@/context/AdminThemeContext';
+import { AdminThemeToggle } from '@/components/admin/AdminThemeToggle';
 import {
   LayoutDashboard,
   Car,
@@ -71,8 +73,18 @@ const navSections: NavSection[] = [
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <AdminThemeProvider>
+      <AdminLayoutContent>{children}</AdminLayoutContent>
+    </AdminThemeProvider>
+  );
+}
+
+function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
+  const { theme } = useAdminTheme();
+  const isLight = theme === 'light';
   const { isAuthenticated, isInitialized, token, user, logout } = useAuthStore();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [counts, setCounts] = useState<{ [key: string]: number }>({});
@@ -146,9 +158,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   if (!isInitialized || !isAuthenticated || !token || user?.role !== 'admin') {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center space-y-4 bg-zinc-950 text-white">
+      <div className="min-h-screen flex flex-col items-center justify-center space-y-4">
         <div className="h-10 w-10 border-4 border-orange-500 border-t-transparent rounded-full animate-spin" />
-        <p className="text-xs font-bold text-zinc-400">Verifying Admin Privileges...</p>
+        <p className="text-xs font-bold opacity-70">Verifying Admin Privileges...</p>
       </div>
     );
   }
@@ -165,20 +177,23 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col md:flex-row font-sans selection:bg-orange-500 selection:text-white">
+    <div className="min-h-screen flex flex-col md:flex-row font-sans selection:bg-orange-500 selection:text-white transition-colors duration-200">
       {/* MOBILE TOP BAR */}
-      <div className="md:hidden bg-zinc-900/90 backdrop-blur-md text-white px-4 py-3 flex items-center justify-between sticky top-0 z-50 border-b border-zinc-800">
+      <div className="md:hidden h-[70px] bg-zinc-900/90 backdrop-blur-md text-white px-4 flex items-center justify-between sticky top-0 z-50 border-b border-zinc-800 shrink-0">
         <Link href="/" className="flex items-center gap-2" title="Back to Home">
-          <Logo variant="white" size="sm" />
+          <Logo variant={isLight ? 'dark' : 'white'} size="sm" />
           <span className="text-xs font-bold text-zinc-400">Admin</span>
         </Link>
-        <button
-          onClick={() => setMobileOpen(!mobileOpen)}
-          aria-label="Toggle Navigation"
-          className="p-2 rounded-xl text-zinc-400 hover:text-white hover:bg-zinc-800"
-        >
-          {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-        </button>
+        <div className="flex items-center gap-2">
+          <AdminThemeToggle />
+          <button
+            onClick={() => setMobileOpen(!mobileOpen)}
+            aria-label="Toggle Navigation"
+            className="p-2 rounded-xl text-zinc-400 hover:text-white hover:bg-zinc-800"
+          >
+            {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
+        </div>
       </div>
 
       {/* MOBILE BACKDROP */}
@@ -197,52 +212,34 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       >
         {/* Top Branding & Collapse Button */}
         <div
-          className={`border-b border-zinc-800/70 transition-all ${
-            isSidebarCollapsed ? 'p-3 flex flex-col items-center gap-2.5' : 'p-4 flex items-center justify-between'
+          className={`h-[70px] border-b border-zinc-800/70 transition-all flex items-center shrink-0 ${
+            isSidebarCollapsed ? 'px-3 justify-center' : 'px-5 justify-between'
           }`}
         >
           {isSidebarCollapsed ? (
-            <>
-              {/* Centered Brand Mark in Collapsed Mode */}
+            <div className="w-full flex items-center justify-center">
               <Link
                 href="/admin"
-                className="h-10 w-10 rounded-xl bg-gradient-to-tr from-orange-600 to-amber-500 flex items-center justify-center font-black text-white text-base shadow-lg shadow-orange-500/25 hover:scale-105 transition-transform shrink-0"
+                className="h-10 w-10 rounded-xl bg-gradient-to-tr from-orange-600 to-amber-500 flex items-center justify-center font-black text-white text-base shadow-md hover:scale-105 transition-transform shrink-0"
                 title="Karketo Admin Console"
               >
                 K
               </Link>
-              {/* Expand Toggle Button directly underneath the logo mark */}
-              <button
-                onClick={toggleSidebar}
-                title="Expand Sidebar"
-                className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800/80 border border-zinc-800/60 hover:border-zinc-700 transition-all"
-              >
-                <PanelLeftOpen className="w-4 h-4 text-orange-400" />
-              </button>
-            </>
+            </div>
           ) : (
-            <>
+            <div className="w-full flex items-center">
               {/* Full Brand Logo & Tag in Expanded Mode */}
               <Link
                 href="/admin"
                 className="flex items-center gap-2.5 hover:opacity-90 transition-opacity min-w-0"
                 title="Karketo Admin Console"
               >
-                <Logo variant="white" size="md" />
-                <span className="px-2 py-0.5 rounded-md bg-orange-500/10 text-orange-400 border border-orange-500/20 text-[10px] font-black uppercase tracking-wider">
+                <Logo variant={isLight ? 'dark' : 'white'} size="md" />
+                <span className="px-2 py-0.5 rounded-md bg-orange-500/10 text-orange-500 border border-orange-500/20 text-[10px] font-black uppercase tracking-wider">
                   Admin
                 </span>
               </Link>
-
-              {/* Collapse Toggle Button in Expanded Mode */}
-              <button
-                onClick={toggleSidebar}
-                title="Collapse Sidebar"
-                className="p-1.5 rounded-xl text-zinc-400 hover:text-white hover:bg-zinc-800/80 border border-zinc-800/60 hover:border-zinc-700/60 transition-all"
-              >
-                <PanelLeftClose className="w-4 h-4 text-zinc-400 hover:text-orange-400" />
-              </button>
-            </>
+            </div>
           )}
         </div>
 
@@ -491,47 +488,79 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       {/* MAIN CONTENT AREA */}
       <div className="flex-1 flex flex-col min-w-0 min-h-screen bg-zinc-900/40">
         {/* Top Desktop Navigation Header */}
-        <header className="hidden md:flex items-center justify-between px-8 py-4 bg-zinc-900/70 backdrop-blur-md border-b border-zinc-800/80 sticky top-0 z-30 shadow-sm">
-          <div className="flex items-center gap-3">
+        <header className="hidden md:flex items-center justify-between px-6 lg:px-8 h-[70px] bg-zinc-900/70 backdrop-blur-md border-b border-zinc-800/80 sticky top-0 z-30 shadow-sm shrink-0">
+          <div className="flex items-center gap-3.5">
             {/* Quick Toggle for Sidebar from top bar */}
             <button
               onClick={toggleSidebar}
               title={isSidebarCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
-              className="p-2 rounded-xl text-zinc-400 hover:text-white hover:bg-zinc-800/80 border border-zinc-800 transition-colors"
+              className="p-2 rounded-xl text-zinc-400 hover:text-orange-500 hover:bg-zinc-800/80 border border-zinc-800/80 transition-all shadow-sm"
             >
               {isSidebarCollapsed ? (
                 <PanelLeftOpen className="w-4 h-4 text-orange-400" />
               ) : (
-                <PanelLeftClose className="w-4 h-4 text-zinc-400" />
+                <PanelLeftClose className="w-4 h-4" />
               )}
             </button>
 
-            <div>
-              <h1 className="text-lg font-black text-white capitalize tracking-tight">
+            <div className="h-5 w-px bg-zinc-800/80 hidden sm:block" />
+
+            {/* Breadcrumb & Current Title */}
+            <div className="flex items-center gap-2">
+              <span className="px-2 py-0.5 rounded-lg bg-orange-500/10 text-orange-500 text-[10px] font-black uppercase tracking-wider border border-orange-500/20">
+                Admin
+              </span>
+              <span className="text-zinc-600 font-bold text-xs">/</span>
+              <h1 className="text-base sm:text-lg font-black text-white capitalize tracking-tight">
                 {activeTitle}
               </h1>
-              <p className="text-[11px] text-zinc-400">
-                Enterprise management console for fleet, bookings, finances and customer relations.
-              </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5">
+            {/* Dark/Light Mode Switcher - ICON ONLY */}
+            <AdminThemeToggle />
+
+            {/* View Storefront Link */}
             <Link
               href="/"
               target="_blank"
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white text-xs font-bold border border-zinc-700 transition-all shadow-sm"
+              title="Open Public Storefront"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white text-xs font-bold border border-zinc-700 transition-all shadow-sm"
             >
               <Globe className="w-3.5 h-3.5 text-orange-400" />
-              <span>View Storefront</span>
+              <span className="hidden sm:inline">Storefront</span>
             </Link>
 
+            <div className="h-5 w-px bg-zinc-800/80 hidden sm:block mx-0.5" />
+
+            {/* Quick Profile Badge */}
+            <div className="hidden lg:flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-zinc-800/50 border border-zinc-700/50">
+              {user?.avatar ? (
+                <img
+                  src={user.avatar}
+                  alt=""
+                  referrerPolicy="no-referrer"
+                  className="h-6 w-6 rounded-lg object-cover border border-zinc-700"
+                />
+              ) : (
+                <div className="h-6 w-6 rounded-lg bg-gradient-to-tr from-orange-600 to-amber-500 text-white flex items-center justify-center font-black text-[10px] shadow-sm">
+                  {user?.name ? user.name.charAt(0).toUpperCase() : 'A'}
+                </div>
+              )}
+              <span className="text-xs font-bold text-zinc-300 max-w-[120px] truncate">
+                {user?.name || 'Admin'}
+              </span>
+            </div>
+
+            {/* Logout Button */}
             <button
               onClick={() => logout()}
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 text-xs font-bold transition-colors"
+              title="Sign Out"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 text-xs font-bold transition-all shadow-sm"
             >
               <LogOut className="w-3.5 h-3.5" />
-              <span>Logout</span>
+              <span className="hidden sm:inline">Logout</span>
             </button>
           </div>
         </header>

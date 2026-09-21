@@ -44,3 +44,280 @@
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
 }
+
+/* ============================================================
+   ADMIN DASHBOARD DUAL THEME ENGINE (LIGHT & DARK MODES)
+   Default: Light Mode
+   ============================================================ */
+
+.admin-root {
+  min-height: 100vh;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* ------------------------------------------------------------
+   LIGHT THEME STYLING (.admin-light)
+   ------------------------------------------------------------ */
+.admin-root.admin-light,
+.admin-light {
+  color-scheme: light;
+  background-color: #f8fafc !important;
+  color: #0f172a !important;
+}
+
+/* All Headings in Light Mode */
+.admin-light h1,
+.admin-light h2,
+.admin-light h3,
+.admin-light h4,
+.admin-light h5,
+.admin-light h6 {
+  color: #0f172a !important;
+}
+
+/* Surface Backgrounds */
+.admin-light .bg-zinc-950 {
+  background-color: #f8fafc !important;
+}
+.admin-light .bg-zinc-950\/90,
+.admin-light .bg-zinc-950\/80,
+.admin-light .bg-zinc-950\/70,
+.admin-light .bg-zinc-950\/40 {
+  background-color: #f8fafc !important;
+}
+
+/* Cards, Sidebar & Header Panels */
+.admin-light .bg-zinc-900,
+.admin-light .bg-zinc-900\/95,
+.admin-light .bg-zinc-900\/90,
+.admin-light .bg-zinc-900\/80,
+.admin-light .bg-zinc-900\/70 {
+  background-color: #ffffff !important;
+}
+
+/* Sub-panels, Table Rows & Hover Backdrops */
+.admin-light .bg-zinc-900\/60,
+.admin-light .bg-zinc-900\/50,
+.admin-light .bg-zinc-900\/40,
+.admin-light .bg-zinc-900\/30 {
+  background-color: #f8fafc !important;
+}
+
+/* Secondary Buttons, Badges, Filter Bar */
+.admin-light .bg-zinc-800,
+.admin-light .bg-zinc-800\/80,
+.admin-light .bg-zinc-800\/70,
+.admin-light .bg-zinc-800\/60 {
+  background-color: #f1f5f9 !important;
+}
+.admin-light .bg-zinc-800\/40,
+.admin-light .bg-zinc-800\/20 {
+  background-color: #f8fafc !important;
+}
+
+/* Borders & Dividers */
+.admin-light .border-zinc-800,
+.admin-light .border-zinc-800\/80,
+.admin-light .border-zinc-800\/70,
+.admin-light .border-zinc-800\/60,
+.admin-light .border-zinc-700,
+.admin-light .border-zinc-700\/80,
+.admin-light .border-zinc-700\/70,
+.admin-light .border-zinc-700\/60,
+.admin-light .border-zinc-700\/50 {
+  border-color: #e2e8f0 !important;
+}
+.admin-light .divide-zinc-800 > :not([hidden]) ~ :not([hidden]) {
+  border-color: #f1f5f9 !important;
+}
+
+/* Typography Hierarchy in Light Mode */
+.admin-light .text-white {
+  color: #0f172a !important;
+}
+.admin-light .text-zinc-100 {
+  color: #0f172a !important;
+}
+.admin-light .text-zinc-200 {
+  color: #1e293b !important;
+}
+.admin-light .text-zinc-300 {
+  color: #334155 !important;
+}
+.admin-light .text-zinc-400 {
+  color: #475569 !important; /* Crisp, high-contrast Slate 600 */
+}
+.admin-light .text-zinc-500 {
+  color: #64748b !important;
+}
+
+/* Text on Secondary Buttons */
+.admin-light a.bg-zinc-800,
+.admin-light button.bg-zinc-800,
+.admin-light .bg-zinc-800.text-zinc-200,
+.admin-light .bg-zinc-800.text-white {
+  color: #1e293b !important;
+  border-color: #cbd5e1 !important;
+}
+.admin-light a.bg-zinc-800:hover,
+.admin-light button.bg-zinc-800:hover {
+  background-color: #e2e8f0 !important;
+  color: #0f172a !important;
+}
+
+/* Rose / Logout button */
+.admin-light .text-rose-300 {
+  color: #e11d48 !important;
+}
+.admin-light .bg-rose-500\/10 {
+  background-color: #fff1f2 !important;
+}
+.admin-light .border-rose-500\/30 {
+  border-color: #fecdd3 !important;
+}
+.admin-light .hover\:bg-rose-500\/20:hover {
+  background-color: #ffe4e6 !important;
+}
+
+/* Explicit Preserved White Text on Colored Action Buttons ONLY */
+.admin-light .bg-orange-600,
+.admin-light .bg-orange-500,
+.admin-light .bg-gradient-to-r.from-orange-600,
+.admin-light .bg-gradient-to-br.from-orange-600,
+.admin-light .bg-gradient-to-tr.from-orange-600 {
+  color: #ffffff !important;
+}
+.admin-light .bg-orange-600 *,
+.admin-light .bg-orange-500 *,
+.admin-light .bg-gradient-to-r.from-orange-600 *,
+.admin-light .bg-gradient-to-br.from-orange-600 *,
+.admin-light .bg-gradient-to-tr.from-orange-600 *,
+.admin-light .from-orange-600.to-amber-500 {
+  color: #ffffff !important;
+}
+
+/* Top Banner Gradient in Light Mode */
+.admin-light .from-zinc-900 {
+  --tw-gradient-from: #ffffff !important;
+}
+.admin-light .via-zinc-900\/90 {
+  --tw-gradient-stops: var(--tw-gradient-from), #f8fafc, var(--tw-gradient-to) !important;
+}
+.admin-light .to-zinc-950 {
+  --tw-gradient-to: #f1f5f9 !important;
+}
+
+/* Hover States in Light Mode */
+.admin-light .hover\:bg-zinc-800:hover,
+.admin-light .hover\:bg-zinc-800\/80:hover,
+.admin-light .hover\:bg-zinc-800\/70:hover,
+.admin-light .hover\:bg-zinc-800\/60:hover,
+.admin-light .hover\:bg-zinc-800\/40:hover {
+  background-color: #f1f5f9 !important;
+}
+.admin-light .hover\:bg-zinc-700:hover {
+  background-color: #e2e8f0 !important;
+}
+.admin-light .hover\:text-white:hover {
+  color: #0f172a !important;
+}
+.admin-light .hover\:text-zinc-200:hover {
+  color: #0f172a !important;
+}
+
+/* Sidebar Nav Items in Light Mode */
+.admin-light aside {
+  background-color: #ffffff !important;
+  border-right-color: #e2e8f0 !important;
+}
+.admin-light aside a:not([class*="from-orange"]):not([class*="bg-orange"]) {
+  color: #334155 !important;
+}
+.admin-light aside a:not([class*="from-orange"]):not([class*="bg-orange"]):hover {
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
+}
+.admin-light aside button:not([class*="from-orange"]):not([class*="bg-orange"]) {
+  color: #475569 !important;
+}
+
+/* Desktop Header in Light Mode */
+.admin-light header {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+  border-bottom-color: #e2e8f0 !important;
+}
+
+/* Form Inputs, Selects & Textareas in Light Mode */
+.admin-light input,
+.admin-light select,
+.admin-light textarea {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border-color: #cbd5e1 !important;
+}
+.admin-light input:focus,
+.admin-light select:focus,
+.admin-light textarea:focus {
+  border-color: #ea580c !important;
+  background-color: #ffffff !important;
+  outline: none !important;
+  box-shadow: 0 0 0 2px rgba(234, 88, 12, 0.15) !important;
+}
+.admin-light input::placeholder,
+.admin-light textarea::placeholder {
+  color: #94a3b8 !important;
+}
+
+/* High Contrast Accent Colors on Light Cards */
+.admin-light .text-emerald-400 {
+  color: #059669 !important;
+}
+.admin-light .text-teal-400 {
+  color: #0d9488 !important;
+}
+.admin-light .text-cyan-400 {
+  color: #0284c7 !important;
+}
+.admin-light .text-blue-400 {
+  color: #2563eb !important;
+}
+.admin-light .text-indigo-400 {
+  color: #4f46e5 !important;
+}
+.admin-light .text-orange-400 {
+  color: #ea580c !important;
+}
+.admin-light .text-amber-400 {
+  color: #d97706 !important;
+}
+.admin-light .text-rose-400 {
+  color: #e11d48 !important;
+}
+
+/* Select Options in Light Mode */
+.admin-light select option {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+}
+
+/* Shadows in Light Mode */
+.admin-light .shadow-xl {
+  box-shadow: 0 8px 24px -4px rgba(15, 23, 42, 0.06), 0 2px 6px -1px rgba(15, 23, 42, 0.04) !important;
+}
+.admin-light .shadow-lg {
+  box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.05), 0 2px 4px -1px rgba(15, 23, 42, 0.03) !important;
+}
+.admin-light .shadow-sm {
+  box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.04), 0 1px 2px -1px rgba(15, 23, 42, 0.03) !important;
+}
+
+/* ------------------------------------------------------------
+   DARK THEME STYLING (.admin-dark)
+   ------------------------------------------------------------ */
+.admin-root.admin-dark {
+  color-scheme: dark;
+  background-color: #09090b;
+  color: #ffffff;
+}
+
+
