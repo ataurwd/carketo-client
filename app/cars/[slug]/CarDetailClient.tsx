@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Accordion } from '@/components/ui/Accordion';
 import { CarCard } from '@/components/common/CarCard';
+import { RAW_CARS, FALLBACK_20_CARS } from '@/lib/fallbackCars';
 import {
   DoorClosed,
   Users,
@@ -262,12 +263,26 @@ export default function CarDetailClient() {
     const targetSlug = clientSlug || slug;
     if (targetSlug && targetSlug !== 'car') {
       setIsLoadingCar(true);
-      carService.getCarBySlug(targetSlug).then((res) => {
-        setCar(res);
-        setIsLoadingCar(false);
-      }).catch(() => {
-        setIsLoadingCar(false);
-      });
+      carService
+        .getCarBySlug(targetSlug)
+        .then((res) => {
+          if (res) {
+            setCar(res);
+          } else {
+            const fallback =
+              RAW_CARS.find((c: any) => c.slug === targetSlug) ||
+              FALLBACK_20_CARS.find((c: any) => c.slug === targetSlug);
+            if (fallback) setCar(fallback);
+          }
+          setIsLoadingCar(false);
+        })
+        .catch(() => {
+          const fallback =
+            RAW_CARS.find((c: any) => c.slug === targetSlug) ||
+            FALLBACK_20_CARS.find((c: any) => c.slug === targetSlug);
+          if (fallback) setCar(fallback);
+          setIsLoadingCar(false);
+        });
     }
   }, [clientSlug, slug]);
 
@@ -413,29 +428,22 @@ export default function CarDetailClient() {
 
   return (
     <div className="min-h-screen bg-zinc-50">
-      {/* 1. TOP HERO HEADER */}
-      <section className="relative bg-black text-white py-16 overflow-hidden">
-        <div className="absolute inset-0 opacity-30 mix-blend-overlay">
+      {/* 1. CENTERED BLACK HERO HEADER (Without the pill badge) */}
+      <section className="relative bg-black text-white py-12 sm:py-16 overflow-hidden">
+        <div className="absolute inset-0 opacity-25 mix-blend-overlay">
           <img
             src={car.coverImage}
-            alt="Hero BG"
+            alt="Hero Background"
             className="w-full h-full object-cover"
           />
         </div>
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-transparent" />
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10 text-center space-y-3">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300 text-xs font-bold uppercase tracking-wider">
-            <span className="text-white font-extrabold">{car.brand} • {car.model} ({car.year})</span>
-            <span className="text-zinc-600">|</span>
-            <span>{isRental ? 'Direct Rental Vehicle' : 'Verified Purchase Vehicle'}</span>
-          </div>
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 relative z-10 text-center space-y-3">
           <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-white">
-            {car.brand} {car.model}
-          </h1>
-          <p className="text-base sm:text-lg text-zinc-300 font-semibold max-w-2xl mx-auto">
             {car.title}
-          </p>
+          </h1>
+
           <div className="flex items-center justify-center gap-2 text-xs font-semibold text-zinc-400">
             <Link href="/" className="hover:text-white transition-colors">
               Home
@@ -450,10 +458,18 @@ export default function CarDetailClient() {
         </div>
       </section>
 
-      {/* 2. MAIN 2-COLUMN CONTENT SECTION */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12">
+      {/* 2. MAIN CONTENT SECTION */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+        {/* MOBILE ONLY: Image Slider shown FIRST at top on mobile */}
+        <div className="block lg:hidden mb-6">
+          <ImageSlider
+            images={car.images.length > 0 ? car.images : [car.coverImage].filter(Boolean)}
+            title={car.title}
+          />
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* LEFT COLUMN: Pricing, Contact Owner & Specs (4 Cols) */}
+          {/* LEFT COLUMN: Pricing, Contact Owner & Specs (4 Cols) - appears 2nd on mobile, left sidebar on desktop */}
           <div className="lg:col-span-4 space-y-6 lg:sticky lg:top-28">
             <div className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-card space-y-6">
               {/* Pricing Header */}
@@ -670,11 +686,13 @@ export default function CarDetailClient() {
 
           {/* RIGHT COLUMN: Gallery, Features, Amenities & Reviews (8 Cols) */}
           <div className="lg:col-span-8 space-y-10">
-            {/* Image Slider — auto-slide + touch/mouse swipe + arrows */}
-            <ImageSlider
-              images={car.images.length > 0 ? car.images : [car.coverImage].filter(Boolean)}
-              title={car.title}
-            />
+            {/* DESKTOP ONLY: Image Slider */}
+            <div className="hidden lg:block">
+              <ImageSlider
+                images={car.images.length > 0 ? car.images : [car.coverImage].filter(Boolean)}
+                title={car.title}
+              />
+            </div>
 
             {/* Quick Spec Highlights Grid */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">

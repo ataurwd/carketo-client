@@ -27,18 +27,15 @@ export const CarCardSkeleton: React.FC = () => {
         </div>
       </div>
 
-      {/* Footer Actions */}
-      <div className="space-y-3 pt-1">
-        <div className="flex items-center justify-between">
-          <div className="space-y-1.5">
-            <div className="h-3 w-16 bg-zinc-200 rounded" />
-            <div className="h-6 w-24 bg-zinc-200 rounded" />
-          </div>
-          <div className="h-10 w-10 rounded-full bg-zinc-200 shrink-0" />
+      {/* Footer Actions (Price + View Details link to single page) */}
+      <div className="pt-2 flex items-center justify-between">
+        <div className="space-y-1">
+          <div className="h-2.5 w-16 bg-zinc-200 rounded" />
+          <div className="h-6 w-24 bg-zinc-200 rounded-md" />
         </div>
 
-        {/* Contact phone pill / direct contact placeholder */}
-        <div className="h-10 w-full rounded-2xl bg-zinc-200" />
+        {/* View Details button placeholder */}
+        <div className="h-8 w-28 rounded-2xl bg-zinc-200 shrink-0" />
       </div>
     </div>
   );

@@ -1,201 +1,317 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import Link from 'next/link';
-import { HomeHero } from '@/components/home/HomeHero';
-import { SearchFilterBar } from '@/components/common/SearchFilterBar';
+import { HomeHero, HomeFilters, DEFAULT_HOME_FILTERS } from '@/components/home/HomeHero';
 import { CarCard } from '@/components/common/CarCard';
 import { CarCardSkeleton } from '@/components/common/CarCardSkeleton';
 import { Button } from '@/components/ui/Button';
 import { carService } from '@/services/car.service';
 import { ICar } from '@/types/car.types';
-import { apiClient } from '@/lib/api-client';
+import { FALLBACK_20_CARS } from '@/lib/fallbackCars';
+import { FeaturedCarsSlider } from '@/components/home/FeaturedCarsSlider';
 import {
   ShieldCheck,
   Zap,
-  ArrowUpRight,
   Sparkles,
   Headphones,
-  Activity,
-  KeyRound,
-  ShoppingBag,
-  Plus,
+  Car as CarIcon,
+  RotateCcw,
 } from 'lucide-react';
 
 export default function HomePage() {
-  const [backendStatus, setBackendStatus] = useState<{
-    status: string;
-    services?: { api: string; database: string; redis: string };
-    uptime?: number;
-  } | null>(null);
-
-  const [cars, setCars] = useState<ICar[]>([]);
+  const [cars, setCars] = useState<ICar[]>(FALLBACK_20_CARS);
   const [isLoadingCars, setIsLoadingCars] = useState(true);
 
+  // Staged / Draft filters in Hero
+  const [draftFilters, setDraftFilters] = useState<HomeFilters>(DEFAULT_HOME_FILTERS);
+
+  // Applied filters that actually filter the 20 cars grid
+  const [appliedFilters, setAppliedFilters] = useState<HomeFilters>(DEFAULT_HOME_FILTERS);
+
   useEffect(() => {
-    // 1. Health check
-    apiClient
-      .get('/health')
-      .then((res: any) => {
-        if (res.data) setBackendStatus(res.data);
+    // Fetch live cars from MongoDB API (limit 50 to get full fleet)
+    carService
+      .getCars({ limit: 50 })
+      .then((res) => {
+        if (res && res.length > 0) {
+          const existingSlugs = new Set(res.map((c) => c.slug));
+          const extraFallbacks = FALLBACK_20_CARS.filter((c) => !existingSlugs.has(c.slug));
+          setCars([...res, ...extraFallbacks]);
+        }
       })
       .catch(() => {
-        setBackendStatus({
-          status: 'ready',
-          services: { api: 'operational', database: 'connected', redis: 'ready' },
-        });
-      });
-
-    // 2. Fetch live cars from MongoDB
-    carService
-      .getCars()
-      .then((res) => {
-        setCars(res || []);
+        setCars(FALLBACK_20_CARS);
       })
       .finally(() => setIsLoadingCars(false));
   }, []);
 
-  // 1. Rental Cars Section dataset (strictly rental cars)
-  const rentalCars = useMemo(() => {
-    return cars.filter((car) => car.listingType === 'rent');
-  }, [cars]);
+  // Calculate active filter count (additional filters beyond tab)
+  const activeFiltersCount =
+    (appliedFilters.search.trim() ? 1 : 0) +
+    (appliedFilters.brand !== 'all' ? 1 : 0) +
+    (appliedFilters.model.trim() ? 1 : 0) +
+    (appliedFilters.condition !== 'all' ? 1 : 0) +
+    (appliedFilters.minYear ? 1 : 0) +
+    (appliedFilters.maxYear ? 1 : 0) +
+    (appliedFilters.bodyType !== 'all' ? 1 : 0) +
+    (appliedFilters.transmission !== 'all' ? 1 : 0) +
+    (appliedFilters.fuelType !== 'all' ? 1 : 0) +
+    (appliedFilters.location !== 'all' ? 1 : 0) +
+    (appliedFilters.minPrice ? 1 : 0) +
+    (appliedFilters.maxPrice ? 1 : 0) +
+    (appliedFilters.maxMileage ? 1 : 0);
 
-  // 2. Sale Cars Section dataset (strictly sale cars)
-  const saleCars = useMemo(() => {
-    return cars.filter((car) => car.listingType === 'sale');
-  }, [cars]);
+  // Check if staged filters differ from applied
+  const hasPendingChanges =
+    draftFilters.listingTab !== appliedFilters.listingTab ||
+    draftFilters.search !== appliedFilters.search ||
+    draftFilters.brand !== appliedFilters.brand ||
+    draftFilters.model !== appliedFilters.model ||
+    draftFilters.condition !== appliedFilters.condition ||
+    draftFilters.minYear !== appliedFilters.minYear ||
+    draftFilters.maxYear !== appliedFilters.maxYear ||
+    draftFilters.bodyType !== appliedFilters.bodyType ||
+    draftFilters.transmission !== appliedFilters.transmission ||
+    draftFilters.fuelType !== appliedFilters.fuelType ||
+    draftFilters.location !== appliedFilters.location ||
+    draftFilters.minPrice !== appliedFilters.minPrice ||
+    draftFilters.maxPrice !== appliedFilters.maxPrice ||
+    draftFilters.maxMileage !== appliedFilters.maxMileage;
+
+  // Apply filters
+  const handleApply = useCallback(() => {
+    setAppliedFilters({ ...draftFilters });
+    // Smooth scroll down to showcase
+    const el = document.getElementById('cars-showcase');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [draftFilters]);
+
+  // Reset all filters
+  const handleResetAll = useCallback(() => {
+    setDraftFilters(DEFAULT_HOME_FILTERS);
+    setAppliedFilters(DEFAULT_HOME_FILTERS);
+  }, []);
+
+  // Quick preset apply
+  const handleApplyPreset = useCallback((presetUpdates: Partial<HomeFilters>) => {
+    setDraftFilters((prev) => {
+      const updated = { ...prev, ...presetUpdates };
+      setAppliedFilters(updated);
+      return updated;
+    });
+  }, []);
+
+  // Remove individual filter chip
+  const handleRemoveAppliedFilter = useCallback((key: string, defaultValue: string) => {
+    setDraftFilters((prev) => ({ ...prev, [key]: defaultValue }));
+    setAppliedFilters((prev) => ({ ...prev, [key]: defaultValue }));
+  }, []);
+
+  // Filter and sort the cars for the 20 cars showcase
+  const displayCars = useMemo(() => {
+    let result = [...cars];
+
+    // 1. Listing Type filter (All vs Buy/Sale vs Rent)
+    if (appliedFilters.listingTab === 'sale') {
+      result = result.filter((c) => c.listingType === 'sale');
+    } else if (appliedFilters.listingTab === 'rent') {
+      result = result.filter((c) => c.listingType === 'rent');
+    }
+
+    // 2. Keyword Search
+    if (appliedFilters.search.trim()) {
+      const q = appliedFilters.search.toLowerCase().trim();
+      result = result.filter((c) => {
+        const title = (c.title || '').toLowerCase();
+        const brand = (c.brand || '').toLowerCase();
+        const model = (c.model || '').toLowerCase();
+        const location = (c.location || '').toLowerCase();
+        return title.includes(q) || brand.includes(q) || model.includes(q) || location.includes(q);
+      });
+    }
+
+    // 3. Brand
+    if (appliedFilters.brand !== 'all') {
+      result = result.filter((c) => (c.brand || '').toLowerCase() === appliedFilters.brand.toLowerCase());
+    }
+
+    // 4. Model
+    if (appliedFilters.model.trim()) {
+      const m = appliedFilters.model.toLowerCase().trim();
+      result = result.filter((c) => (c.model || '').toLowerCase().includes(m));
+    }
+
+    // 5. Condition
+    if (appliedFilters.condition !== 'all') {
+      result = result.filter((c) => {
+        const cond = (c.condition || '').toLowerCase();
+        if (appliedFilters.condition === 'certified') {
+          return cond === 'certified' || cond === 'reconditioned';
+        }
+        return cond === appliedFilters.condition.toLowerCase();
+      });
+    }
+
+    // 6. Fuel Type
+    if (appliedFilters.fuelType !== 'all') {
+      result = result.filter((c) => (c.fuelType || '').toLowerCase().includes(appliedFilters.fuelType.toLowerCase()));
+    }
+
+    // 7. Transmission
+    if (appliedFilters.transmission !== 'all') {
+      result = result.filter((c) => (c.transmission || '').toLowerCase().includes(appliedFilters.transmission.toLowerCase()));
+    }
+
+    // 8. Body Type
+    if (appliedFilters.bodyType !== 'all') {
+      result = result.filter((c) => (c.bodyType || '').toLowerCase().includes(appliedFilters.bodyType.toLowerCase()));
+    }
+
+    // 9. Location
+    if (appliedFilters.location !== 'all') {
+      result = result.filter((c) => (c.location || '').toLowerCase().includes(appliedFilters.location.toLowerCase()));
+    }
+
+    // 10. Price Range
+    if (appliedFilters.minPrice) {
+      const minP = Number(appliedFilters.minPrice);
+      result = result.filter((c) => {
+        const price = c.listingType === 'rent' ? (c.rentalPrice || c.price || 0) : (c.salePrice || c.price || 0);
+        return price >= minP;
+      });
+    }
+    if (appliedFilters.maxPrice) {
+      const maxP = Number(appliedFilters.maxPrice);
+      result = result.filter((c) => {
+        const price = c.listingType === 'rent' ? (c.rentalPrice || c.price || 0) : (c.salePrice || c.price || 0);
+        return price <= maxP;
+      });
+    }
+
+    // 11. Year Range
+    if (appliedFilters.minYear) {
+      const minY = Number(appliedFilters.minYear);
+      result = result.filter((c) => (c.year || 0) >= minY);
+    }
+    if (appliedFilters.maxYear) {
+      const maxY = Number(appliedFilters.maxYear);
+      result = result.filter((c) => (c.year || 0) <= maxY);
+    }
+
+    // 12. Max Mileage
+    if (appliedFilters.maxMileage) {
+      const maxM = Number(appliedFilters.maxMileage);
+      result = result.filter((c) => (c.mileage || 0) <= maxM);
+    }
+
+    // 13. Sorting
+    result.sort((a, b) => {
+      const priceA = a.listingType === 'rent' ? (a.rentalPrice || a.price || 0) : (a.salePrice || a.price || 0);
+      const priceB = b.listingType === 'rent' ? (b.rentalPrice || b.price || 0) : (b.salePrice || b.price || 0);
+
+      switch (appliedFilters.sortBy) {
+        case 'price_asc':
+          return priceA - priceB;
+        case 'price_desc':
+          return priceB - priceA;
+        case 'year_desc':
+          return (b.year || 0) - (a.year || 0);
+        case 'year_asc':
+          return (a.year || 0) - (b.year || 0);
+        case 'mileage_asc':
+          return (a.mileage || 0) - (b.mileage || 0);
+        case 'newest':
+        default:
+          return (b.year || 0) - (a.year || 0);
+      }
+    });
+
+    // If browsing without extra narrow filters, ensure 20 cars are shown
+    if (activeFiltersCount === 0) {
+      return result.slice(0, 20);
+    }
+
+    return result;
+  }, [cars, appliedFilters, activeFiltersCount]);
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
-      {/* 1. HERO SECTION */}
-      <HomeHero />
+      {/* 1. HERO SECTION WITH CENTERED TEXT & COMPREHENSIVE FILTER SYSTEM */}
+      <HomeHero
+        draftFilters={draftFilters}
+        setDraftFilters={setDraftFilters}
+        appliedFilters={appliedFilters}
+        onApply={handleApply}
+        onResetAll={handleResetAll}
+        onApplyPreset={handleApplyPreset}
+        onRemoveAppliedFilter={handleRemoveAppliedFilter}
+        hasPendingChanges={hasPendingChanges}
+        activeFiltersCount={activeFiltersCount}
+        totalFilteredCount={displayCars.length}
+      />
 
-
-      {/* 3. SECTION A: DEDICATED RENTAL CARS */}
-      <section className="py-20 bg-zinc-50 border-t border-zinc-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 space-y-10">
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-zinc-200 pb-6">
-            <div className="space-y-2">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-black text-white text-xs font-bold uppercase tracking-wider">
-                <ShoppingBag className="w-3.5 h-3.5" />
-                <span>Cars for Rent</span>
-              </div>
-              <h2 className="text-3xl sm:text-4xl font-black text-black">
-                Cars for Rent
-              </h2>
-              <p className="text-zinc-500 text-xs sm:text-sm max-w-xl">
-                Browse a diverse selection of vehicles available for rent. Find the perfect car for your needs at competitive daily or weekly rates. Each listing includes detailed specifications, verified owner information, and transparent pricing.
-              </p>
-            </div>
-
-            <Link href="/rent">
-              <Button
-                variant="outline"
-                size="md"
-                rightIcon={<ArrowUpRight className="w-4 h-4" />}
+      {/* 2. DEDICATED 20 LATEST CARS SHOWCASE DIRECTLY BELOW HERO (NO REDUNDANT TEXT) */}
+      <section id="cars-showcase" className="py-12 sm:py-16 bg-zinc-50 border-t border-zinc-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+          
+          {/* Subtle compact filter info bar only if active filters exist */}
+          {activeFiltersCount > 0 && (
+            <div className="flex items-center justify-between pb-4 border-b border-zinc-200 text-xs">
+              <span className="font-bold text-zinc-700">
+                Filtered Results: Showing <strong className="text-black">{displayCars.length}</strong> vehicles
+              </span>
+              <button
+                type="button"
+                onClick={handleResetAll}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-zinc-600 hover:text-black hover:bg-zinc-200 transition-colors"
               >
-                View All Rentals {rentalCars.length > 0 ? `(${rentalCars.length})` : ''}
-              </Button>
-            </Link>
-          </div>
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span>Reset Filters</span>
+              </button>
+            </div>
+          )}
 
-          {/* Rental Cars Grid */}
+          {/* Latest 20 Cars Grid (Responsive 3-column layout) */}
           {isLoadingCars ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-              {[1, 2, 3].map((i) => (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+              {Array.from({ length: 6 }).map((_, i) => (
                 <CarCardSkeleton key={i} />
               ))}
             </div>
-          ) : rentalCars.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-              {rentalCars.map((car) => (
+          ) : displayCars.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+              {displayCars.map((car) => (
                 <CarCard key={car._id} car={car} />
               ))}
             </div>
           ) : (
-            <div className="p-12 rounded-3xl bg-white border border-zinc-200 text-center space-y-3">
-              <ShoppingBag className="w-10 h-10 text-zinc-400 mx-auto" />
-              <h3 className="text-base font-bold text-black">No Cars for Rent Currently Listed</h3>
-              <p className="text-xs text-zinc-500 max-w-md mx-auto">
-                List your vehicle for rent today and start earning booking revenue!
+            /* Empty State */
+            <div className="p-12 sm:p-16 rounded-3xl bg-white border border-zinc-200 text-center space-y-4 max-w-xl mx-auto shadow-sm">
+              <CarIcon className="w-12 h-12 text-zinc-300 mx-auto" />
+              <h3 className="text-lg font-bold text-black">No vehicles match your active filters</h3>
+              <p className="text-xs text-zinc-500 leading-relaxed">
+                Try loosening your filters, changing price range, or reset all filters to view our full collection of 20 vehicles.
               </p>
-              <div className="pt-3">
-                <Link href="/sell" className="inline-block">
-                  <Button variant="dark" size="sm" leftIcon={<Plus className="w-4 h-4" />}>
-                    List Car for Rent
-                  </Button>
-                </Link>
+              <div className="pt-2">
+                <Button variant="dark" size="sm" onClick={handleResetAll} leftIcon={<RotateCcw className="w-4 h-4" />}>
+                  Reset All Filters
+                </Button>
               </div>
             </div>
           )}
+
         </div>
       </section>
 
-      {/* 4. SECTION B: DEDICATED CARS FOR SALE */}
-      <section className="py-20 bg-white border-t border-zinc-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 space-y-10">
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-zinc-200 pb-6">
-            <div className="space-y-2">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-black text-white text-xs font-bold uppercase tracking-wider">
-                <ShoppingBag className="w-3.5 h-3.5" />
-                <span>Verified Showroom</span>
-              </div>
-              <h2 className="text-3xl sm:text-4xl font-black text-black">
-                Cars for Sale
-              </h2>
-              <p className="text-zinc-500 text-xs sm:text-sm max-w-xl">
-                Explore vehicles with clean titles and direct owner contacts. Call and negotiate directly with sellers.
-              </p>
-            </div>
+      {/* 3. FEATURED CARS CAROUSEL SLIDER (UNIQUE LUXURY CARD STYLE) */}
+      <FeaturedCarsSlider cars={cars} />
 
-            <Link href="/buy">
-              <Button
-                variant="outline"
-                size="md"
-                rightIcon={<ArrowUpRight className="w-4 h-4" />}
-              >
-                View All Cars for Sale {saleCars.length > 0 ? `(${saleCars.length})` : ''}
-              </Button>
-            </Link>
-          </div>
-
-          {/* Sale Cars Grid */}
-          {isLoadingCars ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-              {[1, 2, 3].map((i) => (
-                <CarCardSkeleton key={i} />
-              ))}
-            </div>
-          ) : saleCars.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-              {saleCars.map((car) => (
-                <CarCard key={car._id} car={car} />
-              ))}
-            </div>
-          ) : (
-            <div className="p-12 rounded-3xl bg-white border border-zinc-200 text-center space-y-3">
-              <ShoppingBag className="w-10 h-10 text-zinc-400 mx-auto" />
-              <h3 className="text-base font-bold text-black">No Cars for Sale Currently Listed</h3>
-              <p className="text-xs text-zinc-500 max-w-md mx-auto">
-                List your vehicle for sale today and reach thousands of prospective car buyers!
-              </p>
-              <div className="pt-3">
-                <Link href="/sell" className="inline-block">
-                  <Button variant="dark" size="sm" leftIcon={<Plus className="w-4 h-4" />}>
-                    List Car for Sale
-                  </Button>
-                </Link>
-              </div>
-            </div>
-          )}
-        </div>
-      </section>
-
-
-
-      {/* 5. TRUSTED PARTNER & ASSURANCE SECTION */}
-      <section className="py-20 border-t border-zinc-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+      {/* 3. TRUSTED PARTNER & ASSURANCE SECTION */}
+      <section className="py-20 border-t border-zinc-200 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             {/* Left Visual */}
             <div className="relative flex justify-center">
@@ -224,7 +340,7 @@ export default function HomePage() {
               </div>
 
               <h2 className="text-3xl sm:text-4xl font-black text-black leading-tight">
-                We make luxury automotive rentals & sales completely hassle-free.
+                We make luxury automotive rentals &amp; sales completely hassle-free.
               </h2>
 
               <p className="text-zinc-600 text-xs sm:text-sm leading-relaxed">
@@ -242,9 +358,9 @@ export default function HomePage() {
 
                 <div className="p-4 rounded-2xl bg-zinc-50 border border-zinc-200 space-y-1">
                   <Headphones className="w-5 h-5 text-black mb-2" />
-                  <h4 className="font-bold text-sm text-black">24/7 Roadside Assist</h4>
+                  <h4 className="font-bold text-sm text-black">24/7 Support</h4>
                   <p className="text-xs text-zinc-500">
-                    Dedicated customer concierge always on standby.
+                    Dedicated automotive concierge always on standby.
                   </p>
                 </div>
               </div>

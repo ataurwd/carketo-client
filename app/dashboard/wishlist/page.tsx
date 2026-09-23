@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { wishlistService } from '@/services/wishlist.service';
 import { ICar } from '@/types/car.types';
 import { CarCard } from '@/components/common/CarCard';
+import { CarCardSkeleton } from '@/components/common/CarCardSkeleton';
 import { Button } from '@/components/ui/Button';
 import { ArrowLeft, Heart, Search } from 'lucide-react';
 
@@ -43,8 +44,14 @@ export default function WishlistPage() {
           </p>
         </div>
 
-        {cars.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {isLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <CarCardSkeleton key={i} />
+            ))}
+          </div>
+        ) : cars.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
             {cars.map((car) => (
               <CarCard key={car._id} car={car} />
             ))}
