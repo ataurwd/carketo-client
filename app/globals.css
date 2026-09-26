@@ -115,20 +115,94 @@
   background-color: #f8fafc !important;
 }
 
-/* Borders & Dividers */
+/* Borders & Dividers in Light Mode - Soft Slate, Never Harsh/Black */
+.admin-light .border-zinc-950,
+.admin-light .border-zinc-900,
+.admin-light .border-zinc-900\/80,
 .admin-light .border-zinc-800,
+.admin-light .border-zinc-800\/90,
 .admin-light .border-zinc-800\/80,
 .admin-light .border-zinc-800\/70,
 .admin-light .border-zinc-800\/60,
+.admin-light .border-zinc-800\/50,
+.admin-light .border-zinc-800\/40,
 .admin-light .border-zinc-700,
 .admin-light .border-zinc-700\/80,
 .admin-light .border-zinc-700\/70,
 .admin-light .border-zinc-700\/60,
-.admin-light .border-zinc-700\/50 {
+.admin-light .border-zinc-700\/50,
+.admin-light .border-zinc-700\/40 {
   border-color: #e2e8f0 !important;
 }
-.admin-light .divide-zinc-800 > :not([hidden]) ~ :not([hidden]) {
-  border-color: #f1f5f9 !important;
+
+.admin-light .border-transparent {
+  border-color: transparent !important;
+}
+
+/* Sidebar Navigation in Light Mode - Completely Clean Without Stray Borders */
+.admin-light aside nav a,
+.admin-light aside .group a,
+.admin-light aside a,
+.admin-light aside button {
+  border: none !important;
+  border-color: transparent !important;
+}
+
+.admin-light aside a:not([class*="from-orange"]):not([class*="bg-orange"]) {
+  border: none !important;
+  border-color: transparent !important;
+}
+
+/* Table Row Dividers & Divide Utilities in Light Mode */
+.admin-light .divide-zinc-800 > :not([hidden]) ~ :not([hidden]),
+.admin-light .divide-zinc-800\/90 > :not([hidden]) ~ :not([hidden]),
+.admin-light .divide-zinc-800\/80 > :not([hidden]) ~ :not([hidden]),
+.admin-light .divide-zinc-800\/70 > :not([hidden]) ~ :not([hidden]),
+.admin-light .divide-zinc-800\/60 > :not([hidden]) ~ :not([hidden]),
+.admin-light .divide-zinc-800\/50 > :not([hidden]) ~ :not([hidden]),
+.admin-light .divide-zinc-800\/40 > :not([hidden]) ~ :not([hidden]),
+.admin-light .divide-zinc-800\/30 > :not([hidden]) ~ :not([hidden]),
+.admin-light .divide-zinc-700 > :not([hidden]) ~ :not([hidden]),
+.admin-light .divide-zinc-700\/80 > :not([hidden]) ~ :not([hidden]),
+.admin-light .divide-zinc-700\/60 > :not([hidden]) ~ :not([hidden]),
+.admin-light .divide-zinc-700\/50 > :not([hidden]) ~ :not([hidden]),
+.admin-light tbody.divide-y > :not([hidden]) ~ :not([hidden]),
+.admin-light tbody > :not([hidden]) ~ :not([hidden]) {
+  border-color: #e2e8f0 !important;
+}
+
+/* Dedicated Table Styling in Light Mode */
+.admin-light table {
+  border-collapse: collapse !important;
+  border-color: #e2e8f0 !important;
+}
+
+.admin-light table thead tr {
+  background-color: #f8fafc !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+}
+
+.admin-light table thead th {
+  color: #64748b !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+  background-color: #f8fafc !important;
+}
+
+.admin-light table tbody tr {
+  background-color: #ffffff !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+}
+
+.admin-light table tbody tr:hover {
+  background-color: #f8fafc !important;
+}
+
+.admin-light table tbody tr:last-child {
+  border-bottom: none !important;
+}
+
+.admin-light table tbody td {
+  border-color: #e2e8f0 !important;
 }
 
 /* Typography Hierarchy in Light Mode */

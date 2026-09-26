@@ -318,10 +318,10 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
                             /* Symmetrical Square Icon Button in Collapsed Mode */
                             <Link
                               href={item.href}
-                              className={`w-11 h-11 flex items-center justify-center rounded-xl transition-all relative ${
+                              className={`w-11 h-11 flex items-center justify-center rounded-xl transition-all relative border-0 ${
                                 isActive
-                                  ? 'bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-lg shadow-orange-500/30 border border-orange-400/40 ring-2 ring-orange-500/20'
-                                  : 'text-zinc-400 hover:text-white hover:bg-zinc-800/80 border border-transparent hover:border-zinc-700/60'
+                                  ? 'bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-lg shadow-orange-500/30'
+                                  : 'text-zinc-400 hover:text-white hover:bg-zinc-800/80'
                               }`}
                             >
                               <Icon className="w-5 h-5 shrink-0 transition-transform group-hover:scale-110" />
@@ -335,10 +335,10 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
                             /* Full Width Nav Item in Expanded Mode */
                             <Link
                               href={item.href}
-                              className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
+                              className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all border-0 ${
                                 isActive
-                                  ? 'bg-gradient-to-r from-orange-600 to-orange-500 text-white shadow-lg shadow-orange-600/20 border border-orange-500/30'
-                                  : 'text-zinc-400 hover:text-white hover:bg-zinc-800/70 border border-transparent hover:border-zinc-700/50'
+                                  ? 'bg-gradient-to-r from-orange-600 to-orange-500 text-white shadow-lg shadow-orange-600/20'
+                                  : 'text-zinc-400 hover:text-white hover:bg-zinc-800/70'
                               }`}
                             >
                               <div className="flex items-center gap-3 min-w-0">
@@ -399,7 +399,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
               <Link
                 href="/"
                 target="_blank"
-                className="w-11 h-11 flex items-center justify-center rounded-xl text-zinc-400 hover:text-orange-400 hover:bg-zinc-800/80 border border-transparent hover:border-zinc-700/60 transition-all"
+                className="w-11 h-11 flex items-center justify-center rounded-xl text-zinc-400 hover:text-orange-400 hover:bg-zinc-800/80 transition-all border-0"
               >
                 <Globe className="w-5 h-5" />
               </Link>
@@ -407,7 +407,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
               <Link
                 href="/"
                 target="_blank"
-                className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-zinc-400 hover:text-white hover:bg-zinc-800/60 border border-transparent hover:border-zinc-700/60 transition-all"
+                className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-zinc-400 hover:text-white hover:bg-zinc-800/60 transition-all border-0"
               >
                 <div className="flex items-center gap-2">
                   <Globe className="w-4 h-4 text-zinc-400 group-hover:text-orange-400" />

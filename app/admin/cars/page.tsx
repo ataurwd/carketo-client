@@ -232,7 +232,7 @@ export default function AdminCarsPage() {
   const fetchCars = () => {
     setIsLoading(true);
     adminService
-      .getCarsAdmin()
+      .getCarsAdmin({ limit: 1000 })
       .then((res) => {
         setCars(res || []);
       })
@@ -335,7 +335,15 @@ export default function AdminCarsPage() {
   };
 
   const filteredCars = cars.filter((car) => {
-    if (listingTypeFilter !== 'all' && car.listingType !== listingTypeFilter) return false;
+    if (listingTypeFilter !== 'all') {
+      if (listingTypeFilter === 'rent') {
+        if (car.listingType !== 'rent' && car.listingType !== 'both') return false;
+      } else if (listingTypeFilter === 'sale') {
+        if (car.listingType !== 'sale' && car.listingType !== 'both') return false;
+      } else if (car.listingType !== listingTypeFilter) {
+        return false;
+      }
+    }
     if (statusFilter !== 'all' && car.status !== statusFilter) return false;
     if (search.trim()) {
       const q = search.toLowerCase();

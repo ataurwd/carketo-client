@@ -148,7 +148,7 @@ export const adminService = {
 
   // ===================== USER MANAGEMENT & RBAC =====================
   async getUsers(params?: any) {
-    const res: any = await apiClient.get('/admin/users', { params });
+    const res: any = await apiClient.get('/admin/users', { params: { limit: 1000, ...params } });
     return res.data || [];
   },
 
@@ -164,7 +164,7 @@ export const adminService = {
 
   // ===================== MASTER CAR FLEET & MODERATION =====================
   async getCarsAdmin(params?: any) {
-    const res: any = await apiClient.get('/admin/cars', { params });
+    const res: any = await apiClient.get('/admin/cars', { params: { limit: 1000, ...params } });
     return res.data || [];
   },
 
