@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { TopPromoBar } from '@/components/layout/TopPromoBar';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
+import { CarAssistantChatbot } from '@/components/ai/CarAssistantChatbot';
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -20,6 +21,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <Navbar />
       <main className="flex-1">{children}</main>
       <Footer />
+      <CarAssistantChatbot />
     </>
   );
 }
