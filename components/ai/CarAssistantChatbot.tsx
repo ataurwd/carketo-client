@@ -17,11 +17,16 @@ import {
   AlertTriangle,
   ArrowRight,
   Compass,
+  Lock,
+  LogIn,
+  UserPlus,
 } from 'lucide-react';
 import { aiService, ChatMessage, RecommendedCarCard, SuggestedPrompt } from '@/services/ai.service';
 import { formatPrice } from '@/lib/utils';
+import { useAuthStore } from '@/store/auth.store';
 
 export function CarAssistantChatbot() {
+  const { isAuthenticated, isInitialized } = useAuthStore();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputValue, setInputValue] = useState('');
@@ -43,11 +48,15 @@ export function CarAssistantChatbot() {
     // Load initial welcome message
     setMessages([initialGreeting]);
 
-    // Fetch suggested prompts
-    aiService.getPrompts().then((prompts) => {
-      setSuggestedPrompts(prompts);
-    });
-  }, []);
+    // Fetch suggested prompts only when authenticated
+    if (isAuthenticated) {
+      aiService.getPrompts().then((prompts) => {
+        setSuggestedPrompts(prompts);
+      });
+    } else {
+      setSuggestedPrompts([]);
+    }
+  }, [isAuthenticated]);
 
   // Auto-scroll to bottom of chat
   useEffect(() => {
@@ -67,6 +76,18 @@ export function CarAssistantChatbot() {
   }, [isOpen]);
 
   const handleSendMessage = async (textToSend?: string) => {
+    if (!isAuthenticated) {
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: 'assistant',
+          content: '🔒 **লগইন আবশ্যক / Authentication Required**\n\nকারকেটো এআই অ্যাসিস্ট্যান্ট ব্যবহার করতে অনুগ্রহ করে আপনার অ্যাকাউন্টে লগইন করুন।',
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        },
+      ]);
+      return;
+    }
+
     const text = (textToSend || inputValue).trim();
     if (!text || isLoading) return;
 
@@ -99,11 +120,21 @@ export function CarAssistantChatbot() {
 
       setMessages((prev) => [...prev, assistantMessage]);
     } catch (err: any) {
+      const isAuthErr =
+        err?.statusCode === 401 ||
+        err?.response?.status === 401 ||
+        err?.message?.toLowerCase().includes('authentication') ||
+        err?.message?.toLowerCase().includes('unauthorized');
+
+      const fallbackReply = isAuthErr
+        ? '🔒 **সেশন শেষ হয়েছে / লগইন প্রয়োজন**\n\nএআই অ্যাসিস্ট্যান্ট ব্যবহারের অনুমতি পেতে অনুগ্রহ করে লগইন করুন।'
+        : 'Sorry, I encountered a brief issue connecting to our vehicle database. Please try asking again!';
+
       setMessages((prev) => [
         ...prev,
         {
           role: 'assistant',
-          content: 'Sorry, I encountered a brief issue connecting to our vehicle database. Please try asking again!',
+          content: fallbackReply,
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         },
       ]);
@@ -174,15 +205,29 @@ export function CarAssistantChatbot() {
     );
   };
 
-  // Inline formatting helper for bold and highlights
+  // Inline formatting helper for bold, highlights, and markdown links
   const renderInlineFormatting = (text: string) => {
-    const parts = text.split(/(\*\*.*?\*\*)/g);
+    // Split by bold (**text**) and markdown links ([text](url))
+    const parts = text.split(/(\*\*.*?\*\*|\[.*?\]\(.*?\))/g);
     return parts.map((part, i) => {
       if (part.startsWith('**') && part.endsWith('**')) {
         return (
           <strong key={i} className="font-bold text-slate-950">
             {part.slice(2, -2)}
           </strong>
+        );
+      }
+      const linkMatch = part.match(/^\[(.*?)\]\((.*?)\)$/);
+      if (linkMatch) {
+        const [, label, href] = linkMatch;
+        return (
+          <Link
+            key={i}
+            href={href}
+            className="inline-flex items-center gap-0.5 font-bold text-zinc-950 underline underline-offset-2 hover:text-zinc-600 transition-colors"
+          >
+            {label}
+          </Link>
         );
       }
       return part;
@@ -249,8 +294,17 @@ export function CarAssistantChatbot() {
                   </span>
                 </div>
                 <p className="text-[11px] text-slate-500 flex items-center gap-1 mt-0.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                  Live Fleet Search • Zero Hallucination
+                  {isAuthenticated ? (
+                    <>
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                      Live Fleet Search • Zero Hallucination
+                    </>
+                  ) : (
+                    <>
+                      <Lock className="w-3 h-3 text-slate-500" />
+                      <span>Sign in to unlock AI</span>
+                    </>
+                  )}
                 </p>
               </div>
             </div>
@@ -275,6 +329,34 @@ export function CarAssistantChatbot() {
 
           {/* Messages Feed */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50/50 scrollbar-thin scrollbar-thumb-slate-300">
+            {/* If not authenticated, show a prominent and sleek Login Required card */}
+            {!isAuthenticated && isInitialized && (
+              <div className="mx-0.5 my-2 p-4 rounded-2xl bg-zinc-950 text-white shadow-md border border-zinc-800 flex flex-col items-center text-center">
+                <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white mb-2.5">
+                  <Lock className="w-5 h-5 text-white" />
+                </div>
+                <h4 className="font-bold text-sm text-white">লগইন আবশ্যক / Sign In Required</h4>
+                <p className="text-xs text-zinc-300 mt-1 max-w-[280px] leading-relaxed">
+                  কারকেটো এআই অ্যাসিস্ট্যান্টের সাথে কথা বলতে এবং লাইভ ইনভেন্টরি ব্রাউজ করতে অনুগ্রহ করে লগইন করুন।
+                </p>
+                <div className="flex items-center gap-2 w-full mt-3.5">
+                  <Link
+                    href="/login"
+                    className="flex-1 py-2 px-3 rounded-xl bg-white hover:bg-zinc-100 text-zinc-950 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors shadow-xs"
+                  >
+                    <LogIn className="w-3.5 h-3.5" />
+                    লগইন করুন (Log In)
+                  </Link>
+                  <Link
+                    href="/register"
+                    className="flex-1 py-2 px-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-colors border border-zinc-700"
+                  >
+                    <UserPlus className="w-3.5 h-3.5" />
+                    রেজিস্টার (Register)
+                  </Link>
+                </div>
+              </div>
+            )}
             {messages.map((msg, index) => {
               const isUser = msg.role === 'user';
               return (
@@ -420,7 +502,7 @@ export function CarAssistantChatbot() {
           </div>
 
           {/* Quick Prompts Chips (Black & White Light Theme) */}
-          {messages.length <= 2 && suggestedPrompts.length > 0 && (
+          {isAuthenticated && messages.length <= 2 && suggestedPrompts.length > 0 && (
             <div className="px-4 py-2 border-t border-slate-200 bg-white">
               <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5 flex items-center gap-1">
                 <Compass className="w-3 h-3 text-zinc-900" />
@@ -441,38 +523,56 @@ export function CarAssistantChatbot() {
             </div>
           )}
 
-          {/* Input Box (Black & White Light Theme) */}
-          <div className="p-3 bg-white border-t border-slate-200 shrink-0">
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                handleSendMessage();
-              }}
-              className="flex items-center gap-2"
-            >
-              <input
-                ref={inputRef}
-                type="text"
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                placeholder="Ask about rental, purchase, budget..."
-                disabled={isLoading}
-                className="flex-1 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-zinc-900 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none transition-colors disabled:opacity-60 shadow-inner-xs"
-              />
-              <button
-                type="submit"
-                disabled={!inputValue.trim() || isLoading}
-                aria-label="Send message"
-                className="p-2 rounded-xl bg-zinc-950 hover:bg-zinc-800 disabled:bg-slate-200 disabled:text-slate-400 text-white font-bold transition-all duration-200 shrink-0 shadow-sm"
-              >
-                <Send className="w-3.5 h-3.5" />
-              </button>
-            </form>
-            <div className="flex items-center justify-between text-[10px] text-slate-400 mt-1.5 px-1 font-medium">
-              <span>Powered by Google Gemini</span>
-              <span>Live database • Real inventory</span>
+          {/* Input Box / Authentication Banner (Black & White Light Theme) */}
+          {!isAuthenticated ? (
+            <div className="p-3.5 bg-slate-50 border-t border-slate-200 shrink-0">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2 text-xs text-slate-600 font-medium">
+                  <Lock className="w-4 h-4 text-zinc-900 shrink-0" />
+                  <span>লগইন করে এআই চ্যাট শুরু করুন</span>
+                </div>
+                <Link
+                  href="/login"
+                  className="px-3.5 py-2 rounded-xl bg-zinc-950 hover:bg-zinc-800 text-white font-bold text-xs flex items-center gap-1.5 transition-colors shadow-xs"
+                >
+                  <LogIn className="w-3.5 h-3.5" />
+                  Log In
+                </Link>
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="p-3 bg-white border-t border-slate-200 shrink-0">
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleSendMessage();
+                }}
+                className="flex items-center gap-2"
+              >
+                <input
+                  ref={inputRef}
+                  type="text"
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  placeholder="Ask about rental, purchase, budget..."
+                  disabled={isLoading}
+                  className="flex-1 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-zinc-900 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none transition-colors disabled:opacity-60 shadow-inner-xs"
+                />
+                <button
+                  type="submit"
+                  disabled={!inputValue.trim() || isLoading}
+                  aria-label="Send message"
+                  className="p-2 rounded-xl bg-zinc-950 hover:bg-zinc-800 disabled:bg-slate-200 disabled:text-slate-400 text-white font-bold transition-all duration-200 shrink-0 shadow-sm"
+                >
+                  <Send className="w-3.5 h-3.5" />
+                </button>
+              </form>
+              <div className="flex items-center justify-between text-[10px] text-slate-400 mt-1.5 px-1 font-medium">
+                <span>Powered by Google Gemini</span>
+                <span>Live database • Real inventory</span>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </>

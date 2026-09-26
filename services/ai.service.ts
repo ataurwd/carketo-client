@@ -78,6 +78,12 @@ export const aiService = {
           prompt: 'What hybrid cars do you have available for rent?',
         },
         {
+          id: 'sell-car',
+          category: 'Selling',
+          label: '🏷️ Sell a Car / গাড়ি বিক্রি',
+          prompt: 'আমি গাড়ি বিক্রি করতে চাই, কীভাবে বিক্রি করবো?',
+        },
+        {
           id: 'compare-popular',
           category: 'Comparison',
           label: '⚖️ Compare Yaris vs Vezel',
