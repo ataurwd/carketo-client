@@ -14,7 +14,7 @@ export default function PrivacyPage() {
           <section className="space-y-2">
             <h2 className="text-base font-bold text-black">1. Information We Collect</h2>
             <p>
-              We collect information provided directly during registration and booking, including your full name, email address, phone number, driver&apos;s license details, and billing information. Automated diagnostics and telemetry data are collected solely for roadside safety and fleet management.
+              We collect information provided directly during registration and booking, including your full name, email address, phone number, driver&apos;s license details, and billing information. Automated diagnostics and telemetry data are collected solely for roadside safety and vehicle management.
             </p>
           </section>
 

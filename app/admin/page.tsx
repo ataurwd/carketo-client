@@ -82,7 +82,7 @@ export default function AdminOverviewPage() {
 
         <div className="relative z-10">
           <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight">
-            Executive Analytics & Fleet Control
+            Executive Analytics & Car Control
           </h1>
           <p className="text-xs sm:text-sm text-zinc-400 mt-1">
             Holistic performance metrics, customer leads, revenue telemetry, and inventory management.
@@ -135,7 +135,7 @@ export default function AdminOverviewPage() {
         <div className="bg-zinc-900/80 backdrop-blur-sm p-5 sm:p-6 rounded-3xl border border-zinc-800 shadow-sm relative overflow-hidden group hover:border-zinc-700 transition-all">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-extrabold uppercase tracking-wider text-zinc-400">
-              Fleet Valuation (AUM)
+              Car Valuation (AUM)
             </span>
             <div className="p-2 rounded-xl bg-orange-500/10 text-orange-400 border border-orange-500/20">
               <TrendingUp className="w-4 h-4" />
@@ -155,7 +155,7 @@ export default function AdminOverviewPage() {
         <div className="bg-zinc-900/80 backdrop-blur-sm p-5 sm:p-6 rounded-3xl border border-zinc-800 shadow-sm relative overflow-hidden group hover:border-zinc-700 transition-all">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-extrabold uppercase tracking-wider text-zinc-400">
-              Active Fleet Units
+              Active Car Units
             </span>
             <div className="p-2 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20">
               <Car className="w-4 h-4" />
@@ -224,7 +224,7 @@ export default function AdminOverviewPage() {
               </h2>
             </div>
             <p className="text-xs text-zinc-400 mt-0.5">
-              Continuous multi-metric activity timeline of user signups, fleet ingestion, and lead inquiries.
+              Continuous multi-metric activity timeline of user signups, car ingestion, and lead inquiries.
             </p>
           </div>
 
@@ -357,7 +357,7 @@ export default function AdminOverviewPage() {
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="h-3 w-3 rounded-full bg-orange-500" />
-                  <span>Fleet Listings Added</span>
+                  <span>Car Listings Added</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="h-3 w-3 rounded-full bg-cyan-400" />
@@ -375,7 +375,7 @@ export default function AdminOverviewPage() {
         <div className="bg-zinc-900/80 backdrop-blur-sm p-6 sm:p-7 rounded-3xl border border-zinc-800 shadow-sm space-y-5">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-base font-black text-white">Fleet Business Model Split</h2>
+              <h2 className="text-base font-black text-white">Car Business Model Split</h2>
               <p className="text-xs text-zinc-400">Inventory proportion for car rentals vs outright sales</p>
             </div>
             <Link
@@ -404,7 +404,7 @@ export default function AdminOverviewPage() {
               <div className="p-4 rounded-2xl bg-zinc-950/60 border border-zinc-800/80">
                 <div className="flex items-center gap-2">
                   <span className="h-2.5 w-2.5 rounded-full bg-orange-500" />
-                  <span className="text-xs font-bold text-zinc-400">Rental Fleet</span>
+                  <span className="text-xs font-bold text-zinc-400">Rental Cars</span>
                 </div>
                 <p className="text-xl font-black text-white mt-1.5">{metrics.totalRentals}</p>
                 <p className="text-[10px] text-zinc-400 font-semibold">{rentPercent}% of all inventory</p>
@@ -427,7 +427,7 @@ export default function AdminOverviewPage() {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-base font-black text-white">Top Inventory Makes</h2>
-              <p className="text-xs text-zinc-400">Top car manufacturers represented in active fleet</p>
+              <p className="text-xs text-zinc-400">Top car manufacturers represented in active cars</p>
             </div>
             <Link
               href="/admin/cars"

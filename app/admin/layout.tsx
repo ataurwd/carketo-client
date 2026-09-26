@@ -47,9 +47,9 @@ const navSections: NavSection[] = [
     ],
   },
   {
-    title: 'FLEET & COMMERCE',
+    title: 'CARS & COMMERCE',
     items: [
-      { label: 'Fleet Inventory', href: '/admin/cars', icon: Car },
+      { label: 'Car Inventory', href: '/admin/cars', icon: Car },
       { label: 'Financial Ledger', href: '/admin/payments', icon: CreditCard },
     ],
   },

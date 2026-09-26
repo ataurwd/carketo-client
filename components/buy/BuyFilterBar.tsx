@@ -545,7 +545,7 @@ export function BuyFilterBar({
               }}
               className="px-3 py-1 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-800 font-bold text-[11px] transition-colors"
             >
-              Hybrid Fleet
+              Hybrid Cars
             </button>
             <button
               type="button"

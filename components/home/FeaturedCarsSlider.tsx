@@ -65,7 +65,7 @@ export function FeaturedCarsSlider({ cars }: FeaturedCarsSliderProps) {
               href="/cars"
               className="text-xs font-bold text-zinc-400 hover:text-white transition-colors flex items-center gap-1 mr-2"
             >
-              <span>View All Fleet</span>
+              <span>View All Cars</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
 

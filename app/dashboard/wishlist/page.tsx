@@ -67,7 +67,7 @@ export default function WishlistPage() {
             </p>
             <Link href="/cars">
               <Button variant="dark" size="sm">
-                Explore Available Fleet
+                Explore Available Cars
               </Button>
             </Link>
           </div>

@@ -297,7 +297,7 @@ export function CarAssistantChatbot() {
                   {isAuthenticated ? (
                     <>
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                      Live Fleet Search • Zero Hallucination
+                      Live Car Search • Zero Hallucination
                     </>
                   ) : (
                     <>
@@ -493,7 +493,7 @@ export function CarAssistantChatbot() {
                     <span className="w-1.5 h-1.5 rounded-full bg-zinc-900 animate-bounce" style={{ animationDelay: '150ms' }} />
                     <span className="w-1.5 h-1.5 rounded-full bg-zinc-900 animate-bounce" style={{ animationDelay: '300ms' }} />
                   </div>
-                  <span className="text-xs text-slate-500 font-medium">Checking live fleet & criteria...</span>
+                  <span className="text-xs text-slate-500 font-medium">Checking live cars & criteria...</span>
                 </div>
               </div>
             )}

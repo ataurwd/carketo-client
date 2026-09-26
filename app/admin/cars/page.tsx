@@ -73,7 +73,7 @@ const CAR_STATUS_CONFIG: Record<
     label: 'Archived',
     badge: 'bg-zinc-900/90 text-zinc-500 border-zinc-800 hover:bg-zinc-800/80 hover:border-zinc-700',
     dot: 'bg-zinc-600',
-    desc: 'Deactivated fleet record',
+    desc: 'Deactivated car record',
   },
 };
 
@@ -125,7 +125,7 @@ function CarStatusDropdown({
         <div className="absolute left-0 mt-2 w-56 rounded-2xl bg-zinc-900/98 backdrop-blur-2xl border border-zinc-700/80 shadow-[0_10px_40px_rgba(0,0,0,0.8)] p-1.5 z-50 animate-in fade-in zoom-in-95 duration-150">
           <div className="px-2.5 py-1.5 border-b border-zinc-800/80 mb-1 flex items-center justify-between">
             <span className="text-[10px] font-extrabold uppercase tracking-wider text-zinc-400">
-              Update Fleet Status
+              Update Car Status
             </span>
             <span className="text-[10px] text-zinc-500 font-mono">Live</span>
           </div>
@@ -323,7 +323,7 @@ export default function AdminCarsPage() {
         setEditingCar(null);
       } else {
         await adminService.createCarAdmin(formData);
-        showToast('New vehicle listing added to fleet', 'success');
+        showToast('New vehicle listing added to cars', 'success');
         setIsAddModalOpen(false);
       }
       fetchCars();
@@ -368,7 +368,7 @@ export default function AdminCarsPage() {
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
     link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `karketo_fleet_${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute('download', `karketo_cars_${new Date().toISOString().split('T')[0]}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -385,13 +385,13 @@ export default function AdminCarsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-zinc-900/80 backdrop-blur-sm p-6 rounded-3xl border border-zinc-800 shadow-sm">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-black text-white">Fleet Inventory Control</h1>
+            <h1 className="text-2xl font-black text-white">Car Inventory Control</h1>
             <span className="h-6 px-2.5 rounded-full bg-orange-600 text-white text-xs font-black flex items-center justify-center shadow-sm">
               {cars.length} Units
             </span>
           </div>
           <p className="text-xs text-zinc-400 mt-1">
-            Complete vehicle fleet management, pricing, moderation, and direct vehicle creation.
+            Complete vehicle inventory management, pricing, moderation, and direct vehicle creation.
           </p>
         </div>
 
@@ -418,7 +418,7 @@ export default function AdminCarsPage() {
       {/* QUICK STATS CARDS */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <div className="p-4 rounded-2xl bg-zinc-900/60 border border-zinc-800">
-          <p className="text-[10px] font-extrabold uppercase text-zinc-400">Total Fleet</p>
+          <p className="text-[10px] font-extrabold uppercase text-zinc-400">Total Cars</p>
           <p className="text-xl font-black text-white mt-1">{cars.length}</p>
         </div>
         <div className="p-4 rounded-2xl bg-zinc-900/60 border border-zinc-800">
@@ -434,7 +434,7 @@ export default function AdminCarsPage() {
           </p>
         </div>
         <div className="p-4 rounded-2xl bg-zinc-900/60 border border-zinc-800">
-          <p className="text-[10px] font-extrabold uppercase text-blue-400">Gross Fleet Valuation</p>
+          <p className="text-[10px] font-extrabold uppercase text-blue-400">Gross Car Valuation</p>
           <p className="text-xl font-black text-blue-400 mt-1">{formatPrice(totalAssetValue)}</p>
         </div>
       </div>
@@ -460,7 +460,7 @@ export default function AdminCarsPage() {
             className="px-3.5 py-2.5 rounded-2xl bg-zinc-950 border border-zinc-800 text-xs font-bold text-white focus:outline-none focus:border-orange-500"
           >
             <option value="all">All Types (Rent & Sale)</option>
-            <option value="rent">Rental Fleet Only</option>
+            <option value="rent">Rental Cars Only</option>
             <option value="sale">Direct Sales Only</option>
             <option value="both">Both Rent & Sale</option>
           </select>
@@ -499,7 +499,7 @@ export default function AdminCarsPage() {
         {isLoading ? (
           <div className="p-12 text-center text-xs font-bold text-zinc-400">
             <div className="h-8 w-8 border-3 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
-            Loading fleet vehicles...
+            Loading vehicles...
           </div>
         ) : filteredCars.length === 0 ? (
           <div className="p-12 text-center space-y-3">
@@ -659,7 +659,7 @@ export default function AdminCarsPage() {
                 </div>
                 <div>
                   <h2 className="text-lg font-black text-white">
-                    {editingCar ? 'Edit Vehicle Details' : 'Add New Vehicle to Fleet'}
+                    {editingCar ? 'Edit Vehicle Details' : 'Add New Vehicle to Inventory'}
                   </h2>
                   <p className="text-xs text-zinc-400">Configure vehicle specifications, pricing, and media.</p>
                 </div>

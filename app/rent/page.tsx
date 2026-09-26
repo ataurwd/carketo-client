@@ -178,7 +178,7 @@ function RentCarContent() {
           <div className="max-w-2xl space-y-3 relative z-10">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-xs font-bold text-zinc-300">
               <KeyRound className="w-3.5 h-3.5 text-white" />
-              <span>Direct Rental Fleet</span>
+              <span>Direct Rental Cars</span>
             </div>
             <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-white">
               Rent Premium Vehicles

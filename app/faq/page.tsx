@@ -28,7 +28,7 @@ export default function FAQPage() {
       id: 'mileage',
       title: 'Are there mileage limits on rental cars?',
       content:
-        'Most vehicles in our fleet feature Unlimited Mileage. Specific high-performance track-edition supercars come with a generous daily allowance of 250 miles per day with affordable per-mile rates thereafter.',
+        'Most of our rental cars feature Unlimited Mileage. Specific high-performance track-edition supercars come with a generous daily allowance of 250 miles per day with affordable per-mile rates thereafter.',
     },
     {
       id: 'cancellation',

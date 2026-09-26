@@ -42,14 +42,14 @@ export default function ProviderDashboardPage() {
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-xl sm:text-2xl font-black text-black">
-                  {user?.name || 'Dealership / Fleet Hub'}
+                  {user?.name || 'Dealership / Car Hub'}
                 </h1>
                 <Badge variant="brand" size="sm">
                   Provider
                 </Badge>
               </div>
               <p className="text-xs sm:text-sm text-zinc-500 mt-0.5">
-                Manage your vehicle fleet inventory, customer reservations, and revenue.
+                Manage your cars inventory, customer reservations, and revenue.
               </p>
             </div>
           </div>
@@ -68,7 +68,7 @@ export default function ProviderDashboardPage() {
           </div>
         </div>
 
-        {/* Financial & Fleet Metrics */}
+        {/* Financial & Car Metrics */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           <div className="bg-white p-5 rounded-3xl border border-zinc-200 shadow-sm space-y-2">
             <div className="flex items-center justify-between text-zinc-400">
@@ -83,7 +83,7 @@ export default function ProviderDashboardPage() {
 
           <div className="bg-white p-5 rounded-3xl border border-zinc-200 shadow-sm space-y-2">
             <div className="flex items-center justify-between text-zinc-400">
-              <span className="text-xs font-bold uppercase tracking-wider">Active Fleet</span>
+              <span className="text-xs font-bold uppercase tracking-wider">Active Cars</span>
               <Car className="w-4 h-4 text-black" />
             </div>
             <p className="text-2xl sm:text-3xl font-black text-black">

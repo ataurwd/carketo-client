@@ -64,7 +64,7 @@ export default function ContactPage() {
             We are here to assist your journey
           </h1>
           <p className="text-xs sm:text-sm text-zinc-500">
-            Have questions about custom rentals, fleet bookings, or vehicle sales? Reach out to our 24/7 concierge team.
+            Have questions about custom rentals, car bookings, or vehicle sales? Reach out to our 24/7 concierge team.
           </p>
         </div>
 

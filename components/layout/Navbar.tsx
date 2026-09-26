@@ -247,7 +247,7 @@ export const Navbar: React.FC = () => {
                           className="flex items-center gap-2 px-4 py-2 text-xs font-semibold text-zinc-700 hover:bg-zinc-100 hover:text-black"
                         >
                           <Car className="w-4 h-4" />
-                          <span>Master Fleet</span>
+                          <span>Master Cars</span>
                         </Link>
                         <Link
                           href="/admin/users"
@@ -274,7 +274,7 @@ export const Navbar: React.FC = () => {
                           className="flex items-center gap-2 px-4 py-2 text-xs font-semibold text-zinc-700 hover:bg-zinc-100 hover:text-black"
                         >
                           <Car className="w-4 h-4" />
-                          <span>My Fleet</span>
+                          <span>My Cars</span>
                         </Link>
                         <Link
                           href="/dashboard/inquiries"

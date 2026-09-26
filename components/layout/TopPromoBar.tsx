@@ -9,7 +9,7 @@ export const TopPromoBar: React.FC = () => {
     <div className="bg-zinc-900 text-zinc-100 py-2 px-4 text-xs sm:text-sm font-medium border-b border-zinc-800 flex items-center justify-center gap-3">
       <div className="flex items-center gap-1.5">
         <Sparkles className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
-        <span>Luxury Fleet Edition — Enjoy up to 35% Off Bookings</span>
+        <span>Luxury Cars Edition — Enjoy up to 35% Off Bookings</span>
       </div>
       <Link
         href="/cars"

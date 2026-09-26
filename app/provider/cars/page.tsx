@@ -151,7 +151,7 @@ export default function ProviderCarsPage() {
               <span>Back to Dashboard</span>
             </Link>
             <div className="flex items-center gap-3">
-              <h1 className="text-2xl sm:text-3xl font-black text-black">Fleet Inventory</h1>
+              <h1 className="text-2xl sm:text-3xl font-black text-black">Car Inventory</h1>
               <span className="h-6 px-2.5 rounded-full bg-black text-white text-xs font-bold flex items-center justify-center">
                 {cars.length} Listings
               </span>
@@ -179,7 +179,7 @@ export default function ProviderCarsPage() {
         {isLoading ? (
           <div className="p-16 bg-white rounded-3xl border border-zinc-200 text-center space-y-4 shadow-sm">
             <div className="h-10 w-10 border-4 border-black border-t-transparent rounded-full animate-spin mx-auto" />
-            <p className="text-xs font-bold text-zinc-500">Loading your vehicle fleet...</p>
+            <p className="text-xs font-bold text-zinc-500">Loading your cars...</p>
           </div>
         ) : cars.length > 0 ? (
           <div className="bg-white rounded-3xl border border-zinc-200 shadow-sm overflow-hidden">
@@ -280,7 +280,7 @@ export default function ProviderCarsPage() {
         ) : (
           <div className="p-16 bg-white rounded-3xl border border-zinc-200 text-center space-y-4 shadow-sm">
             <Car className="w-12 h-12 text-zinc-300 mx-auto" />
-            <h3 className="text-lg font-black text-black">No Vehicles in Your Fleet</h3>
+            <h3 className="text-lg font-black text-black">No Cars in Your Inventory</h3>
             <p className="text-xs text-zinc-500 max-w-sm mx-auto">
               You have not listed any cars for rent or sale yet. Click below to add your first vehicle.
             </p>

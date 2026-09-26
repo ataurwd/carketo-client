@@ -76,7 +76,7 @@ export default function UserDashboardPage() {
             </Link>
             <Link href="/provider/cars">
               <Button variant="outline" size="sm" leftIcon={<Car className="w-3.5 h-3.5" />}>
-                My Fleet
+                My Cars
               </Button>
             </Link>
             <Link href="/dashboard/profile">
@@ -96,7 +96,7 @@ export default function UserDashboardPage() {
             <div className="h-10 w-10 rounded-2xl bg-zinc-100 flex items-center justify-center text-black group-hover:bg-black group-hover:text-white transition-colors">
               <Car className="w-5 h-5" />
             </div>
-            <h4 className="font-extrabold text-sm text-black">My Fleet</h4>
+            <h4 className="font-extrabold text-sm text-black">My Cars</h4>
             <p className="text-[11px] text-zinc-400">View and manage your cars</p>
           </Link>
 
@@ -231,7 +231,7 @@ export default function UserDashboardPage() {
               <div className="flex items-center justify-center gap-3">
                 <Link href="/cars">
                   <Button variant="dark" size="sm">
-                    Explore Fleet
+                    Explore Cars
                   </Button>
                 </Link>
                 <Link href="/sell">

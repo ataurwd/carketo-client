@@ -14,7 +14,7 @@ export function ListingTypeSelector({ listingType, onChange }: ListingTypeSelect
         <div>
           <h2 className="text-base font-black text-black">Listing Type</h2>
           <p className="text-xs text-zinc-400">
-            Choose whether you are posting a vehicle for outright sale or adding to the rental fleet.
+            Choose whether you are posting a vehicle for outright sale or adding to rental cars.
           </p>
         </div>
       </div>
@@ -91,7 +91,7 @@ export function ListingTypeSelector({ listingType, onChange }: ListingTypeSelect
                 listingType === 'rent' ? 'text-zinc-300' : 'text-zinc-500'
               }`}
             >
-              Rental fleet listing with daily pricing, direct renter contact & pickup hub.
+              Rental car listing with daily pricing, direct renter contact & pickup hub.
             </p>
           </div>
         </button>

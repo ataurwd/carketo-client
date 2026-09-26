@@ -217,7 +217,7 @@ function CarsCatalogContent() {
               Verified Marketplace Inventory
             </span>
             <h1 className="text-2xl sm:text-3xl font-black text-black mt-1">
-              Explore Vehicle Fleet
+              Explore Cars
             </h1>
             <p className="text-xs sm:text-sm text-zinc-500 mt-1">
               Search and filter certified vehicles for rent or purchase with 24/7 direct owner contact.

@@ -36,7 +36,7 @@ export default function RentalCheckoutPage() {
           className="inline-flex items-center gap-2 text-xs font-bold text-zinc-600 hover:text-black transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span>Back to Fleet</span>
+          <span>Back to Cars</span>
         </Link>
 
         <div>

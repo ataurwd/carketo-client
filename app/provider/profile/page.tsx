@@ -68,7 +68,7 @@ export default function ProviderProfilePage() {
           <span>Back to Provider Hub</span>
         </Link>
 
-        <h1 className="text-2xl sm:text-3xl font-black text-black">Dealership & Fleet Profile</h1>
+        <h1 className="text-2xl sm:text-3xl font-black text-black">Dealership & Car Profile</h1>
 
         <div className="bg-white p-6 sm:p-10 rounded-3xl border border-zinc-200 shadow-sm space-y-6">
           {msg && (
@@ -100,7 +100,7 @@ export default function ProviderProfilePage() {
 
             <div className="space-y-1.5">
               <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700">
-                Fleet Business Model
+                Car Business Model
               </label>
               <select
                 value={providerType}
@@ -108,7 +108,7 @@ export default function ProviderProfilePage() {
                 className="w-full text-xs font-semibold px-3 py-2.5 rounded-xl border border-zinc-200 bg-white focus:outline-none focus:border-black"
               >
                 <option value="both">Both Car Rental & Sales</option>
-                <option value="rental">Rental Fleet Only</option>
+                <option value="rental">Rental Cars Only</option>
                 <option value="seller">Car Dealership / Sales Only</option>
               </select>
             </div>

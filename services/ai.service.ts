@@ -73,7 +73,7 @@ export const aiService = {
         },
         {
           id: 'hybrid-cars',
-          category: 'Eco Fleet',
+          category: 'Eco Cars',
           label: '⚡ Hybrid rental vehicles',
           prompt: 'What hybrid cars do you have available for rent?',
         },

@@ -47,7 +47,7 @@ export const Footer: React.FC = () => {
           {/* Quick Links */}
           <div>
             <h4 className="text-sm font-bold uppercase tracking-wider text-zinc-200 mb-4">
-              Explore Fleet
+              Explore Cars
             </h4>
             <ul className="space-y-2.5 text-sm text-zinc-400">
               <li>

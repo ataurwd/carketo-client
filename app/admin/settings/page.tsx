@@ -41,7 +41,7 @@ export default function AdminSettingsPage() {
     maintenanceMessage: 'Carketo is currently undergoing scheduled platform upgrades.',
     topAnnouncement: {
       enabled: true,
-      text: '⚡ Luxury Spring Fleet Collection: Verified luxury rentals and sales with 24/7 concierge delivery.',
+      text: '⚡ Luxury Spring Cars Collection: Verified luxury rentals and sales with 24/7 concierge delivery.',
       link: '/cars',
     },
   });

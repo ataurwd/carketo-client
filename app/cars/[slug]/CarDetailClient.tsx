@@ -890,7 +890,7 @@ export default function CarDetailClient() {
               <div className="space-y-2">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-black text-white text-xs font-bold uppercase tracking-wider">
                   <ShoppingBag className="w-3.5 h-3.5" />
-                  <span>{isRental ? 'More Rental Fleet' : 'Similar Vehicles For Sale'}</span>
+                  <span>{isRental ? 'More Rental Cars' : 'Similar Vehicles For Sale'}</span>
                 </div>
                 <h2 className="text-2xl sm:text-3xl font-black text-black">
                   {isRental ? 'Similar Rental Vehicles' : 'You Might Also Like'}

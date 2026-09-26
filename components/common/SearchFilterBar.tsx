@@ -130,7 +130,7 @@ export const SearchFilterBar: React.FC = () => {
             className="w-full h-12 text-sm font-bold shadow-md hover:bg-black"
             rightIcon={<Search className="w-4 h-4" />}
           >
-            Search Fleet
+            Search Cars
           </Button>
         </div>
       </form>
