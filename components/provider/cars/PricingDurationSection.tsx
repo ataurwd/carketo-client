@@ -47,45 +47,49 @@ export function PricingDurationSection({
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {listingType === 'rent' ? (
           <Input
-            label="Daily Rental Rate (৳ / Day)"
-            type="number"
+            label="Daily Rental Rate (৳ / Day) *"
+            type="text"
+            inputMode="numeric"
             required
-            value={rentalPrice}
+            value={rentalPrice === '' ? '' : rentalPrice}
             onChange={(e) => {
-              setRentalPrice(e.target.value === '' ? '' : Number(e.target.value));
+              const cleanVal = e.target.value.replace(/\D/g, '').slice(0, 8);
+              setRentalPrice(cleanVal === '' ? '' : Number(cleanVal));
               setFieldErrors((p) => ({ ...p, rentalPrice: '' }));
             }}
-            placeholder="e.g. 5000"
+            placeholder="Enter daily rental rate in ৳ (e.g. 5000)"
             error={fieldErrors['rentalPrice']}
           />
         ) : (
           <Input
-            label="Total Outright Sale Price (৳)"
-            type="number"
+            label="Total Outright Sale Price (৳) *"
+            type="text"
+            inputMode="numeric"
             required
-            value={salePrice}
+            value={salePrice === '' ? '' : salePrice}
             onChange={(e) => {
-              setSalePrice(e.target.value === '' ? '' : Number(e.target.value));
+              const cleanVal = e.target.value.replace(/\D/g, '').slice(0, 10);
+              setSalePrice(cleanVal === '' ? '' : Number(cleanVal));
               setFieldErrors((p) => ({ ...p, salePrice: '' }));
             }}
-            placeholder="e.g. 3500000"
+            placeholder="Enter outright sale price in ৳ (e.g. 3500000)"
             error={fieldErrors['salePrice']}
           />
         )}
 
-        {/* Direct Contact Phone Number */}
+        {/* Direct Contact Phone Number - Exactly max 11 digits */}
         <div className="space-y-1.5">
-          <label className="block text-xs font-bold uppercase tracking-wider text-black">
-            Direct Contact Phone Number *
-          </label>
           <Input
+            label="Direct Contact Phone Number *"
             type="tel"
-            placeholder="01712345678"
+            inputMode="numeric"
+            placeholder="Enter 11-digit mobile number (e.g. 01712345678)"
             required
+            maxLength={11}
             value={contactPhone}
             onChange={(e) => {
-              const cleanVal = e.target.value.replace(/[^\d\s\-()+]/g, '');
-              setContactPhone(cleanVal);
+              const digitsOnly = e.target.value.replace(/\D/g, '').slice(0, 11);
+              setContactPhone(digitsOnly);
               setFieldErrors((p) => ({ ...p, contactPhone: '' }));
             }}
             leftIcon={<Phone className="w-4 h-4 text-black" />}
@@ -101,7 +105,6 @@ export function PricingDurationSection({
           value={expiresAt}
           onChange={(date) => setExpiresAt(date)}
           maxMonthsAhead={2}
-          helperText="Select how long this vehicle remains publicly visible. After this date, the post automatically expires. Maximum limit: 2 months (60 days) from today."
         />
       </div>
     </div>

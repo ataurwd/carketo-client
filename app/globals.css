@@ -105,13 +105,18 @@
 
 /* Secondary Buttons, Badges, Filter Bar */
 .admin-light .bg-zinc-800,
+.admin-light .bg-zinc-800\/95,
+.admin-light .bg-zinc-800\/90,
 .admin-light .bg-zinc-800\/80,
 .admin-light .bg-zinc-800\/70,
-.admin-light .bg-zinc-800\/60 {
+.admin-light .bg-zinc-800\/60,
+.admin-light .bg-zinc-800\/50 {
   background-color: #f1f5f9 !important;
 }
 .admin-light .bg-zinc-800\/40,
-.admin-light .bg-zinc-800\/20 {
+.admin-light .bg-zinc-800\/30,
+.admin-light .bg-zinc-800\/20,
+.admin-light .bg-zinc-800\/10 {
   background-color: #f8fafc !important;
 }
 
@@ -137,6 +142,25 @@
 
 .admin-light .border-transparent {
   border-color: transparent !important;
+}
+
+/* Pagination Buttons in Admin Light Mode */
+.admin-light button.bg-zinc-800\/90,
+.admin-light .bg-zinc-800\/90 {
+  background-color: #ffffff !important;
+  color: #334155 !important;
+  border-color: #e2e8f0 !important;
+}
+.admin-light button.bg-zinc-800\/90:hover:not(:disabled) {
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
+  border-color: #cbd5e1 !important;
+}
+.admin-light button.bg-zinc-800\/90:disabled {
+  background-color: #f1f5f9 !important;
+  color: #94a3b8 !important;
+  border-color: #e2e8f0 !important;
+  opacity: 0.65 !important;
 }
 
 /* Sidebar Navigation in Light Mode - Completely Clean Without Stray Borders */

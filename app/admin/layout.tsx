@@ -535,20 +535,20 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
             <div className="h-5 w-px bg-zinc-800/80 hidden sm:block mx-0.5" />
 
             {/* Quick Profile Badge */}
-            <div className="hidden lg:flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-zinc-800/50 border border-zinc-700/50">
+            <div className="hidden lg:flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-slate-100 border border-slate-200 dark:bg-zinc-800/50 dark:border-zinc-700/50 shadow-sm">
               {user?.avatar ? (
                 <img
                   src={user.avatar}
                   alt=""
                   referrerPolicy="no-referrer"
-                  className="h-6 w-6 rounded-lg object-cover border border-zinc-700"
+                  className="h-6 w-6 rounded-lg object-cover border border-slate-300 dark:border-zinc-700"
                 />
               ) : (
                 <div className="h-6 w-6 rounded-lg bg-gradient-to-tr from-orange-600 to-amber-500 text-white flex items-center justify-center font-black text-[10px] shadow-sm">
                   {user?.name ? user.name.charAt(0).toUpperCase() : 'A'}
                 </div>
               )}
-              <span className="text-xs font-bold text-zinc-300 max-w-[120px] truncate">
+              <span className="text-xs font-bold text-slate-700 dark:text-zinc-300 max-w-[120px] truncate">
                 {user?.name || 'Admin'}
               </span>
             </div>

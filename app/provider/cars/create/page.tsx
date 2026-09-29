@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/Button';
 import { useAuthStore } from '@/store/auth.store';
 import {
   ArrowLeft,
+  ArrowRight,
   CheckCircle2,
   AlertCircle,
   Plus,
@@ -29,6 +30,9 @@ export default function CreateCarPage() {
   const { user, token, isAuthenticated, isInitialized } = useAuthStore();
   const [mounted, setMounted] = useState(false);
 
+  // Multi-step form state (1 to 4) - Hidden from user, only Next and Back buttons
+  const [currentStep, setCurrentStep] = useState<number>(1);
+
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -45,8 +49,8 @@ export default function CreateCarPage() {
   const [listingType, setListingType] = useState<'sale' | 'rent'>('sale');
 
   // 2. Pricing & Visibility
-  const [rentalPrice, setRentalPrice] = useState<number | ''>(5000);
-  const [salePrice, setSalePrice] = useState<number | ''>(3500000);
+  const [rentalPrice, setRentalPrice] = useState<number | ''>('');
+  const [salePrice, setSalePrice] = useState<number | ''>('');
   const [contactPhone, setContactPhone] = useState('');
   const [expiresAt, setExpiresAt] = useState<Date>(() => {
     const d = new Date();
@@ -54,24 +58,18 @@ export default function CreateCarPage() {
     return d;
   });
 
-  // 3. Vehicle Overview Details
+  // 3. Vehicle Overview Details (Model, Seats, Color, Location, Registration Year, VIN removed per request)
   const [title, setTitle] = useState('');
-  const [brand, setBrand] = useState('Toyota');
-  const [model, setModel] = useState('');
-  const [year, setYear] = useState<number>(2024);
-  const [condition, setCondition] = useState<'new' | 'used' | 'certified'>('used');
-  const [mileage, setMileage] = useState<number | ''>(35000);
-  const [fuelType, setFuelType] = useState('Petrol');
-  const [transmission, setTransmission] = useState('Automatic');
-  const [engineCapacity, setEngineCapacity] = useState('1500cc');
-  const [color, setColor] = useState('Obsidian Black');
-  const [passengers, setPassengers] = useState<number>(5);
-  const [registrationYear, setRegistrationYear] = useState<number | ''>(2024);
-  const [vin, setVin] = useState('');
-  const [bodyType, setBodyType] = useState('Sedan');
-  const [location, setLocation] = useState('Dhaka, Gulshan-2');
-  const [doors, setDoors] = useState<number>(4);
-  const [luggage, setLuggage] = useState<number>(2);
+  const [brand, setBrand] = useState('');
+  const [year, setYear] = useState<number | ''>('');
+  const [condition, setCondition] = useState<'new' | 'used' | 'certified' | ''>('');
+  const [mileage, setMileage] = useState<number | ''>('');
+  const [fuelType, setFuelType] = useState('');
+  const [transmission, setTransmission] = useState('');
+  const [engineCapacity, setEngineCapacity] = useState('');
+  const [bodyType, setBodyType] = useState('');
+  const [doors] = useState<number>(4);
+  const [luggage] = useState<number>(2);
 
   // 4. Description & Highlights
   const [description, setDescription] = useState('');
@@ -81,16 +79,7 @@ export default function CreateCarPage() {
   const [isDragging, setIsDragging] = useState(false);
 
   // 6. Features & Amenities
-  const [selectedAmenities, setSelectedAmenities] = useState<string[]>([
-    'Bluetooth Connectivity',
-    'Apple CarPlay',
-    'Cruise Control',
-    'Air Conditioning',
-    'Leather Upholstery',
-    'GPS Navigation',
-    'Backup Camera',
-    'Keyless Entry & Push Start',
-  ]);
+  const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
 
   // Status & Feedback
   const [isLoading, setIsLoading] = useState(false);
@@ -211,40 +200,128 @@ export default function CreateCarPage() {
     });
   };
 
-  // Validate form before submission
-  const validateForm = () => {
+  // Step-by-step validations
+  const validateStep1 = () => {
     const errs: Record<string, string> = {};
-    if (!title.trim()) errs.title = 'Vehicle title is required';
-
-    if (listingType === 'rent') {
-      if (!location.trim()) errs.location = 'Pickup location / hub address is required';
-      if (!rentalPrice || Number(rentalPrice) <= 0) errs.rentalPrice = 'Valid daily rate is required';
-    } else {
-      if (!brand.trim()) errs.brand = 'Brand is required';
-      if (!model.trim()) errs.model = 'Model is required';
-      if (!year || year < 1950) errs.year = 'Valid manufacturing year is required';
-      if (!location.trim()) errs.location = 'Dealership / pickup location is required';
-      if (!salePrice || Number(salePrice) <= 0) errs.salePrice = 'Valid sale price is required';
+    const trimmedTitle = title.trim();
+    if (!trimmedTitle) {
+      errs.title = 'Vehicle title is required';
+    } else if (trimmedTitle.length < 3) {
+      errs.title = 'Vehicle title must be at least 3 characters';
+    } else if (trimmedTitle.length > 100) {
+      errs.title = 'Vehicle title cannot exceed 100 characters';
     }
 
-    if (!contactPhone.trim()) {
-      errs.contactPhone = 'Direct contact phone number is required';
-    } else if (contactPhone.replace(/\D/g, '').length < 7) {
-      errs.contactPhone = 'Please enter a valid phone number';
+    if (!brand.trim()) {
+      errs.brand = 'Please select a vehicle brand / make';
+    }
+
+    const yearStr = year !== '' && year !== undefined ? year.toString() : '';
+    const currentYear = new Date().getFullYear();
+    if (!yearStr) {
+      errs.year = 'Manufacturing year is required';
+    } else if (yearStr.length !== 4) {
+      errs.year = 'Manufacturing year must be exactly 4 digits (e.g. 2024)';
+    } else {
+      const yearNum = Number(year);
+      if (isNaN(yearNum) || yearNum < 1950 || yearNum > currentYear + 2) {
+        errs.year = `Manufacturing year must be between 1950 and ${currentYear + 2}`;
+      }
+    }
+
+    if (!condition) {
+      errs.condition = 'Please select vehicle condition';
+    } else if (condition !== 'new') {
+      if (mileage === '' || isNaN(Number(mileage)) || Number(mileage) < 0) {
+        errs.mileage = 'Valid mileage is required for pre-owned vehicles';
+      } else if (Number(mileage) > 9999999) {
+        errs.mileage = 'Mileage cannot exceed 9,999,999 km';
+      }
+    }
+
+    if (!fuelType) {
+      errs.fuelType = 'Please select fuel type';
+    }
+
+    if (!transmission) {
+      errs.transmission = 'Please select transmission';
+    }
+
+    if (!bodyType) {
+      errs.bodyType = 'Please select body type';
     }
 
     setFieldErrors(errs);
     return Object.keys(errs).length === 0;
   };
 
-  // Submit Handler
+  const validateStep2 = () => {
+    const errs: Record<string, string> = {};
+    if (listingType === 'rent') {
+      if (rentalPrice === '' || isNaN(Number(rentalPrice)) || Number(rentalPrice) <= 0) {
+        errs.rentalPrice = 'Valid daily rate is required (greater than 0)';
+      } else if (Number(rentalPrice) > 10000000) {
+        errs.rentalPrice = 'Daily rental rate cannot exceed ৳ 10,000,000';
+      }
+    } else {
+      if (salePrice === '' || isNaN(Number(salePrice)) || Number(salePrice) <= 0) {
+        errs.salePrice = 'Valid sale price is required (greater than 0)';
+      } else if (Number(salePrice) > 1000000000) {
+        errs.salePrice = 'Sale price cannot exceed ৳ 1,000,000,000';
+      }
+    }
+
+    const cleanPhone = contactPhone.replace(/\D/g, '');
+    if (!cleanPhone) {
+      errs.contactPhone = 'Direct contact phone number is required';
+    } else if (cleanPhone.length !== 11) {
+      errs.contactPhone = `Phone number must be exactly 11 digits (current: ${cleanPhone.length} digits)`;
+    } else if (!/^01[3-9]\d{8}$/.test(cleanPhone)) {
+      errs.contactPhone = 'Enter a valid Bangladeshi mobile number starting with 01 (e.g. 01712345678)';
+    }
+
+    setFieldErrors(errs);
+    return Object.keys(errs).length === 0;
+  };
+
+  const handleNext = () => {
+    setError('');
+    if (currentStep === 1) {
+      if (!validateStep1()) {
+        setError('Please fill in the required fields before proceeding.');
+        return;
+      }
+      setCurrentStep(2);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else if (currentStep === 2) {
+      if (!validateStep2()) {
+        setError('Please enter valid pricing and contact information.');
+        return;
+      }
+      setCurrentStep(3);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else if (currentStep === 3) {
+      setCurrentStep(4);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  const handleBack = () => {
+    setError('');
+    if (currentStep > 1) {
+      setCurrentStep((prev) => prev - 1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  // Submit Handler on final step
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setSuccess('');
 
-    if (!validateForm()) {
-      setError('Please resolve the highlighted validation errors.');
+    if (!validateStep1() || !validateStep2()) {
+      setError('Please resolve all validation errors before publishing.');
       return;
     }
 
@@ -264,6 +341,12 @@ export default function CreateCarPage() {
         ? imageUrls
         : ['https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&q=80&w=1200'];
 
+    // Automatically derive model from title if omitted
+    const derivedModel =
+      title.trim().split(' ').length > 1
+        ? title.trim().split(' ').slice(1).join(' ')
+        : title.trim() || 'Standard';
+
     const carData = {
       title,
       listingType,
@@ -272,23 +355,20 @@ export default function CreateCarPage() {
       price: listingType === 'sale' ? Number(salePrice) : Number(rentalPrice),
       contactPhone: contactPhone.trim(),
       expiresAt: expiresAt.toISOString(),
-      location: location.trim(),
-      description: description || `${title} available for ${listingType}. Verified and inspected.`,
-      brand: listingType === 'sale' ? brand : brand || 'Toyota',
-      model: listingType === 'sale' ? model : title.split(' ')[0] || 'Standard',
-      year: listingType === 'sale' ? Number(year) : 2024,
-      condition: listingType === 'sale' ? condition : 'used',
-      mileage: listingType === 'sale' ? (condition === 'new' ? 0 : Number(mileage) || 0) : 0,
-      color: listingType === 'sale' ? color : 'Obsidian Black',
-      engineCapacity: listingType === 'sale' ? engineCapacity : '1500cc',
-      registrationYear:
-        listingType === 'sale' && registrationYear ? Number(registrationYear) : undefined,
-      vin: listingType === 'sale' && vin.trim() ? vin.trim() : undefined,
-      bodyType: listingType === 'sale' ? bodyType : 'Sedan',
-      fuelType: listingType === 'sale' ? fuelType : 'Petrol',
-      transmission: listingType === 'sale' ? transmission : 'Automatic',
+      location: 'Dhaka',
+      description: description.trim() || `${title} available for ${listingType}. Verified and inspected.`,
+      brand: brand || 'Toyota',
+      model: derivedModel,
+      year: Number(year) || 2024,
+      condition: condition || 'used',
+      mileage: condition === 'new' ? 0 : Number(mileage) || 0,
+      color: 'Obsidian Black',
+      engineCapacity: engineCapacity || '1500cc',
+      bodyType: bodyType || 'Sedan',
+      fuelType: fuelType || 'Petrol',
+      transmission: transmission || 'Automatic',
       doors: Number(doors) || 4,
-      seats: Number(passengers) || 5,
+      seats: 5,
       luggage: Number(luggage) || 2,
       features: listingType === 'sale' ? selectedAmenities : [],
       images: effectiveImages,
@@ -311,7 +391,7 @@ export default function CreateCarPage() {
   return (
     <div className="min-h-screen bg-zinc-50 py-10">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 space-y-8">
-        {/* Header */}
+        {/* Header - No step indicator shown per user specification */}
         <div className="flex items-center justify-between">
           <Link
             href="/provider/cars"
@@ -320,7 +400,6 @@ export default function CreateCarPage() {
             <ArrowLeft className="w-4 h-4" />
             Back to Inventory
           </Link>
-          <span className="text-xs font-semibold text-zinc-400">Step 1 of 1 • New Listing</span>
         </div>
 
         <div>
@@ -328,7 +407,7 @@ export default function CreateCarPage() {
             Add New Vehicle
           </h1>
           <p className="text-xs sm:text-sm text-zinc-500 mt-1">
-            Create an verified vehicle listing for outright sale or daily rental in Bangladesh.
+            Create a verified vehicle listing for outright sale or daily rental in Bangladesh.
           </p>
         </div>
 
@@ -348,128 +427,161 @@ export default function CreateCarPage() {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-8">
-          {/* SECTION 1: LISTING TYPE */}
-          <ListingTypeSelector
-            listingType={listingType}
-            onChange={(type) => {
-              setListingType(type);
-              setFieldErrors({});
-            }}
-          />
+          {/* STEP 1: LISTING TYPE & VEHICLE OVERVIEW SPECIFICATIONS */}
+          {currentStep === 1 && (
+            <div className="space-y-8 animate-fade-in">
+              <ListingTypeSelector
+                listingType={listingType}
+                onChange={(type) => {
+                  setListingType(type);
+                  setFieldErrors({});
+                }}
+              />
 
-          {/* SECTION 2: VEHICLE OVERVIEW & SPECIFICATIONS */}
-          <VehicleOverviewSection
-            listingType={listingType}
-            title={title}
-            setTitle={setTitle}
-            brand={brand}
-            setBrand={setBrand}
-            model={model}
-            setModel={setModel}
-            year={year}
-            setYear={setYear}
-            condition={condition}
-            setCondition={setCondition}
-            mileage={mileage}
-            setMileage={setMileage}
-            fuelType={fuelType}
-            setFuelType={setFuelType}
-            transmission={transmission}
-            setTransmission={setTransmission}
-            engineCapacity={engineCapacity}
-            setEngineCapacity={setEngineCapacity}
-            color={color}
-            setColor={setColor}
-            passengers={passengers}
-            setPassengers={setPassengers}
-            registrationYear={registrationYear}
-            setRegistrationYear={setRegistrationYear}
-            vin={vin}
-            setVin={setVin}
-            bodyType={bodyType}
-            setBodyType={setBodyType}
-            location={location}
-            setLocation={setLocation}
-            fieldErrors={fieldErrors}
-            setFieldErrors={setFieldErrors}
-          />
-
-          {/* SECTION 3: PRICING, CONTACT & VISIBILITY EXPIRATION */}
-          <PricingDurationSection
-            listingType={listingType}
-            rentalPrice={rentalPrice}
-            setRentalPrice={setRentalPrice}
-            salePrice={salePrice}
-            setSalePrice={setSalePrice}
-            contactPhone={contactPhone}
-            setContactPhone={setContactPhone}
-            expiresAt={expiresAt}
-            setExpiresAt={setExpiresAt}
-            fieldErrors={fieldErrors}
-            setFieldErrors={setFieldErrors}
-          />
-
-          {/* SECTION 4: DETAILED DESCRIPTION */}
-          <div className="bg-white p-6 sm:p-8 rounded-3xl border border-zinc-200 shadow-sm space-y-6">
-            <div className="flex items-center gap-2 border-b border-zinc-100 pb-3">
-              <Sparkles className="w-5 h-5 text-black" />
-              <h2 className="text-base font-black text-black">Description & Highlights</h2>
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700">
-                Detailed Vehicle Description
-              </label>
-              <textarea
-                rows={4}
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder={
-                  listingType === 'rent'
-                    ? 'Rental terms, daily mileage limits, chauffeur option, fuel policy, and pickup details...'
-                    : 'Highlight vehicle condition, maintenance records, test-drive options, and inspection history...'
-                }
-                className="w-full text-xs font-semibold p-4 rounded-2xl border border-zinc-200 bg-white focus:outline-none focus:border-black leading-relaxed"
+              <VehicleOverviewSection
+                listingType={listingType}
+                title={title}
+                setTitle={setTitle}
+                brand={brand}
+                setBrand={setBrand}
+                year={year}
+                setYear={setYear}
+                condition={condition}
+                setCondition={setCondition}
+                mileage={mileage}
+                setMileage={setMileage}
+                fuelType={fuelType}
+                setFuelType={setFuelType}
+                transmission={transmission}
+                setTransmission={setTransmission}
+                engineCapacity={engineCapacity}
+                setEngineCapacity={setEngineCapacity}
+                bodyType={bodyType}
+                setBodyType={setBodyType}
+                fieldErrors={fieldErrors}
+                setFieldErrors={setFieldErrors}
               />
             </div>
-          </div>
-
-          {/* SECTION 5: FEATURES & AMENITIES OPTIONS (HIDDEN FOR RENT LISTINGS) */}
-          {listingType === 'sale' && (
-            <FeaturesAmenitiesSection
-              selectedAmenities={selectedAmenities}
-              setSelectedAmenities={setSelectedAmenities}
-            />
           )}
 
-          {/* SECTION 6: VEHICLE IMAGERY (MAX 3 PHOTOS WITH DRAG & DROP) */}
-          <ImageDropzoneSection
-            uploadedPhotos={uploadedPhotos}
-            isDragging={isDragging}
-            onDragOver={handleDragOver}
-            onDragEnter={handleDragEnter}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
-            onFileChange={handleFileChange}
-            onRemovePhoto={handleRemovePhoto}
-          />
+          {/* STEP 2: PRICING, CONTACT & VISIBILITY DURATION */}
+          {currentStep === 2 && (
+            <div className="animate-fade-in">
+              <PricingDurationSection
+                listingType={listingType}
+                rentalPrice={rentalPrice}
+                setRentalPrice={setRentalPrice}
+                salePrice={salePrice}
+                setSalePrice={setSalePrice}
+                contactPhone={contactPhone}
+                setContactPhone={setContactPhone}
+                expiresAt={expiresAt}
+                setExpiresAt={setExpiresAt}
+                fieldErrors={fieldErrors}
+                setFieldErrors={setFieldErrors}
+              />
+            </div>
+          )}
 
-          {/* Submit Action Buttons */}
-          <div className="flex items-center justify-end gap-3 pt-4">
-            <Link href="/provider/cars">
-              <Button type="button" variant="outline" size="md" disabled={isLoading}>
-                Cancel
-              </Button>
-            </Link>
-            <Button
-              type="submit"
-              variant="dark"
-              size="lg"
-              isLoading={isLoading}
-              leftIcon={<Plus className="w-4 h-4" />}
-            >
-              Publish Vehicle Listing
-            </Button>
+          {/* STEP 3: DETAILED DESCRIPTION & FEATURES/AMENITIES */}
+          {currentStep === 3 && (
+            <div className="space-y-8 animate-fade-in">
+              <div className="bg-white p-6 sm:p-8 rounded-3xl border border-zinc-200 shadow-sm space-y-6">
+                <div className="flex items-center gap-2 border-b border-zinc-100 pb-3">
+                  <Sparkles className="w-5 h-5 text-black" />
+                  <h2 className="text-base font-black text-black">Description & Highlights</h2>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700">
+                    Detailed Vehicle Description
+                  </label>
+                  <textarea
+                    rows={4}
+                    maxLength={2000}
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value.slice(0, 2000))}
+                    placeholder={
+                      listingType === 'rent'
+                        ? 'Enter rental terms, daily mileage limits, chauffeur option, fuel policy, and pickup details...'
+                        : 'Enter vehicle highlights, condition, service history, test-drive options, and inspection details...'
+                    }
+                    className="w-full text-xs font-semibold p-4 rounded-2xl border border-zinc-200 bg-white focus:outline-none focus:border-black leading-relaxed"
+                  />
+                </div>
+              </div>
+
+              {listingType === 'sale' && (
+                <FeaturesAmenitiesSection
+                  selectedAmenities={selectedAmenities}
+                  setSelectedAmenities={setSelectedAmenities}
+                />
+              )}
+            </div>
+          )}
+
+          {/* STEP 4: VEHICLE IMAGERY & FINAL PUBLISH */}
+          {currentStep === 4 && (
+            <div className="animate-fade-in">
+              <ImageDropzoneSection
+                uploadedPhotos={uploadedPhotos}
+                isDragging={isDragging}
+                onDragOver={handleDragOver}
+                onDragEnter={handleDragEnter}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                onFileChange={handleFileChange}
+                onRemovePhoto={handleRemovePhoto}
+              />
+            </div>
+          )}
+
+          {/* Multi-Step Navigation Controls: Only Next & Back buttons (No stepper displayed) */}
+          <div className="flex items-center justify-between pt-6 border-t border-zinc-200">
+            <div>
+              {currentStep > 1 ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="md"
+                  onClick={handleBack}
+                  disabled={isLoading}
+                  leftIcon={<ArrowLeft className="w-4 h-4" />}
+                >
+                  Back
+                </Button>
+              ) : (
+                <Link href="/provider/cars">
+                  <Button type="button" variant="outline" size="md" disabled={isLoading}>
+                    Cancel
+                  </Button>
+                </Link>
+              )}
+            </div>
+
+            <div className="flex items-center gap-3">
+              {currentStep < 4 ? (
+                <Button
+                  type="button"
+                  variant="dark"
+                  size="md"
+                  onClick={handleNext}
+                  rightIcon={<ArrowRight className="w-4 h-4" />}
+                >
+                  Next
+                </Button>
+              ) : (
+                <Button
+                  type="submit"
+                  variant="dark"
+                  size="lg"
+                  isLoading={isLoading}
+                  leftIcon={<Plus className="w-4 h-4" />}
+                >
+                  Publish Vehicle Listing
+                </Button>
+              )}
+            </div>
           </div>
         </form>
       </div>

@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useAdminTheme } from '@/context/AdminThemeContext';
 
 export interface PaginationProps {
   currentPage: number;
@@ -28,6 +29,10 @@ export const Pagination: React.FC<PaginationProps> = ({
     return null;
   }
 
+  // Detect admin theme dynamically: if in light mode, never show dark pagination!
+  const { theme } = useAdminTheme();
+  const isDark = theme === 'light' ? false : variant === 'dark';
+
   const from = (currentPage - 1) * limit + 1;
   const to = Math.min(currentPage * limit, totalItems);
 
@@ -49,18 +54,17 @@ export const Pagination: React.FC<PaginationProps> = ({
   };
 
   const pages = getPageNumbers();
-  const isDark = variant === 'dark';
 
   return (
     <div
       className={`flex flex-col sm:flex-row items-center justify-between gap-4 py-4 px-2 ${
-        isDark ? 'border-t border-zinc-800/80 text-zinc-400' : 'border-t border-zinc-200 text-zinc-500'
+        isDark ? 'border-t border-zinc-800/80 text-zinc-400' : 'border-t border-slate-200 text-slate-500'
       } ${className}`}
     >
       <p className="text-xs font-semibold order-2 sm:order-1">
-        Showing <span className={`font-black ${isDark ? 'text-white' : 'text-black'}`}>{from}</span> to{' '}
-        <span className={`font-black ${isDark ? 'text-white' : 'text-black'}`}>{to}</span> of{' '}
-        <span className={`font-black ${isDark ? 'text-orange-400' : 'text-black'}`}>{totalItems}</span> {itemLabel}
+        Showing <span className={`font-black ${isDark ? 'text-white' : 'text-slate-900'}`}>{from}</span> to{' '}
+        <span className={`font-black ${isDark ? 'text-white' : 'text-slate-900'}`}>{to}</span> of{' '}
+        <span className="font-black text-orange-500">{totalItems}</span> {itemLabel}
       </p>
 
       <div className="flex items-center gap-1.5 order-1 sm:order-2">
@@ -73,10 +77,10 @@ export const Pagination: React.FC<PaginationProps> = ({
             }
           }}
           disabled={currentPage <= 1}
-          className={`flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold border transition-all shadow-sm disabled:opacity-30 disabled:pointer-events-none ${
+          className={`flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold border transition-all shadow-sm ${
             isDark
-              ? 'bg-zinc-800/90 border-zinc-700/80 text-zinc-300 hover:bg-zinc-700 hover:text-white hover:border-zinc-600'
-              : 'bg-white border-zinc-200 text-zinc-700 hover:bg-zinc-50 hover:text-black'
+              ? 'bg-zinc-800/90 border-zinc-700/80 text-zinc-300 hover:bg-zinc-700 hover:text-white hover:border-zinc-600 disabled:opacity-30 disabled:pointer-events-none'
+              : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100 hover:text-slate-900 hover:border-slate-300 disabled:bg-slate-100 disabled:text-slate-400 disabled:border-slate-200 disabled:pointer-events-none'
           }`}
         >
           <ChevronLeft className="w-4 h-4" />
@@ -90,7 +94,7 @@ export const Pagination: React.FC<PaginationProps> = ({
               return (
                 <span
                   key={`ellipsis-${idx}`}
-                  className="px-2 py-1 text-xs font-bold text-zinc-500 select-none"
+                  className="px-2 py-1 text-xs font-bold text-slate-400 select-none"
                 >
                   •••
                 </span>
@@ -107,12 +111,10 @@ export const Pagination: React.FC<PaginationProps> = ({
                 onClick={() => onPageChange(pageNumber)}
                 className={`h-8 w-8 rounded-xl text-xs font-black transition-all flex items-center justify-center ${
                   isActive
-                    ? isDark
-                      ? 'bg-gradient-to-r from-orange-600 to-orange-500 text-white shadow-lg shadow-orange-600/30 scale-105 border border-orange-400/40'
-                      : 'bg-black text-white shadow-md scale-105'
+                    ? 'bg-gradient-to-r from-orange-600 to-orange-500 text-white shadow-md shadow-orange-600/30 scale-105 border border-orange-400/40'
                     : isDark
                     ? 'bg-zinc-900 border border-zinc-800 text-zinc-400 hover:bg-zinc-800 hover:text-white hover:border-zinc-700 shadow-sm'
-                    : 'bg-white border border-zinc-200 text-zinc-600 hover:bg-zinc-100 hover:text-black hover:border-zinc-300 shadow-sm'
+                    : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 hover:text-slate-900 hover:border-slate-300 shadow-sm'
                 }`}
               >
                 {pageNumber}
@@ -130,10 +132,10 @@ export const Pagination: React.FC<PaginationProps> = ({
             }
           }}
           disabled={currentPage >= totalPages}
-          className={`flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold border transition-all shadow-sm disabled:opacity-30 disabled:pointer-events-none ${
+          className={`flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold border transition-all shadow-sm ${
             isDark
-              ? 'bg-zinc-800/90 border-zinc-700/80 text-zinc-300 hover:bg-zinc-700 hover:text-white hover:border-zinc-600'
-              : 'bg-white border-zinc-200 text-zinc-700 hover:bg-zinc-50 hover:text-black'
+              ? 'bg-zinc-800/90 border-zinc-700/80 text-zinc-300 hover:bg-zinc-700 hover:text-white hover:border-zinc-600 disabled:opacity-30 disabled:pointer-events-none'
+              : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100 hover:text-slate-900 hover:border-slate-300 disabled:bg-slate-100 disabled:text-slate-400 disabled:border-slate-200 disabled:pointer-events-none'
           }`}
         >
           <span className="hidden sm:inline">Next</span>
