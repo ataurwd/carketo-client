@@ -8,6 +8,12 @@
     --foreground: 222.2 84% 4.9%;
   }
 
+  html,
+  body {
+    overflow-x: hidden;
+    max-width: 100%;
+  }
+
   body {
     @apply bg-white text-slate-900 antialiased font-sans selection:bg-brand selection:text-white;
   }

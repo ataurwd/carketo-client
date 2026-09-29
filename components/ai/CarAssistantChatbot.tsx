@@ -261,16 +261,16 @@ export function CarAssistantChatbot() {
         <button
           onClick={() => setIsOpen(true)}
           aria-label="Open AI Car Assistant"
-          className="fixed bottom-6 right-6 z-50 flex items-center gap-2 group px-3.5 py-2 rounded-full bg-zinc-950 hover:bg-zinc-800 text-white shadow-lg shadow-zinc-950/20 hover:scale-105 active:scale-95 transition-all duration-200 border border-zinc-800"
+          className="fixed bottom-5 right-5 sm:bottom-6 sm:right-6 z-50 flex items-center justify-center sm:gap-2 group p-3 sm:px-3.5 sm:py-2 rounded-full bg-zinc-950 hover:bg-zinc-800 text-white shadow-xl shadow-zinc-950/25 hover:scale-105 active:scale-95 transition-all duration-200 border border-zinc-800"
         >
           <div className="relative">
             <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center backdrop-blur-sm">
-              <Bot className="w-3.5 h-3.5 text-white" />
+              <Bot className="w-4 h-4 text-white" />
             </div>
-            <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-emerald-400 rounded-full border border-zinc-950 animate-pulse" />
+            <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-400 rounded-full border-2 border-zinc-950 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
           </div>
-          <span className="font-semibold text-xs tracking-wide">AI Assistant</span>
-          <Sparkles className="w-3.5 h-3.5 text-zinc-300 animate-spin-slow" />
+          <span className="hidden sm:inline font-semibold text-xs tracking-wide">AI Assistant</span>
+          <Sparkles className="hidden sm:inline w-3.5 h-3.5 text-zinc-300 animate-spin-slow" />
         </button>
       )}
 

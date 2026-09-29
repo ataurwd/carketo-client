@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
@@ -23,9 +24,26 @@ import {
   Bell,
   MessageSquare,
   CheckCheck,
+  Home,
+  ShoppingBag,
+  DollarSign,
+  PhoneCall,
+  ChevronRight,
+  Users,
+  ShieldCheck,
+  Headphones,
 } from 'lucide-react';
 
+const OFF_CANVAS_NAV = [
+  { label: 'Home', href: '/', icon: Home, desc: 'Featured vehicles & deals' },
+  { label: 'Rent Car', href: '/rent', icon: Car, desc: 'Daily, weekly & monthly rentals' },
+  { label: 'Buy Car', href: '/buy', icon: ShoppingBag, desc: 'Verified vehicles for sale' },
+  { label: 'Sell Car', href: '/sell', icon: DollarSign, desc: 'List & sell your car today' },
+  { label: 'Contact Us', href: '/contact', icon: PhoneCall, desc: '24/7 support & assistance' },
+];
+
 export const Navbar: React.FC = () => {
+  const [mounted, setMounted] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
@@ -33,6 +51,10 @@ export const Navbar: React.FC = () => {
   const [recentNotifications, setRecentNotifications] = useState<INotification[]>([]);
   const pathname = usePathname();
   const { user, isAuthenticated, logout, setAuth } = useAuthStore();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     // Check session on initial load
@@ -54,11 +76,34 @@ export const Navbar: React.FC = () => {
     }
   }, [isAuthenticated, pathname]);
 
+  // Close off-canvas drawer on page navigation
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [pathname]);
+
+  // Lock body scroll and listen for Escape key when off-canvas is open
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') setMobileMenuOpen(false);
+      };
+      window.addEventListener('keydown', handleKeyDown);
+      return () => {
+        document.body.style.overflow = '';
+        window.removeEventListener('keydown', handleKeyDown);
+      };
+    } else {
+      document.body.style.overflow = '';
+    }
+  }, [mobileMenuOpen]);
+
   const handleLogout = async () => {
     await authService.logout();
     logout();
     setUserDropdownOpen(false);
     setNotificationsOpen(false);
+    setMobileMenuOpen(false);
   };
 
   const handleMarkAllRead = async () => {
@@ -70,15 +115,16 @@ export const Navbar: React.FC = () => {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-white/95 backdrop-blur border-b border-zinc-200/80 transition-all">
+    <>
+      <header className="sticky top-0 z-40 w-full bg-white/95 backdrop-blur border-b border-zinc-200/80 transition-all">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between">
         {/* Brand Logo */}
         <Link href="/" className="flex items-center group">
           <Logo variant="dark" size="md" />
         </Link>
 
-        {/* Desktop Navigation Links */}
-        <nav className="hidden md:flex items-center gap-8">
+        {/* Desktop Navigation Links (Visible on >= 1024px) */}
+        <nav className="hidden lg:flex items-center gap-8">
           {NAV_LINKS.map((link) => {
             const isActive = pathname === link.href;
             return (
@@ -101,7 +147,7 @@ export const Navbar: React.FC = () => {
           })}
         </nav>
 
-        {/* Action Button & Auth CTA */}
+        {/* Desktop Action Button & Auth CTA */}
         <div className="hidden lg:flex items-center gap-3">
           {isAuthenticated && user ? (
             <div className="flex items-center gap-3">
@@ -329,67 +375,326 @@ export const Navbar: React.FC = () => {
           )}
         </div>
 
-        {/* Mobile menu trigger */}
-        <button
-          type="button"
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="md:hidden p-2 rounded-lg text-zinc-700 hover:text-black hover:bg-zinc-100"
-          aria-label="Toggle Menu"
-        >
-          {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-        </button>
-      </div>
-
-      {/* Mobile Drawer */}
-      {mobileMenuOpen && (
-        <div className="md:hidden border-t border-zinc-200 bg-white px-4 pt-3 pb-6 space-y-3 shadow-xl">
-          {NAV_LINKS.map((link) => (
+        {/* Mobile & Tablet Trigger Button (Visible on < 1024px) */}
+        <div className="flex items-center gap-2 lg:hidden">
+          {isAuthenticated && (
             <Link
-              key={link.label}
-              href={link.href}
-              onClick={() => setMobileMenuOpen(false)}
-              className="block py-2 text-base font-semibold text-zinc-800 hover:text-black"
+              href="/dashboard/notifications"
+              className="relative p-2.5 rounded-full border border-zinc-200 bg-white text-zinc-700 hover:text-black hover:border-black transition-colors"
+              title="Notifications"
             >
-              {link.label}
+              <Bell className="w-4 h-4" />
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 h-4 min-w-[16px] px-1 rounded-full bg-black text-white text-[9px] font-black flex items-center justify-center">
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </span>
+              )}
             </Link>
-          ))}
-          <div className="pt-2 space-y-2">
-            {!isAuthenticated ? (
-              <>
-                <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="block">
-                  <Button variant="outline" size="md" className="w-full">
-                    Sign In
-                  </Button>
-                </Link>
-                <Link href="/cars?type=rent" onClick={() => setMobileMenuOpen(false)} className="block">
-                  <Button variant="dark" size="md" className="w-full">
-                    Book A Rental
-                  </Button>
-                </Link>
-              </>
-            ) : (
-              <>
-                <Link
-                  href={user?.role === 'admin' ? '/admin' : '/dashboard'}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="block"
-                >
-                  <Button variant="dark" size="md" className="w-full">
-                    {user?.role === 'admin' ? 'Admin Dashboard' : 'Dashboard'}
-                  </Button>
-                </Link>
-                <button
-                  type="button"
-                  onClick={handleLogout}
-                  className="w-full py-2.5 text-center text-sm font-bold text-rose-600 hover:bg-rose-50 rounded-xl mt-2"
-                >
-                  Sign Out
-                </button>
-              </>
-            )}
-          </div>
+          )}
+
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen(true)}
+            className="p-2.5 rounded-2xl border border-zinc-200 bg-zinc-50 hover:bg-zinc-100 text-zinc-800 hover:text-black transition-colors flex items-center justify-center"
+            aria-label="Open Navigation Menu"
+          >
+            <Menu className="w-5 h-5 stroke-[2.2]" />
+          </button>
         </div>
-      )}
+      </div>
     </header>
+
+    {/* OFF-CANVAS DRAWER SYSTEM (Mobile & Tablet) - Portaled directly to document.body to avoid header containment & horizontal overflow */}
+    {mounted &&
+      createPortal(
+        <div
+          className={cn(
+            'fixed inset-0 z-[9999] lg:hidden',
+            mobileMenuOpen ? 'visible pointer-events-auto' : 'invisible pointer-events-none'
+          )}
+        >
+          {/* 1. Backdrop Overlay */}
+          <div
+            className={cn(
+              'fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300',
+              mobileMenuOpen ? 'opacity-100' : 'opacity-0'
+            )}
+            onClick={() => setMobileMenuOpen(false)}
+            aria-hidden="true"
+          />
+
+          {/* 2. Off-Canvas Sliding Drawer Panel */}
+          <aside
+            className={cn(
+              'fixed top-0 right-0 bottom-0 z-[10000] w-full max-w-[340px] sm:max-w-[380px] bg-white shadow-2xl flex flex-col transition-all duration-300 ease-out',
+              mobileMenuOpen ? 'translate-x-0 opacity-100 visible' : 'translate-x-full opacity-0 invisible pointer-events-none'
+            )}
+            aria-label="Mobile Navigation Drawer"
+          >
+            {/* Drawer Header */}
+            <div className="p-4 sm:p-5 flex items-center justify-between border-b border-zinc-100 bg-white">
+              <Link href="/" onClick={() => setMobileMenuOpen(false)} className="flex items-center">
+                <Logo variant="dark" size="sm" />
+              </Link>
+              <button
+                type="button"
+                onClick={() => setMobileMenuOpen(false)}
+                className="h-9 w-9 rounded-full border border-zinc-200 bg-zinc-50 hover:bg-black hover:text-white text-zinc-600 flex items-center justify-center transition-all duration-150 cursor-pointer"
+                aria-label="Close Navigation"
+              >
+                <X className="w-4 h-4 stroke-[2.5]" />
+              </button>
+            </div>
+
+            {/* User Card (if Authenticated) */}
+            {isAuthenticated && user && (
+              <div className="p-4 mx-4 mt-3 rounded-2xl bg-zinc-50 border border-zinc-200 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3 min-w-0">
+                  {user.avatar ? (
+                    <img
+                      src={user.avatar}
+                      alt={user.name}
+                      referrerPolicy="no-referrer"
+                      className="h-10 w-10 rounded-full object-cover border border-zinc-300 shrink-0"
+                    />
+                  ) : (
+                    <div className="h-10 w-10 rounded-full bg-black text-white flex items-center justify-center text-sm font-black shrink-0">
+                      {user.name.charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-1.5">
+                      <p className="text-xs font-black text-black truncate">{user.name}</p>
+                      {user.role === 'admin' && (
+                        <span className="px-1.5 py-0.5 rounded-full text-[9px] font-extrabold uppercase bg-amber-500/10 text-amber-700 border border-amber-500/20">
+                          Admin
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-[10px] text-zinc-500 truncate">{user.email}</p>
+                  </div>
+                </div>
+                <Link
+                  href={user.role === 'admin' ? '/admin' : '/dashboard'}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="shrink-0 p-2 rounded-xl bg-white border border-zinc-200 hover:border-black text-zinc-700 hover:text-black transition-colors"
+                  title="Dashboard"
+                >
+                  <LayoutDashboard className="w-4 h-4" />
+                </Link>
+              </div>
+            )}
+
+            {/* Scrollable Navigation Body */}
+            <div className="flex-1 overflow-y-auto px-4 py-4 space-y-6">
+              {/* Main Navigation Links */}
+              <div className="space-y-1.5">
+                <span className="text-[10px] font-black uppercase tracking-wider text-zinc-400 px-3">
+                  Explore Carketo
+                </span>
+                <div className="space-y-1">
+                  {OFF_CANVAS_NAV.map((item) => {
+                    const isActive = pathname === item.href;
+                    const IconComponent = item.icon;
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={() => setMobileMenuOpen(false)}
+                        className={cn(
+                          'flex items-center justify-between p-3 rounded-2xl transition-all duration-150 group',
+                          isActive
+                            ? 'bg-black text-white shadow-sm'
+                            : 'text-zinc-800 hover:bg-zinc-100 hover:text-black'
+                        )}
+                      >
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div
+                            className={cn(
+                              'h-9 w-9 rounded-xl flex items-center justify-center shrink-0 transition-colors',
+                              isActive
+                                ? 'bg-white/20 text-white'
+                                : 'bg-zinc-100 text-zinc-700 group-hover:bg-white group-hover:shadow-sm'
+                            )}
+                          >
+                            <IconComponent className="w-4 h-4" />
+                          </div>
+                          <div className="min-w-0">
+                            <p className={cn('text-xs font-bold leading-tight', isActive ? 'text-white' : 'text-zinc-900')}>
+                              {item.label}
+                            </p>
+                            <p className={cn('text-[10px] leading-tight truncate mt-0.5', isActive ? 'text-zinc-300' : 'text-zinc-400')}>
+                              {item.desc}
+                            </p>
+                          </div>
+                        </div>
+                        <ChevronRight
+                          className={cn(
+                            'w-4 h-4 shrink-0 transition-transform group-hover:translate-x-0.5',
+                            isActive ? 'text-white/80' : 'text-zinc-400'
+                          )}
+                        />
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* User Account & Management Shortcuts (If logged in) */}
+              {isAuthenticated && (
+                <div className="space-y-1.5 pt-2 border-t border-zinc-100">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-zinc-400 px-3">
+                    Account & Fleet
+                  </span>
+                  <div className="space-y-1">
+                    {user?.role === 'admin' ? (
+                      <>
+                        <Link
+                          href="/admin"
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="flex items-center justify-between p-2.5 rounded-xl text-xs font-bold text-zinc-700 hover:bg-zinc-100 hover:text-black transition-colors"
+                        >
+                          <div className="flex items-center gap-2.5">
+                            <LayoutDashboard className="w-4 h-4 text-black" />
+                            <span>Admin Dashboard</span>
+                          </div>
+                          <ChevronRight className="w-3.5 h-3.5 text-zinc-400" />
+                        </Link>
+                        <Link
+                          href="/admin/cars"
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="flex items-center justify-between p-2.5 rounded-xl text-xs font-bold text-zinc-700 hover:bg-zinc-100 hover:text-black transition-colors"
+                        >
+                          <div className="flex items-center gap-2.5">
+                            <Car className="w-4 h-4 text-black" />
+                            <span>Master Cars Inventory</span>
+                          </div>
+                          <ChevronRight className="w-3.5 h-3.5 text-zinc-400" />
+                        </Link>
+                        <Link
+                          href="/admin/users"
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="flex items-center justify-between p-2.5 rounded-xl text-xs font-bold text-zinc-700 hover:bg-zinc-100 hover:text-black transition-colors"
+                        >
+                          <div className="flex items-center gap-2.5">
+                            <Users className="w-4 h-4 text-black" />
+                            <span>User Management</span>
+                          </div>
+                          <ChevronRight className="w-3.5 h-3.5 text-zinc-400" />
+                        </Link>
+                      </>
+                    ) : (
+                      <>
+                        <Link
+                          href="/dashboard"
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="flex items-center justify-between p-2.5 rounded-xl text-xs font-bold text-zinc-700 hover:bg-zinc-100 hover:text-black transition-colors"
+                        >
+                          <div className="flex items-center gap-2.5">
+                            <LayoutDashboard className="w-4 h-4 text-black" />
+                            <span>Dashboard Overview</span>
+                          </div>
+                          <ChevronRight className="w-3.5 h-3.5 text-zinc-400" />
+                        </Link>
+                        <Link
+                          href="/provider/cars"
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="flex items-center justify-between p-2.5 rounded-xl text-xs font-bold text-zinc-700 hover:bg-zinc-100 hover:text-black transition-colors"
+                        >
+                          <div className="flex items-center gap-2.5">
+                            <Car className="w-4 h-4 text-black" />
+                            <span>My Cars & Listings</span>
+                          </div>
+                          <ChevronRight className="w-3.5 h-3.5 text-zinc-400" />
+                        </Link>
+                        <Link
+                          href="/dashboard/inquiries"
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="flex items-center justify-between p-2.5 rounded-xl text-xs font-bold text-zinc-700 hover:bg-zinc-100 hover:text-black transition-colors"
+                        >
+                          <div className="flex items-center gap-2.5">
+                            <MessageSquare className="w-4 h-4 text-black" />
+                            <span>Inquiries Inbox</span>
+                          </div>
+                          <ChevronRight className="w-3.5 h-3.5 text-zinc-400" />
+                        </Link>
+                        <Link
+                          href="/dashboard/wishlist"
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="flex items-center justify-between p-2.5 rounded-xl text-xs font-bold text-zinc-700 hover:bg-zinc-100 hover:text-black transition-colors"
+                        >
+                          <div className="flex items-center gap-2.5">
+                            <Heart className="w-4 h-4 text-black" />
+                            <span>Saved Vehicles</span>
+                          </div>
+                          <ChevronRight className="w-3.5 h-3.5 text-zinc-400" />
+                        </Link>
+                      </>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* 24/7 Concierge Support Mini Card */}
+              <div className="p-3.5 rounded-2xl bg-zinc-50 border border-zinc-200 space-y-1.5">
+                <div className="flex items-center gap-2">
+                  <Headphones className="w-4 h-4 text-black" />
+                  <span className="text-xs font-black text-black">Need Assistance?</span>
+                </div>
+                <p className="text-[11px] text-zinc-500 leading-relaxed">
+                  Our concierge team is available 24/7 for booking help & queries.
+                </p>
+                <a
+                  href="tel:+8801700000000"
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-black hover:underline pt-1"
+                >
+                  <span>+880 1700-000000</span>
+                  <ArrowUpRight className="w-3.5 h-3.5" />
+                </a>
+              </div>
+            </div>
+
+            {/* Drawer Sticky Bottom Actions */}
+            <div className="p-4 border-t border-zinc-200 bg-white space-y-2">
+              {!isAuthenticated ? (
+                <div className="space-y-2">
+                  <Link href="/cars?type=rent" onClick={() => setMobileMenuOpen(false)} className="block">
+                    <Button variant="dark" size="md" className="w-full">
+                      Book A Rental
+                    </Button>
+                  </Link>
+                  <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="block">
+                    <Button variant="outline" size="md" className="w-full font-bold">
+                      Sign In to Account
+                    </Button>
+                  </Link>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <Link
+                    href={user?.role === 'admin' ? '/admin' : '/dashboard'}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block"
+                  >
+                    <Button variant="dark" size="md" className="w-full">
+                      {user?.role === 'admin' ? 'Open Admin Panel' : 'Open Dashboard'}
+                    </Button>
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    className="w-full py-2.5 px-3 rounded-xl border border-rose-200 bg-rose-50 text-rose-600 hover:bg-rose-100 text-xs font-bold transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                  >
+                    <LogOut className="w-3.5 h-3.5" />
+                    <span>Sign Out of Account</span>
+                  </button>
+                </div>
+              )}
+            </div>
+          </aside>
+        </div>,
+        document.body
+      )}
+    </>
   );
 };
