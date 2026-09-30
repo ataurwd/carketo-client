@@ -9,7 +9,7 @@ export function BuyHero() {
           <ShoppingBag className="w-3.5 h-3.5 text-white" />
           <span>সার্টিফায়েড শোরুম</span>
         </div>
-        <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-white">
+        <h1 className="text-3xl sm:text-5xl font-black leading-snug text-white">
           বাংলাদেশে যাচাইকৃত গাড়ি কিনুন
         </h1>
         <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed">

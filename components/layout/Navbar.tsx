@@ -50,31 +50,50 @@ export const Navbar: React.FC = () => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [recentNotifications, setRecentNotifications] = useState<INotification[]>([]);
   const pathname = usePathname();
-  const { user, isAuthenticated, logout, setAuth } = useAuthStore();
+  const { user, token, isAuthenticated, logout, setAuth } = useAuthStore();
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
   useEffect(() => {
-    // Check session on initial load
+    if (typeof window === 'undefined') return;
+    const currentToken = localStorage.getItem('access_token');
+    if (!currentToken) {
+      if (isAuthenticated || user) {
+        useAuthStore.setState({ user: null, token: null, isAuthenticated: false });
+        try {
+          localStorage.removeItem('carketo_auth_session');
+          document.cookie = 'access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; max-age=0; SameSite=Lax';
+        } catch {}
+      }
+      return;
+    }
+
+    // Check session on initial load with valid token
     authService.getMe().then((userData) => {
       if (userData) {
-        const token = localStorage.getItem('access_token') || '';
-        setAuth(userData, token);
+        setAuth(userData, currentToken);
+      } else {
+        logout();
       }
+    }).catch(() => {
+      logout();
     });
-  }, [setAuth]);
+  }, [setAuth, logout]);
+
+  const hasToken = mounted ? !!(token || (typeof window !== 'undefined' && localStorage.getItem('access_token'))) : false;
+  const isLoggedIn = mounted && isAuthenticated && !!user && hasToken;
 
   // Fetch unread notifications if authenticated
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isLoggedIn) {
       notificationService.getNotifications(1, 5).then((res) => {
         setRecentNotifications(res.notifications || []);
         setUnreadCount(res.unreadCount || 0);
       }).catch(() => {});
     }
-  }, [isAuthenticated, pathname]);
+  }, [isLoggedIn, pathname]);
 
   // Close off-canvas drawer on page navigation
   useEffect(() => {
@@ -149,7 +168,7 @@ export const Navbar: React.FC = () => {
 
         {/* Desktop Action Button & Auth CTA */}
         <div className="hidden lg:flex items-center gap-3">
-          {isAuthenticated && user ? (
+          {isLoggedIn && user ? (
             <div className="flex items-center gap-3">
               {/* Notification Bell with Popover */}
               <div className="relative">
@@ -377,7 +396,7 @@ export const Navbar: React.FC = () => {
 
         {/* Mobile & Tablet Trigger Button (Visible on < 1024px) */}
         <div className="flex items-center gap-2 lg:hidden">
-          {isAuthenticated && (
+          {isLoggedIn && (
             <Link
               href="/dashboard/notifications"
               className="relative p-2.5 rounded-full border border-zinc-200 bg-white text-zinc-700 hover:text-black hover:border-black transition-colors"
@@ -447,7 +466,7 @@ export const Navbar: React.FC = () => {
             </div>
 
             {/* User Card (if Authenticated) */}
-            {isAuthenticated && user && (
+            {isLoggedIn && user && (
               <div className="p-4 mx-4 mt-3 rounded-2xl bg-zinc-50 border border-zinc-200 flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3 min-w-0">
                   {user.avatar ? (
@@ -541,7 +560,7 @@ export const Navbar: React.FC = () => {
               </div>
 
               {/* User Account & Management Shortcuts (If logged in) */}
-              {isAuthenticated && (
+              {isLoggedIn && (
                 <div className="space-y-1.5 pt-2 border-t border-zinc-100">
                   <span className="text-[10px] font-black uppercase tracking-wider text-zinc-400 px-3">
                     অ্যাকাউন্ট ও গাড়ি
@@ -656,7 +675,7 @@ export const Navbar: React.FC = () => {
 
             {/* Drawer Sticky Bottom Actions */}
             <div className="p-4 border-t border-zinc-200 bg-white space-y-2">
-              {!isAuthenticated ? (
+              {!isLoggedIn ? (
                 <div className="space-y-2">
                   <Link href="/cars?type=rent" onClick={() => setMobileMenuOpen(false)} className="block">
                     <Button variant="dark" size="md" className="w-full">

@@ -180,7 +180,7 @@ function RentCarContent() {
               <KeyRound className="w-3.5 h-3.5 text-white" />
               <span>সরাসরি গাড়ি ভাড়া</span>
             </div>
-            <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-white">
+            <h1 className="text-3xl sm:text-5xl font-black leading-snug text-white">
               প্রিমিয়াম গাড়ি ভাড়া নিন
             </h1>
             <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed">

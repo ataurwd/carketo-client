@@ -35,12 +35,15 @@ export function Providers({ children }: { children: React.ReactNode }) {
             }
           })
           .catch(() => {
-            // Keep existing rehydrated state or fallback
+            logout();
           })
           .finally(() => {
             setInitialized(true);
           });
       } else {
+        // No token in localStorage: Ensure store is completely unauthenticated!
+        useAuthStore.setState({ user: null, token: null, isAuthenticated: false, isInitialized: true });
+        localStorage.removeItem('carketo_auth_session');
         setInitialized(true);
       }
     }
