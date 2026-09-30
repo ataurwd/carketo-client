@@ -49,7 +49,7 @@ function RegisterFormContent() {
       });
 
       setAuth(data.user, data.accessToken);
-      setSuccess('Account created successfully! Welcome to Carketo.');
+      setSuccess('অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে! কারকেটো-তে স্বাগতম।');
       const targetUrl =
         searchParams.get('redirect') ||
         searchParams.get('from') ||
@@ -58,7 +58,7 @@ function RegisterFormContent() {
         router.push(targetUrl);
       }, 800);
     } catch (err: any) {
-      setError(err.message || 'Failed to create account. Please check your inputs.');
+      setError(err.message || 'অ্যাকাউন্ট তৈরি করতে ব্যর্থ হয়েছে। অনুগ্রহ করে আপনার তথ্য যাচাই করুন।');
     } finally {
       setIsLoading(false);
     }
@@ -72,10 +72,10 @@ function RegisterFormContent() {
           <Logo variant="dark" size="lg" />
         </Link>
         <h2 className="text-2xl sm:text-3xl font-black text-black tracking-tight">
-          Create an Account
+          নতুন অ্যাকাউন্ট তৈরি করুন
         </h2>
         <p className="text-xs sm:text-sm text-zinc-500">
-          Join Carketo to rent, buy, or sell vehicles directly with zero commissions.
+          শূন্য কমিশনে সরাসরি গাড়ি ভাড়া নিতে, কিনতে বা বিক্রি করতে কারকেটো-তে যোগ দিন।
         </p>
       </div>
 
@@ -97,17 +97,17 @@ function RegisterFormContent() {
       {/* Form */}
       <form onSubmit={handleSubmit} className="space-y-4">
         <Input
-          label="Full Name"
+          label="পূর্ণ নাম"
           type="text"
           required
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="e.g. Ataur Rahman"
+          placeholder="যেমন: আতাউর রহমান"
           leftIcon={<UserIcon className="w-4 h-4" />}
         />
 
         <Input
-          label="Email Address"
+          label="ইমেইল ঠিকানা"
           type="email"
           required
           value={email}
@@ -117,23 +117,23 @@ function RegisterFormContent() {
         />
 
         <Input
-          label="Phone Number"
+          label="ফোন নম্বর"
           type="tel"
           required
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
-          placeholder="e.g. 01712345678"
+          placeholder="যেমন: 01712345678"
           leftIcon={<Phone className="w-4 h-4" />}
         />
 
         <Input
-          label="Password"
+          label="পাসওয়ার্ড"
           type="password"
           required
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          placeholder="Min. 8 characters (uppercase, lowercase, number)"
-          helperText="Must be at least 8 characters with upper, lower and numbers."
+          placeholder="কমপক্ষে ৮ অক্ষর (বড় হাতের, ছোট হাতের অক্ষর ও সংখ্যা)"
+          helperText="বড় হাতের, ছোট হাতের অক্ষর এবং সংখ্যাসহ কমপক্ষে ৮ অক্ষরের হতে হবে।"
           leftIcon={<Lock className="w-4 h-4" />}
         />
 
@@ -145,7 +145,7 @@ function RegisterFormContent() {
           className="w-full text-sm font-bold shadow-md hover:bg-black mt-2"
           rightIcon={<ArrowRight className="w-4 h-4" />}
         >
-          Create Account
+          অ্যাকাউন্ট তৈরি করুন
         </Button>
       </form>
 
@@ -155,7 +155,7 @@ function RegisterFormContent() {
           <div className="w-full border-t border-zinc-200" />
         </div>
         <div className="relative flex justify-center text-xs uppercase font-bold text-zinc-400">
-          <span className="bg-white px-3">Or continue with</span>
+          <span className="bg-white px-3">অথবা চালিয়ে যান</span>
         </div>
       </div>
 
@@ -185,22 +185,22 @@ function RegisterFormContent() {
             d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
           />
         </svg>
-        <span>Continue with Google</span>
+        <span>গুগল দিয়ে চালিয়ে যান</span>
       </button>
 
       <div className="flex items-center justify-center gap-2 text-[11px] text-zinc-400 font-medium">
         <ShieldCheck className="w-3.5 h-3.5" />
-        <span>Argon2id Encrypted • Direct Buyer & Seller Contact</span>
+        <span>সুরক্ষিত এনক্রিপশন • ক্রেতা ও বিক্রেতার সরাসরি যোগাযোগ</span>
       </div>
 
       {/* Footer Link */}
       <p className="text-center text-xs font-semibold text-zinc-500 pt-2 border-t border-zinc-100">
-        Already have an account?{' '}
+        ইতিমধ্যেই অ্যাকাউন্ট আছে?{' '}
         <Link
           href={`/login${redirectUrl ? `?redirect=${encodeURIComponent(redirectUrl)}` : ''}`}
           className="font-bold text-black hover:underline"
         >
-          Sign in
+          সাইন ইন করুন
         </Link>
       </p>
     </div>

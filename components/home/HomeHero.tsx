@@ -57,26 +57,26 @@ export const DEFAULT_HOME_FILTERS: HomeFilters = {
 };
 
 const CONDITIONS_LIST = [
-  { value: 'all', label: 'All Conditions' },
-  { value: 'new', label: 'Brand New' },
-  { value: 'certified', label: 'Certified / Reconditioned' },
-  { value: 'used', label: 'Used / Pre-Owned' },
+  { value: 'all', label: 'সব কন্ডিশন' },
+  { value: 'new', label: 'ব্র্যান্ড নিউ' },
+  { value: 'certified', label: 'সার্টিফায়েড / রিকন্ডিশনড' },
+  { value: 'used', label: 'ব্যবহৃত / প্রি-ওনড' },
 ];
 
 const FUEL_TYPES_LIST = [
-  { value: 'all', label: 'All Fuel Types' },
-  { value: 'petrol', label: 'Petrol / Octane' },
-  { value: 'hybrid', label: 'Hybrid' },
-  { value: 'electric', label: '100% Electric (EV)' },
-  { value: 'diesel', label: 'Diesel' },
-  { value: 'cng', label: 'CNG / LPG' },
+  { value: 'all', label: 'সব জ্বালানি' },
+  { value: 'petrol', label: 'পেট্রোল / অকটেন' },
+  { value: 'hybrid', label: 'হাইব্রিড' },
+  { value: 'electric', label: '১০০% ইলেকট্রিক (EV)' },
+  { value: 'diesel', label: 'ডিজেল' },
+  { value: 'cng', label: 'সিএনজি / এলপিজি' },
 ];
 
 const TRANSMISSIONS_LIST = [
-  { value: 'all', label: 'All Transmissions' },
-  { value: 'automatic', label: 'Automatic' },
-  { value: 'manual', label: 'Manual' },
-  { value: 'dual-clutch', label: 'Dual-Clutch / Tiptronic' },
+  { value: 'all', label: 'সব ট্রান্সমিশন' },
+  { value: 'automatic', label: 'অটোমেটিক' },
+  { value: 'manual', label: 'ম্যানুয়াল' },
+  { value: 'dual-clutch', label: 'ডুয়াল-ক্লাচ / টিপট্রনিক' },
 ];
 
 const LOCATIONS_LIST = [
@@ -152,20 +152,20 @@ export function HomeHero({
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
               <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
             </span>
-            <span>Direct &amp; Verified Automotive Marketplace</span>
+            <span>সরাসরি ও যাচাইকৃত অটোমোটিভ মার্কেটপ্লেস</span>
           </div>
 
           {/* Bold Centered Headline */}
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-zinc-950 leading-[1.1]">
-            Find the right car.{' '}
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-zinc-950 leading-[1.15]">
+            সঠিক গাড়িটি খুঁজে নিন।{' '}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-zinc-950 via-zinc-700 to-zinc-500">
-              Rent or buy direct.
+              সরাসরি ভাড়া নিন বা কিনুন।
             </span>
           </h1>
 
           {/* Centered Subtitle */}
           <p className="text-sm sm:text-base text-zinc-600 font-medium leading-relaxed max-w-2xl mx-auto">
-            Discover verified vehicles with transparent Bangladeshi Taka (৳) rates, authentic owner contacts, and zero broker commissions.
+            স্বচ্ছ বাংলাদেশি টাকায় (৳) যাচাইকৃত গাড়ি খুঁজুন, সরাসরি মালিকের সাথে কথা বলুন — কোনো ব্রোকার কমিশন ছাড়াই।
           </p>
         </div>
 
@@ -181,7 +181,7 @@ export function HomeHero({
             }`}
           >
             <ShoppingBag className="w-4 h-4 text-emerald-400" />
-            <span>Buy a Car</span>
+            <span>গাড়ি কিনুন</span>
           </button>
 
           <button
@@ -194,7 +194,7 @@ export function HomeHero({
             }`}
           >
             <KeyRound className="w-4 h-4 text-sky-400" />
-            <span>Rent a Car</span>
+            <span>গাড়ি ভাড়া নিন</span>
           </button>
         </div>
 
@@ -209,7 +209,7 @@ export function HomeHero({
                 <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
                 <input
                   type="text"
-                  placeholder="Search by title, brand, model (e.g. Premio, Civic, Prado), city..."
+                  placeholder="নাম, ব্র্যান্ড, মডেল (যেমন: Premio, Civic, Prado) বা শহর দিয়ে খুঁজুন..."
                   value={draftFilters.search}
                   onChange={(e) => setDraftFilters((prev) => ({ ...prev, search: e.target.value }))}
                   onKeyDown={(e) => {
@@ -241,7 +241,7 @@ export function HomeHero({
                 className="px-5 py-2.5 rounded-2xl bg-zinc-950 text-white hover:bg-zinc-800 text-xs sm:text-sm font-bold transition-all shadow-sm flex items-center gap-1.5 shrink-0 active:scale-95"
               >
                 <Search className="w-3.5 h-3.5" />
-                <span>Search</span>
+                <span>খুঁজুন</span>
               </button>
             </div>
 
@@ -256,12 +256,12 @@ export function HomeHero({
                 }}
                 className="w-full pl-4 pr-10 py-2.5 rounded-2xl border border-zinc-200 bg-white text-xs font-bold text-zinc-800 focus:outline-none focus:border-black hover:border-zinc-400 cursor-pointer shadow-sm appearance-none transition-colors"
               >
-                <option value="newest">Sort: Newest Listed</option>
-                <option value="price_asc">Price: Low to High</option>
-                <option value="price_desc">Price: High to Low</option>
-                <option value="year_desc">Year: Newest Models</option>
-                <option value="year_asc">Year: Older Models</option>
-                <option value="mileage_asc">Mileage: Lowest First</option>
+                <option value="newest">সাজান: নতুন যুক্ত</option>
+                <option value="price_asc">মূল্য: কম থেকে বেশি</option>
+                <option value="price_desc">মূল্য: বেশি থেকে কম</option>
+                <option value="year_desc">সাল: নতুন মডেল</option>
+                <option value="year_asc">সাল: পুরাতন মডেল</option>
+                <option value="mileage_asc">মাইলেজ: কম থেকে বেশি</option>
               </select>
               <ChevronDown className="w-4 h-4 text-zinc-400 pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 transition-colors group-hover:text-black" />
             </div>
@@ -272,7 +272,7 @@ export function HomeHero({
             {/* 1. Brand Selector */}
             <div>
               <label className="block text-zinc-500 font-bold mb-1 text-[11px] uppercase tracking-wider">
-                Brand / Make
+                ব্র্যান্ড / মেক
               </label>
               <div className="relative group">
                 <select
@@ -280,7 +280,7 @@ export function HomeHero({
                   onChange={(e) => setDraftFilters((prev) => ({ ...prev, brand: e.target.value }))}
                   className="w-full pl-3 pr-8 py-2 rounded-xl border border-zinc-200 bg-white text-xs font-bold text-zinc-800 focus:outline-none focus:border-black hover:border-zinc-400 cursor-pointer shadow-xs appearance-none transition-colors"
                 >
-                  <option value="all">All Brands</option>
+                  <option value="all">সব ব্র্যান্ড</option>
                   {POPULAR_BRANDS.map((b) => (
                     <option key={b} value={b}>
                       {b}
@@ -294,11 +294,11 @@ export function HomeHero({
             {/* 2. Model Input */}
             <div>
               <label className="block text-zinc-500 font-bold mb-1 text-[11px] uppercase tracking-wider">
-                Model Name
+                মডেলের নাম
               </label>
               <input
                 type="text"
-                placeholder="e.g. Premio, Civic..."
+                placeholder="যেমন: Premio, Civic..."
                 value={draftFilters.model}
                 onChange={(e) => setDraftFilters((prev) => ({ ...prev, model: e.target.value }))}
                 onKeyDown={(e) => {
@@ -314,7 +314,7 @@ export function HomeHero({
             {/* 3. Condition */}
             <div>
               <label className="block text-zinc-500 font-bold mb-1 text-[11px] uppercase tracking-wider">
-                Condition
+                কন্ডিশন
               </label>
               <div className="relative group">
                 <select
@@ -335,7 +335,7 @@ export function HomeHero({
             {/* 4. Fuel Type */}
             <div>
               <label className="block text-zinc-500 font-bold mb-1 text-[11px] uppercase tracking-wider">
-                Fuel Type
+                জ্বালানির ধরন
               </label>
               <div className="relative group">
                 <select
@@ -356,12 +356,12 @@ export function HomeHero({
             {/* 5. Price Range */}
             <div>
               <label className="block text-zinc-500 font-bold mb-1 text-[11px] uppercase tracking-wider">
-                Price Range (৳)
+                মূল্য সীমা (৳)
               </label>
               <div className="flex items-center gap-1.5">
                 <input
                   type="number"
-                  placeholder="Min ৳"
+                  placeholder="সর্বনিম্ন ৳"
                   value={draftFilters.minPrice}
                   onChange={(e) => setDraftFilters((prev) => ({ ...prev, minPrice: e.target.value }))}
                   onKeyDown={(e) => {
@@ -375,7 +375,7 @@ export function HomeHero({
                 <span className="text-zinc-400 font-bold">-</span>
                 <input
                   type="number"
-                  placeholder="Max ৳"
+                  placeholder="সর্বোচ্চ ৳"
                   value={draftFilters.maxPrice}
                   onChange={(e) => setDraftFilters((prev) => ({ ...prev, maxPrice: e.target.value }))}
                   onKeyDown={(e) => {
@@ -396,7 +396,7 @@ export function HomeHero({
             <div>
               <label className="block text-zinc-500 font-bold mb-1 text-[11px] uppercase tracking-wider flex items-center gap-1">
                 <Calendar className="w-3.5 h-3.5 text-zinc-700" />
-                <span>Mfg. Year Range</span>
+                <span>তৈরির সাল</span>
               </label>
               <div className="flex items-center gap-1.5">
                 <div className="relative flex-1 group">
@@ -405,7 +405,7 @@ export function HomeHero({
                     onChange={(e) => setDraftFilters((prev) => ({ ...prev, minYear: e.target.value }))}
                     className="w-full pl-2.5 pr-7 py-2 rounded-xl border border-zinc-200 bg-white text-xs font-semibold text-zinc-800 focus:outline-none focus:border-black hover:border-zinc-400 cursor-pointer shadow-xs appearance-none transition-colors"
                   >
-                    <option value="">Min Year</option>
+                    <option value="">শুরুর সাল</option>
                     {YEAR_OPTIONS.map((y) => (
                       <option key={`min-${y}`} value={y}>
                         {y}
@@ -421,7 +421,7 @@ export function HomeHero({
                     onChange={(e) => setDraftFilters((prev) => ({ ...prev, maxYear: e.target.value }))}
                     className="w-full pl-2.5 pr-7 py-2 rounded-xl border border-zinc-200 bg-white text-xs font-semibold text-zinc-800 focus:outline-none focus:border-black hover:border-zinc-400 cursor-pointer shadow-xs appearance-none transition-colors"
                   >
-                    <option value="">Max Year</option>
+                    <option value="">শেষ সাল</option>
                     {YEAR_OPTIONS.map((y) => (
                       <option key={`max-${y}`} value={y}>
                         {y}
@@ -437,7 +437,7 @@ export function HomeHero({
             <div>
               <label className="block text-zinc-500 font-bold mb-1 text-[11px] uppercase tracking-wider flex items-center gap-1">
                 <Gauge className="w-3.5 h-3.5 text-zinc-700" />
-                <span>Transmission</span>
+                <span>ট্রান্সমিশন</span>
               </label>
               <div className="relative group">
                 <select
@@ -458,7 +458,7 @@ export function HomeHero({
             {/* 8. Body Type */}
             <div>
               <label className="block text-zinc-500 font-bold mb-1 text-[11px] uppercase tracking-wider">
-                Body Class
+                বডি টাইপ
               </label>
               <div className="relative group">
                 <select
@@ -466,7 +466,7 @@ export function HomeHero({
                   onChange={(e) => setDraftFilters((prev) => ({ ...prev, bodyType: e.target.value }))}
                   className="w-full pl-3 pr-8 py-2 rounded-xl border border-zinc-200 bg-white text-xs font-bold text-zinc-800 focus:outline-none focus:border-black hover:border-zinc-400 cursor-pointer shadow-xs appearance-none transition-colors"
                 >
-                  <option value="all">All Body Classes</option>
+                  <option value="all">সব বডি টাইপ</option>
                   {BODY_TYPES.map((bt) => (
                     <option key={bt} value={bt}>
                       {bt}
@@ -481,7 +481,7 @@ export function HomeHero({
             <div>
               <label className="block text-zinc-500 font-bold mb-1 text-[11px] uppercase tracking-wider flex items-center gap-1">
                 <MapPin className="w-3.5 h-3.5 text-zinc-700" />
-                <span>Location / City</span>
+                <span>অবস্থান / শহর</span>
               </label>
               <div className="relative group">
                 <select
@@ -491,7 +491,7 @@ export function HomeHero({
                 >
                   {LOCATIONS_LIST.map((loc) => (
                     <option key={loc} value={loc === 'All Locations' ? 'all' : loc}>
-                      {loc}
+                      {loc === 'All Locations' ? 'সব অবস্থান' : loc}
                     </option>
                   ))}
                 </select>
@@ -502,7 +502,7 @@ export function HomeHero({
             {/* 10. Max Mileage Range */}
             <div>
               <label className="block text-zinc-500 font-bold mb-1 text-[11px] uppercase tracking-wider">
-                Max Mileage
+                সর্বোচ্চ মাইলেজ
               </label>
               <div className="relative group">
                 <select
@@ -510,11 +510,11 @@ export function HomeHero({
                   onChange={(e) => setDraftFilters((prev) => ({ ...prev, maxMileage: e.target.value }))}
                   className="w-full pl-3 pr-8 py-2 rounded-xl border border-zinc-200 bg-white text-xs font-bold text-zinc-800 focus:outline-none focus:border-black hover:border-zinc-400 cursor-pointer shadow-xs appearance-none transition-colors"
                 >
-                  <option value="">Any Mileage</option>
-                  <option value="20000">Under 20,000 km</option>
-                  <option value="50000">Under 50,000 km</option>
-                  <option value="80000">Under 80,000 km</option>
-                  <option value="120000">Under 120,000 km</option>
+                  <option value="">যেকোনো মাইলেজ</option>
+                  <option value="20000">২০,০০০ কি.মি. এর নিচে</option>
+                  <option value="50000">৫০,০০০ কি.মি. এর নিচে</option>
+                  <option value="80000">৮০,০০০ কি.মি. এর নিচে</option>
+                  <option value="120000">১,২০,০০০ কি.মি. এর নিচে</option>
                 </select>
                 <ChevronDown className="w-3.5 h-3.5 text-zinc-400 pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 transition-colors group-hover:text-black" />
               </div>
@@ -525,49 +525,49 @@ export function HomeHero({
           <div className="pt-2 border-t border-zinc-100 flex flex-wrap items-center gap-2 text-xs">
             <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-1">
               <Tag className="w-3.5 h-3.5" />
-              Quick Presets:
+              দ্রুত ফিল্টার:
             </span>
             <button
               type="button"
               onClick={() => onApplyPreset({ minPrice: '', maxPrice: '2000000' })}
               className="px-3 py-1 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-800 font-bold text-[11px] transition-colors"
             >
-              Under ৳20 Lakh
+              ৳২০ লাখের নিচে
             </button>
             <button
               type="button"
               onClick={() => onApplyPreset({ minPrice: '2000000', maxPrice: '4000000' })}
               className="px-3 py-1 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-800 font-bold text-[11px] transition-colors"
             >
-              ৳20L - ৳40L
+              ৳২০ লাখ - ৳৪০ লাখ
             </button>
             <button
               type="button"
               onClick={() => onApplyPreset({ minPrice: '4000000', maxPrice: '8000000' })}
               className="px-3 py-1 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-800 font-bold text-[11px] transition-colors"
             >
-              ৳40L - ৳80L
+              ৳৪০ লাখ - ৳৮০ লাখ
             </button>
             <button
               type="button"
               onClick={() => onApplyPreset({ minPrice: '8000000', maxPrice: '' })}
               className="px-3 py-1 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-800 font-bold text-[11px] transition-colors"
             >
-              ৳80L+ Luxury
+              ৳৮০ লাখ+ লাক্সারি
             </button>
             <button
               type="button"
               onClick={() => onApplyPreset({ fuelType: 'hybrid' })}
               className="px-3 py-1 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-800 font-bold text-[11px] transition-colors"
             >
-              Hybrid Cars
+              হাইব্রিড গাড়ি
             </button>
             <button
               type="button"
               onClick={() => onApplyPreset({ minYear: '2021' })}
               className="px-3 py-1 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-800 font-bold text-[11px] transition-colors"
             >
-              2021 &amp; Newer
+              ২০২১ ও নতুন
             </button>
           </div>
 
@@ -579,14 +579,14 @@ export function HomeHero({
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-zinc-500 hover:text-black hover:bg-zinc-100 transition-colors w-full sm:w-auto justify-center"
             >
               <RotateCcw className="w-3.5 h-3.5" />
-              <span>Reset All Filters</span>
+              <span>সব ফিল্টার রিসেট করুন</span>
             </button>
 
             <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
               {hasPendingChanges && (
                 <span className="text-[11px] font-semibold text-amber-700 bg-amber-50 border border-amber-200 px-3 py-1 rounded-full flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-                  Filters selected — click Apply
+                  ফিল্টার নির্বাচিত — প্রয়োগ করুন ক্লিক করুন
                 </span>
               )}
               <button
@@ -595,7 +595,7 @@ export function HomeHero({
                 className="flex items-center gap-2 px-6 py-2.5 rounded-2xl bg-zinc-950 text-white hover:bg-zinc-800 text-xs sm:text-sm font-bold transition-all shadow-md active:scale-95 w-full sm:w-auto justify-center"
               >
                 <SlidersHorizontal className="w-4 h-4" />
-                <span>Apply Filters</span>
+                <span>ফিল্টার প্রয়োগ করুন</span>
               </button>
             </div>
           </div>

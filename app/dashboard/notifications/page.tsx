@@ -103,20 +103,20 @@ export default function NotificationsPage() {
             className="inline-flex items-center gap-2 text-xs font-bold text-zinc-600 hover:text-black transition-colors mb-2"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span>Back to Dashboard</span>
+            <span>ড্যাশবোর্ডে ফিরে যান</span>
           </Link>
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <div className="flex items-center gap-3">
-                <h1 className="text-2xl sm:text-3xl font-black text-black">Notifications & Alerts</h1>
+                <h1 className="text-2xl sm:text-3xl font-black text-black">নোটিফিকেশন ও অ্যালার্ট</h1>
                 {unreadCount > 0 && (
                   <span className="h-6 px-2.5 rounded-full bg-black text-white text-xs font-bold flex items-center justify-center">
-                    {unreadCount} Unread
+                    {unreadCount} টি অপঠিত
                   </span>
                 )}
               </div>
               <p className="text-xs sm:text-sm text-zinc-500 mt-1">
-                Real-time lead inquiries, marketplace announcements, and vehicle status updates.
+                রিয়েল-টাইম ক্রেতা জিজ্ঞাসা, মার্কেটপ্লেস ঘোষণা এবং গাড়ির স্ট্যাটাস আপডেট।
               </p>
             </div>
 
@@ -129,7 +129,7 @@ export default function NotificationsPage() {
                   leftIcon={<CheckCheck className="w-4 h-4" />}
                   className="text-xs font-bold"
                 >
-                  Mark all as read
+                  সবগুলো পঠিত হিসেবে চিহ্নিত করুন
                 </Button>
               )}
             </div>
@@ -139,11 +139,11 @@ export default function NotificationsPage() {
         {/* Filter Pills */}
         <div className="flex items-center gap-2 bg-white p-1.5 rounded-2xl border border-zinc-200 shadow-sm text-xs font-bold overflow-x-auto">
           {[
-            { key: 'all', label: 'All Alerts' },
-            { key: 'unread', label: 'Unread' },
-            { key: 'inquiry', label: 'Buyer Inquiries' },
-            { key: 'car_approval', label: 'Car Approvals' },
-            { key: 'system', label: 'System' },
+            { key: 'all', label: 'সব অ্যালার্ট' },
+            { key: 'unread', label: 'অপঠিত' },
+            { key: 'inquiry', label: 'ক্রেতার জিজ্ঞাসা' },
+            { key: 'car_approval', label: 'গাড়ি অনুমোদন' },
+            { key: 'system', label: 'সিস্টেম' },
           ].map((item) => (
             <button
               key={item.key}
@@ -162,7 +162,7 @@ export default function NotificationsPage() {
           {isLoading ? (
             <div className="p-16 text-center space-y-4">
               <div className="h-10 w-10 border-4 border-black border-t-transparent rounded-full animate-spin mx-auto" />
-              <p className="text-xs font-bold text-zinc-500">Loading notifications...</p>
+              <p className="text-xs font-bold text-zinc-500">নোটিফিকেশন লোড হচ্ছে...</p>
             </div>
           ) : filteredNotifications.length > 0 ? (
             filteredNotifications.map((n) => (
@@ -207,7 +207,7 @@ export default function NotificationsPage() {
                         onClick={(e) => e.stopPropagation()}
                         className="inline-flex items-center gap-1 text-xs font-bold text-black hover:underline mt-1 pt-1"
                       >
-                        <span>View Details</span>
+                        <span>বিস্তারিত দেখুন</span>
                         <ExternalLink className="w-3 h-3" />
                       </Link>
                     )}
@@ -222,7 +222,7 @@ export default function NotificationsPage() {
                     type="button"
                     onClick={(e) => handleDelete(e, n._id)}
                     className="p-1.5 rounded-xl text-zinc-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
-                    title="Delete notification"
+                    title="নোটিফিকেশন মুছুন"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -234,8 +234,8 @@ export default function NotificationsPage() {
               <div className="h-12 w-12 mx-auto rounded-full bg-zinc-100 flex items-center justify-center text-zinc-400">
                 <Bell className="w-6 h-6" />
               </div>
-              <p className="text-sm font-bold text-zinc-800">No notifications found</p>
-              <p className="text-xs text-zinc-500">You are all caught up with your platform updates.</p>
+              <p className="text-sm font-bold text-zinc-800">কোনো নোটিফিকেশন পাওয়া যায়নি</p>
+              <p className="text-xs text-zinc-500">আপনার সকল আপডেট দেখা শেষ হয়েছে।</p>
             </div>
           )}
         </div>

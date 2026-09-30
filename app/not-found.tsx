@@ -10,16 +10,16 @@ export default function NotFound() {
           <Car className="w-8 h-8" />
         </div>
         <div className="space-y-2">
-          <span className="text-4xl font-black text-slate-900">404</span>
-          <h2 className="text-xl font-bold text-slate-800">Page Not Found</h2>
+          <span className="text-4xl font-black text-slate-900">৪০৪</span>
+          <h2 className="text-xl font-bold text-slate-800">পৃষ্ঠাটি খুঁজে পাওয়া যায়নি</h2>
           <p className="text-xs text-slate-500">
-            The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.
+            আপনি যে পৃষ্ঠাটি খুঁজছেন তা হয়ত সরিয়ে ফেলা হয়েছে, নাম পরিবর্তন করা হয়েছে অথবা সাময়িকভাবে অনুপলব্ধ।
           </p>
         </div>
         <div className="pt-2">
           <Link href="/">
             <Button variant="primary" size="md" leftIcon={<ArrowLeft className="w-4 h-4" />}>
-              Back to Home
+              হোমে ফিরে যান
             </Button>
           </Link>
         </div>

@@ -1,17 +1,17 @@
 export const SITE_CONFIG = {
   name: 'carketo',
-  tagline: 'Premium Car Rental & Marketplace',
-  description: 'Experience the ease and convenience of renting or buying top-tier vehicles.',
+  tagline: 'প্রিমিয়াম গাড়ি ভাড়া ও মার্কেটপ্লেস',
+  description: 'সহজে এবং নিশ্চিন্তে সেরা মানের গাড়ি ভাড়া নিন অথবা ক্রয় করুন।',
   apiUrl: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1',
   currency: '৳',
 };
 
 export const NAV_LINKS = [
-  { label: 'Home', href: '/' },
-  { label: 'Rent Car', href: '/rent' },
-  { label: 'Buy Car', href: '/buy' },
-  { label: 'Sell Car', href: '/sell' },
-  { label: 'Contact Us', href: '/contact' },
+  { label: 'হোম', href: '/' },
+  { label: 'গাড়ি ভাড়া', href: '/rent' },
+  { label: 'গাড়ি কিনুন', href: '/buy' },
+  { label: 'গাড়ি বিক্রি', href: '/sell' },
+  { label: 'যোগাযোগ', href: '/contact' },
 ];
 
 export const BODY_TYPES = [

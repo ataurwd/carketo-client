@@ -18,7 +18,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return (
       <div className="min-h-[80vh] flex flex-col items-center justify-center space-y-4 bg-zinc-50">
         <div className="h-10 w-10 border-4 border-black border-t-transparent rounded-full animate-spin" />
-        <p className="text-xs font-bold text-zinc-500 font-sans">Checking session authentication...</p>
+        <p className="text-xs font-bold text-zinc-500 font-sans">সেশন যাচাই করা হচ্ছে...</p>
       </div>
     );
   }

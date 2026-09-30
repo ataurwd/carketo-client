@@ -45,7 +45,7 @@ function LoginFormContent() {
         .then((userData) => {
           if (userData) {
             setAuth(userData, oauthToken);
-            setSuccess('Signed in with Google successfully! Redirecting...');
+            setSuccess('গুগল দিয়ে সফলভাবে সাইন ইন হয়েছে! নিয়ে যাওয়া হচ্ছে...');
             const rawTarget = searchParams.get('redirect') || searchParams.get('from');
             const targetUrl =
               rawTarget && !rawTarget.startsWith('/login')
@@ -58,11 +58,11 @@ function LoginFormContent() {
               window.location.href = targetUrl;
             }, 500);
           } else {
-            setError('Failed to fetch user profile. Please try logging in again.');
+            setError('ব্যবহারকারীর প্রোফাইল লোড করতে ব্যর্থ হয়েছে। অনুগ্রহ করে আবার লগইন করুন।');
           }
         })
         .catch(() => {
-          setError('Google authentication failed. Please try again.');
+          setError('গুগল অথেনটিকেশন ব্যর্থ হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।');
         })
         .finally(() => {
           setIsLoading(false);
@@ -107,7 +107,7 @@ function LoginFormContent() {
     try {
       const data = await authService.login({ email, password });
       setAuth(data.user, data.accessToken);
-      setSuccess('Signed in successfully! Redirecting...');
+      setSuccess('সফলভাবে সাইন ইন হয়েছে! নিয়ে যাওয়া হচ্ছে...');
       const targetUrl =
         searchParams.get('redirect') ||
         searchParams.get('from') ||
@@ -116,7 +116,7 @@ function LoginFormContent() {
         router.push(targetUrl);
       }, 800);
     } catch (err: any) {
-      setError(err.message || 'Invalid email or password credentials.');
+      setError(err.message || 'ভুল ইমেইল অথবা পাসওয়ার্ড।');
     } finally {
       setIsLoading(false);
     }
@@ -130,10 +130,10 @@ function LoginFormContent() {
           <Logo variant="dark" size="lg" />
         </Link>
         <h2 className="text-2xl sm:text-3xl font-black text-black tracking-tight">
-          Welcome Back
+          আবার স্বাগতম
         </h2>
         <p className="text-xs sm:text-sm text-zinc-500">
-          Sign in to access your listings, saved cars, and dashboard.
+          আপনার বিজ্ঞাপন, সংরক্ষিত গাড়ি এবং ড্যাশবোর্ডে প্রবেশ করতে সাইন ইন করুন।
         </p>
       </div>
 
@@ -155,7 +155,7 @@ function LoginFormContent() {
       {/* Form */}
       <form onSubmit={handleSubmit} className="space-y-4">
         <Input
-          label="Email Address"
+          label="ইমেইল ঠিকানা"
           type="email"
           required
           value={email}
@@ -167,13 +167,13 @@ function LoginFormContent() {
         <div className="space-y-1.5">
           <div className="flex items-center justify-between">
             <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700">
-              Password
+              পাসওয়ার্ড
             </label>
             <Link
               href="/forgot-password"
               className="text-xs font-bold text-zinc-500 hover:text-black transition-colors"
             >
-              Forgot Password?
+              পাসওয়ার্ড ভুলে গেছেন?
             </Link>
           </div>
           <Input
@@ -194,7 +194,7 @@ function LoginFormContent() {
           className="w-full text-sm font-bold shadow-md hover:bg-black mt-2"
           rightIcon={<ArrowRight className="w-4 h-4" />}
         >
-          Sign In
+          সাইন ইন করুন
         </Button>
       </form>
 
@@ -204,7 +204,7 @@ function LoginFormContent() {
           <div className="w-full border-t border-zinc-200" />
         </div>
         <div className="relative flex justify-center text-xs uppercase font-bold text-zinc-400">
-          <span className="bg-white px-3">Or continue with</span>
+          <span className="bg-white px-3">অথবা চালিয়ে যান</span>
         </div>
       </div>
 
@@ -232,17 +232,17 @@ function LoginFormContent() {
             d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
           />
         </svg>
-        <span>Continue with Google</span>
+        <span>গুগল দিয়ে চালিয়ে যান</span>
       </button>
 
       {/* Footer Link */}
       <p className="text-center text-xs font-semibold text-zinc-500">
-        Don't have an account?{' '}
+        কোনো অ্যাকাউন্ট নেই?{' '}
         <Link
           href={`/register${redirectUrl ? `?redirect=${encodeURIComponent(redirectUrl)}` : ''}`}
           className="font-bold text-black hover:underline"
         >
-          Create an account
+          নতুন অ্যাকাউন্ট তৈরি করুন
         </Link>
       </p>
     </div>

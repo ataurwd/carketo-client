@@ -35,7 +35,7 @@ const config: Config = {
         },
       },
       fontFamily: {
-        sans: ['Plus Jakarta Sans', 'Inter', 'system-ui', 'sans-serif'],
+        sans: ['AdorNoirrit', 'Li Ador Noirrit', 'Plus Jakarta Sans', 'Inter', 'system-ui', 'sans-serif'],
       },
       boxShadow: {
         glow: '0 0 20px -3px rgba(0, 0, 0, 0.35)',

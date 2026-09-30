@@ -6,7 +6,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { carService } from '@/services/car.service';
 import { ICar } from '@/types/car.types';
 import { wishlistService } from '@/services/wishlist.service';
-import { inquiryService } from '@/services/inquiry.service';
+import { inquiryService, IInquiry, IChatMessage } from '@/services/inquiry.service';
 import { useAuthStore } from '@/store/auth.store';
 import { formatPrice } from '@/lib/utils';
 import { Button } from '@/components/ui/Button';
@@ -211,7 +211,7 @@ function DescriptionBlock({ description }: { description: string }) {
           onClick={() => setExpanded((p) => !p)}
           className="text-xs font-bold text-black underline underline-offset-2 hover:opacity-60 transition-opacity"
         >
-          {expanded ? 'Read less ↑' : 'Read more ↓'}
+          {expanded ? 'সংক্ষিপ্ত করুন ↑' : 'আরও পড়ুন ↓'}
         </button>
       )}
     </div>
@@ -235,7 +235,11 @@ export default function CarDetailClient() {
   const [inquiryName, setInquiryName] = useState('');
   const [inquiryPhone, setInquiryPhone] = useState('');
   const [inquiryMessage, setInquiryMessage] = useState('');
-  const [inquirySubmitted, setInquirySubmitted] = useState(false);
+  const [activeThread, setActiveThread] = useState<IInquiry | null>(null);
+  const [chatMessages, setChatMessages] = useState<IChatMessage[]>([]);
+  const [isSendingChat, setIsSendingChat] = useState(false);
+  const [isChatProfileSet, setIsChatProfileSet] = useState(false);
+  const chatEndRef = useRef<HTMLDivElement>(null);
 
   const [clientSlug, setClientSlug] = useState<string>('');
 
@@ -352,51 +356,168 @@ export default function CarDetailClient() {
     }
   };
 
+  // Load user / guest chat identity
+  useEffect(() => {
+    if (user) {
+      setInquiryName(user.name || '');
+      const uPhone = (user as any).phone || '';
+      if (uPhone) setInquiryPhone(uPhone);
+      setIsChatProfileSet(true);
+    } else if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('karketo_guest_chat');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed.name && parsed.phone) {
+            setInquiryName(parsed.name);
+            setInquiryPhone(parsed.phone);
+            setIsChatProfileSet(true);
+          }
+        }
+      } catch {
+        // ignore storage error
+      }
+    }
+  }, [user]);
+
+  // Fetch & poll live chat thread when modal is open
+  useEffect(() => {
+    if (!inquiryModalOpen || !car?._id) return;
+    if (!user && !isChatProfileSet) return;
+
+    let isMounted = true;
+
+    const fetchThread = async () => {
+      try {
+        if (activeThread?._id) {
+          const updated = await inquiryService.getInquiryById(activeThread._id);
+          if (isMounted && updated) {
+            setActiveThread(updated);
+            setChatMessages(updated.messages || []);
+          }
+        } else {
+          const thread = await inquiryService.getCarThread(
+            car._id,
+            inquiryPhone || (user as any)?.phone
+          );
+          if (isMounted && thread) {
+            setActiveThread(thread);
+            setChatMessages(thread.messages || []);
+          }
+        }
+      } catch {
+        // ignore polling error
+      }
+    };
+
+    fetchThread();
+    const interval = setInterval(fetchThread, 3000);
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
+  }, [inquiryModalOpen, car?._id, user, isChatProfileSet, activeThread?._id, inquiryPhone]);
+
+  // Auto-scroll chat to bottom
+  useEffect(() => {
+    if (inquiryModalOpen) {
+      chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [chatMessages.length, inquiryModalOpen]);
+
+  const handleStartGuestChat = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!inquiryName.trim() || !inquiryPhone.trim()) return;
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(
+        'karketo_guest_chat',
+        JSON.stringify({ name: inquiryName.trim(), phone: inquiryPhone.trim() })
+      );
+    }
+    setIsChatProfileSet(true);
+  };
+
+  const sendChatMessageText = async (textToSend: string) => {
+    const trimmed = textToSend.trim();
+    if (!car?._id || !trimmed || isSendingChat) return;
+
+    const effectiveName = (user?.name || inquiryName || 'ক্রেতা').trim();
+    const effectivePhone = ((user as any)?.phone || inquiryPhone || '01700000000').trim();
+
+    const optimisticMsg: IChatMessage = {
+      _id: `temp-${Date.now()}`,
+      senderRole: 'buyer',
+      senderName: effectiveName,
+      text: trimmed,
+      createdAt: new Date().toISOString(),
+    };
+
+    setChatMessages((prev) => [...prev, optimisticMsg]);
+    setInquiryMessage('');
+    setIsSendingChat(true);
+
+    try {
+      if (activeThread?._id) {
+        const updated = await inquiryService.sendMessage(activeThread._id, {
+          text: trimmed,
+          senderName: effectiveName,
+          senderRole: 'buyer',
+        });
+        setActiveThread(updated);
+        if (updated.messages) setChatMessages(updated.messages);
+      } else {
+        const created = await inquiryService.createInquiry({
+          carId: car._id,
+          carSnapshot: {
+            _id: car._id,
+            title: car.title,
+            slug: car.slug,
+            coverImage: car.coverImage,
+            brand: car.brand,
+            model: car.model,
+            listingType: car.listingType,
+            salePrice: car.salePrice || car.price,
+            rentalPrice: car.rentalPrice,
+            contactPhone: car.contactPhone,
+          },
+          senderName: effectiveName,
+          senderEmail: user?.email || 'guest@carketo.com',
+          senderPhone: effectivePhone,
+          message: trimmed,
+        });
+        setActiveThread(created);
+        if (created.messages) setChatMessages(created.messages);
+      }
+    } catch {
+      // Keep optimistic message visible even if offline
+    } finally {
+      setIsSendingChat(false);
+    }
+  };
+
   const handleSendInquiry = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!car?._id || !inquiryName.trim() || !inquiryPhone.trim() || !inquiryMessage.trim()) return;
-    try {
-      await inquiryService.createInquiry({
-        carId: car._id,
-        senderName: inquiryName,
-        senderEmail: user?.email || 'guest@carketo.com',
-        senderPhone: inquiryPhone,
-        message: inquiryMessage,
-      });
-      setInquirySubmitted(true);
-      setTimeout(() => {
-        setInquiryModalOpen(false);
-        setInquirySubmitted(false);
-        setInquiryMessage('');
-      }, 2000);
-    } catch {
-      setInquirySubmitted(true);
-      setTimeout(() => {
-        setInquiryModalOpen(false);
-        setInquirySubmitted(false);
-        setInquiryMessage('');
-      }, 2000);
-    }
+    await sendChatMessageText(inquiryMessage);
   };
 
   const policyItems = [
     {
       id: 'contact',
-      title: 'How to Contact and Deal with Seller?',
+      title: 'বিক্রেতার সাথে কীভাবে যোগাযোগ ও লেনদেন করবেন?',
       content:
-        'You can call or WhatsApp the owner directly using the phone number above. Inspect the vehicle in person before final payment.',
+        'উপরের ফোন নম্বর ব্যবহার করে আপনি সরাসরি গাড়ির মালিককে কল বা হোয়াটসঅ্যাপ করতে পারেন। চূড়ান্ত পেমেন্টের আগে সরাসরি গাড়িটি পরিদর্শন করে নিন।',
     },
     {
       id: 'inspection',
-      title: 'Vehicle Condition & Inspection Guarantee',
+      title: 'গাড়ির কন্ডিশন ও পরিদর্শন গ্যারান্টি',
       content:
-        'All certified vehicles on Carketo undergo a comprehensive 150-point diagnostic check including engine health, brakes, transmission, and clean title verification.',
+        'কারকেটো-এর সব সার্টিফায়েড গাড়ি ইঞ্জিনের স্বাস্থ্য, ব্রেক, ট্রান্সমিশন এবং কাগজপত্রের সত্যতা সহ ১৫০-পয়েন্ট ডায়াগনস্টিক চেকের মাধ্যমে যাচাই করা হয়।',
     },
     {
       id: 'documents',
-      title: 'Required Documentation for Rental / Purchase',
+      title: 'ভাড়া বা কেনার জন্য প্রয়োজনীয় কাগজপত্র',
       content:
-        'Bring a valid National ID or Passport along with an active Driver’s License when meeting the vehicle owner for pickup or title handover.',
+        'গাড়ি গ্রহণ বা মালিকানা হস্তান্তরের সময় গাড়ির মালিকের সাথে সাক্ষাতের জন্য একটি বৈধ জাতীয় পরিচয়পত্র (NID) বা পাসপোর্ট এবং সক্রিয় ড্রাইভিং লাইসেন্স সাথে রাখুন।',
     },
   ];
 
@@ -404,7 +525,7 @@ export default function CarDetailClient() {
     return (
       <div className="min-h-[70vh] flex flex-col items-center justify-center space-y-4 bg-zinc-50">
         <div className="h-10 w-10 border-4 border-black border-t-transparent rounded-full animate-spin" />
-        <p className="text-xs font-bold text-zinc-500">Loading vehicle details...</p>
+        <p className="text-xs font-bold text-zinc-500">গাড়ির বিস্তারিত তথ্য লোড হচ্ছে...</p>
       </div>
     );
   }
@@ -413,13 +534,13 @@ export default function CarDetailClient() {
     return (
       <div className="min-h-[70vh] flex flex-col items-center justify-center space-y-4 bg-zinc-50 px-4 text-center">
         <CarIcon className="w-12 h-12 text-zinc-300 mx-auto" />
-        <h2 className="text-xl font-black text-black">Vehicle Not Found</h2>
+        <h2 className="text-xl font-black text-black">গাড়িটি পাওয়া যায়নি</h2>
         <p className="text-xs text-zinc-500 max-w-sm mx-auto">
-          The vehicle listing you are looking for may have been removed or does not exist in the database.
+          আপনি যে গাড়ির বিজ্ঞাপনটি খুঁজছেন তা হয়তো সরানো হয়েছে অথবা ডাটাবেসে বিদ্যমান নেই।
         </p>
         <Link href="/buy">
           <Button variant="dark" size="sm">
-            Explore Available Cars
+            অন্যান্য গাড়ি দেখুন
           </Button>
         </Link>
       </div>
@@ -446,11 +567,11 @@ export default function CarDetailClient() {
 
           <div className="flex items-center justify-center gap-2 text-xs font-semibold text-zinc-400">
             <Link href="/" className="hover:text-white transition-colors">
-              Home
+              হোম
             </Link>
             <span>/</span>
             <Link href={isRental ? '/rent' : '/buy'} className="hover:text-white transition-colors">
-              {isRental ? 'Rent Car' : 'Buy Car'}
+              {isRental ? 'গাড়ি ভাড়া' : 'গাড়ি কিনুন'}
             </Link>
             <span>/</span>
             <span className="text-white font-bold">{car.brand} {car.model}</span>
@@ -470,7 +591,7 @@ export default function CarDetailClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* LEFT COLUMN: Pricing, Contact Owner & Specs (4 Cols) - appears 2nd on mobile, left sidebar on desktop */}
-          <div className="lg:col-span-4 space-y-6 lg:sticky lg:top-28">
+          <div className="lg:col-span-4 space-y-6 lg:sticky lg:top-24 self-start">
             <div className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-card space-y-6">
               {/* Pricing Header */}
               <div className="border-b border-zinc-100 pb-4 flex items-center justify-between">
@@ -481,13 +602,13 @@ export default function CarDetailClient() {
                         {formatPrice(car.rentalPrice || 289)}
                       </span>
                       <span className="text-xs font-bold uppercase tracking-wider text-zinc-400">
-                        / Day
+                        / দিন
                       </span>
                     </div>
                   ) : (
                     <div>
                       <span className="text-xs font-bold uppercase tracking-wider text-zinc-400 block mb-1">
-                        Outright Purchase Price
+                        সরাসরি ক্রয় মূল্য
                       </span>
                       <span className="text-3xl sm:text-4xl font-black text-black">
                         {formatPrice(car.salePrice || car.price || 89000)}
@@ -508,7 +629,7 @@ export default function CarDetailClient() {
                       ? 'bg-rose-50 border-rose-200 text-rose-600 shadow-sm ring-4 ring-rose-50'
                       : 'bg-white border-zinc-200 text-zinc-400 hover:text-rose-600 hover:border-rose-200'
                   }`}
-                  title={isWishlisted ? 'Remove from Saved Wishlist' : 'Save to Wishlist'}
+                  title={isWishlisted ? 'পছন্দের তালিকা থেকে সরান' : 'পছন্দের তালিকায় যুক্ত করুন'}
                 >
                   <Heart
                     className={`w-5 h-5 transition-all duration-200 ${
@@ -525,12 +646,12 @@ export default function CarDetailClient() {
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold uppercase tracking-wider text-black flex items-center gap-1.5">
                     <Phone className="w-3.5 h-3.5 text-black" />
-                    <span>Owner / Seller Contact</span>
+                    <span>মালিক / বিক্রেতার যোগাযোগ</span>
                   </span>
                   {isCopied && (
                     <span className="text-[10px] font-black text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full flex items-center gap-1 animate-pulse">
                       <Check className="w-3 h-3" />
-                      <span>Copied!</span>
+                      <span>কপি হয়েছে!</span>
                     </span>
                   )}
                 </div>
@@ -549,7 +670,7 @@ export default function CarDetailClient() {
                         {isPhoneRevealed ? rawPhone : maskedPhone}
                       </p>
                       <p className="text-[10px] text-zinc-500 font-semibold">
-                        {isPhoneRevealed ? 'Click to copy number' : 'Click to reveal & copy'}
+                        {isPhoneRevealed ? 'নম্বর কপি করতে ক্লিক করুন' : 'নম্বর দেখতে ও কপি করতে ক্লিক করুন'}
                       </p>
                     </div>
                   </div>
@@ -566,7 +687,7 @@ export default function CarDetailClient() {
                       className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-black text-white text-xs font-bold hover:bg-zinc-800 transition-colors shadow-sm"
                     >
                       <Phone className="w-3.5 h-3.5" />
-                      <span>Call Now</span>
+                      <span>কল করুন</span>
                     </a>
                     <a
                       href={`https://wa.me/${rawPhone.replace(/[^0-9]/g, '')}`}
@@ -575,89 +696,92 @@ export default function CarDetailClient() {
                       className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-emerald-600 text-white text-xs font-bold hover:bg-emerald-700 transition-colors shadow-sm"
                     >
                       <MessageCircle className="w-3.5 h-3.5" />
-                      <span>WhatsApp</span>
+                      <span>হোয়াটসঅ্যাপ</span>
                     </a>
                   </div>
                 )}
 
                 <Button
-                  variant="outline"
+                  variant="dark"
                   size="md"
                   onClick={() => setInquiryModalOpen(true)}
-                  className="w-full text-xs font-bold"
-                  leftIcon={<Send className="w-3.5 h-3.5" />}
+                  className="w-full text-xs font-bold shadow-sm"
+                  leftIcon={<MessageCircle className="w-4 h-4" />}
                 >
-                  Send Direct Inquiry
+                  <span className="flex items-center gap-2">
+                    <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                    <span>মালিকের সাথে লাইভ চ্যাট করুন</span>
+                  </span>
                 </Button>
               </div>
 
               {/* Specs Table */}
               <div className="space-y-2.5 text-xs sm:text-sm">
                 <div className="flex items-center justify-between py-1.5 border-b border-zinc-100 text-zinc-600">
-                  <span className="text-zinc-500 font-semibold">Brand / Make</span>
+                  <span className="text-zinc-500 font-semibold">ব্র্যান্ড / মেক</span>
                   <span className="font-extrabold text-black text-sm">{car.brand}</span>
                 </div>
 
                 <div className="flex items-center justify-between py-1.5 border-b border-zinc-100 text-zinc-600">
-                  <span className="text-zinc-500 font-semibold">Car Model</span>
+                  <span className="text-zinc-500 font-semibold">গাড়ির মডেল</span>
                   <span className="font-extrabold text-black text-sm">{car.model}</span>
                 </div>
 
                 <div className="flex items-center justify-between py-1.5 border-b border-zinc-100 text-zinc-600">
-                  <span className="text-zinc-500 font-semibold">Model Year</span>
+                  <span className="text-zinc-500 font-semibold">মডেল সাল</span>
                   <span className="font-bold text-black">{car.year}</span>
                 </div>
 
                 {car.condition && (
                   <div className="flex items-center justify-between py-1.5 border-b border-zinc-100 text-zinc-600">
-                    <span className="text-zinc-500">Condition</span>
+                    <span className="text-zinc-500">কন্ডিশন</span>
                     <span className="font-bold text-black capitalize">
-                      {car.condition === 'new' ? 'Brand New (0 km)' : car.condition === 'certified' ? 'Certified Pre-Owned' : 'Used / Pre-Owned'}
+                      {car.condition === 'new' ? 'ব্র্যান্ড নিউ (০ কি.মি.)' : car.condition === 'certified' ? 'সার্টিফায়েড প্রি-ওনড' : 'ব্যবহৃত / প্রি-ওনড'}
                     </span>
                   </div>
                 )}
 
                 <div className="flex items-center justify-between py-1.5 border-b border-zinc-100 text-zinc-600">
-                  <span className="text-zinc-500">Mileage</span>
+                  <span className="text-zinc-500">মাইলেজ</span>
                   <span className="font-bold text-black">
-                    {car.condition === 'new' ? '0 km' : `${(car.mileage || car.specs?.mileage || 0).toLocaleString()} km`}
+                    {car.condition === 'new' ? '০ কি.মি.' : `${(car.mileage || car.specs?.mileage || 0).toLocaleString()} কি.মি.`}
                   </span>
                 </div>
 
                 {car.engineCapacity && (
                   <div className="flex items-center justify-between py-1.5 border-b border-zinc-100 text-zinc-600">
-                    <span className="text-zinc-500">Engine Capacity</span>
+                    <span className="text-zinc-500">ইঞ্জিন ক্ষমতা</span>
                     <span className="font-bold text-black">{car.engineCapacity}</span>
                   </div>
                 )}
 
                 <div className="flex items-center justify-between py-1.5 border-b border-zinc-100 text-zinc-600">
-                  <span className="text-zinc-500">Transmission</span>
+                  <span className="text-zinc-500">ট্রান্সমিশন</span>
                   <span className="font-bold text-black">{car.specs?.transmission || car.transmission || 'Automatic'}</span>
                 </div>
 
                 <div className="flex items-center justify-between py-1.5 border-b border-zinc-100 text-zinc-600">
-                  <span className="text-zinc-500">Fuel Type</span>
+                  <span className="text-zinc-500">জ্বালানির ধরন</span>
                   <span className="font-bold text-black">{car.specs?.fuelType || car.fuelType || 'Petrol'}</span>
                 </div>
 
                 {car.color && (
                   <div className="flex items-center justify-between py-1.5 border-b border-zinc-100 text-zinc-600">
-                    <span className="text-zinc-500">Exterior Color</span>
+                    <span className="text-zinc-500">বাহ্যিক রঙ</span>
                     <span className="font-bold text-black">{car.color}</span>
                   </div>
                 )}
 
                 {car.registrationYear && (
                   <div className="flex items-center justify-between py-1.5 border-b border-zinc-100 text-zinc-600">
-                    <span className="text-zinc-500">Registration Year</span>
+                    <span className="text-zinc-500">রেজিস্ট্রেশন সাল</span>
                     <span className="font-bold text-black">{car.registrationYear}</span>
                   </div>
                 )}
 
                 {car.vin && (
                   <div className="flex items-center justify-between py-1.5 border-b border-zinc-100 text-zinc-600">
-                    <span className="text-zinc-500">VIN / Chassis</span>
+                    <span className="text-zinc-500">ভিআইএন / চ্যাসিস</span>
                     <span className="font-bold text-black font-mono tracking-wider">
                       {car.vin.length > 8 ? `${car.vin.slice(0, 4)}•••••••${car.vin.slice(-3)}` : '••••••••'}
                     </span>
@@ -665,19 +789,19 @@ export default function CarDetailClient() {
                 )}
 
                 <div className="flex items-center justify-between py-1.5 border-b border-zinc-100 text-zinc-600">
-                  <span className="text-zinc-500">Seats / Passengers</span>
-                  <span className="font-bold text-black">{car.specs?.passengers || car.seats || 4} Seats</span>
+                  <span className="text-zinc-500">আসন / যাত্রী সংখ্যা</span>
+                  <span className="font-bold text-black">{car.specs?.passengers || car.seats || 4} সিট</span>
                 </div>
 
                 <div className="flex items-center justify-between py-1.5 border-b border-zinc-100 text-zinc-600">
-                  <span className="text-zinc-500">Doors</span>
-                  <span className="font-bold text-black">{car.specs?.doors || car.doors || 4} Doors</span>
+                  <span className="text-zinc-500">দরজা</span>
+                  <span className="font-bold text-black">{car.specs?.doors || car.doors || 4}টি দরজা</span>
                 </div>
 
                 <div className="flex items-center justify-between py-1.5 text-zinc-600">
-                  <span className="text-zinc-500">Air Condition</span>
+                  <span className="text-zinc-500">এয়ার কন্ডিশন (A/C)</span>
                   <span className="font-bold text-black">
-                    {car.specs?.airCondition !== undefined ? (car.specs.airCondition ? 'Yes' : 'No') : 'Yes'}
+                    {car.specs?.airCondition !== undefined ? (car.specs.airCondition ? 'হ্যাঁ' : 'না') : 'হ্যাঁ'}
                   </span>
                 </div>
               </div>
@@ -697,19 +821,19 @@ export default function CarDetailClient() {
             {/* Quick Spec Highlights Grid */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               <div className="p-3.5 rounded-2xl bg-white border border-zinc-200 text-center space-y-1 shadow-sm">
-                <span className="text-[10px] uppercase font-bold tracking-wider text-zinc-400">Brand</span>
+                <span className="text-[10px] uppercase font-bold tracking-wider text-zinc-400">ব্র্যান্ড</span>
                 <p className="text-sm font-black text-black truncate">{car.brand}</p>
               </div>
               <div className="p-3.5 rounded-2xl bg-white border border-zinc-200 text-center space-y-1 shadow-sm">
-                <span className="text-[10px] uppercase font-bold tracking-wider text-zinc-400">Model</span>
+                <span className="text-[10px] uppercase font-bold tracking-wider text-zinc-400">মডেল</span>
                 <p className="text-sm font-black text-black truncate">{car.model}</p>
               </div>
               <div className="p-3.5 rounded-2xl bg-white border border-zinc-200 text-center space-y-1 shadow-sm">
-                <span className="text-[10px] uppercase font-bold tracking-wider text-zinc-400">Year</span>
+                <span className="text-[10px] uppercase font-bold tracking-wider text-zinc-400">সাল</span>
                 <p className="text-sm font-black text-black">{car.year}</p>
               </div>
               <div className="p-3.5 rounded-2xl bg-white border border-zinc-200 text-center space-y-1 shadow-sm">
-                <span className="text-[10px] uppercase font-bold tracking-wider text-zinc-400">Transmission</span>
+                <span className="text-[10px] uppercase font-bold tracking-wider text-zinc-400">ট্রান্সমিশন</span>
                 <p className="text-sm font-black text-black truncate">{car.specs?.transmission || car.transmission || 'Automatic'}</p>
               </div>
             </div>
@@ -721,8 +845,8 @@ export default function CarDetailClient() {
                   <Milestone className="w-5 h-5" />
                 </div>
                 <div>
-                  <h4 className="text-sm font-bold text-zinc-900">Direct Owner Contact</h4>
-                  <p className="text-xs text-zinc-500">Zero middleman commissions or extra fees</p>
+                  <h4 className="text-sm font-bold text-zinc-900">সরাসরি মালিকের সাথে যোগাযোগ</h4>
+                  <p className="text-xs text-zinc-500">কোনো মধ্যস্বত্বভোগী কমিশন বা অতিরিক্ত ফি নেই</p>
                 </div>
               </div>
 
@@ -731,8 +855,8 @@ export default function CarDetailClient() {
                   <ShieldCheck className="w-5 h-5" />
                 </div>
                 <div>
-                  <h4 className="text-sm font-bold text-zinc-900">150-Point Certified</h4>
-                  <p className="text-xs text-zinc-500">Comprehensive diagnostic & clean title check</p>
+                  <h4 className="text-sm font-bold text-zinc-900">১৫০-পয়েন্ট সার্টিফায়েড</h4>
+                  <p className="text-xs text-zinc-500">সম্পূর্ণ ডায়াগনস্টিক ও কাগজপত্র যাচাইকৃত</p>
                 </div>
               </div>
             </div>
@@ -741,11 +865,11 @@ export default function CarDetailClient() {
             <div className="space-y-4">
               <div className="inline-flex items-center gap-1.5 text-zinc-500 font-bold text-xs uppercase tracking-widest">
                 <Sparkles className="w-3.5 h-3.5" />
-                <span>Vehicle Overview</span>
+                <span>গাড়ির সংক্ষিপ্ত বিবরণ</span>
               </div>
 
               <h2 className="text-2xl sm:text-3xl font-black text-black">
-                About this vehicle
+                এই গাড়িটি সম্পর্কে বিস্তারিত
               </h2>
 
               {/* Seller Description */}
@@ -759,37 +883,37 @@ export default function CarDetailClient() {
             <div className="space-y-4 pt-4 border-t border-zinc-200">
               <div className="inline-flex items-center gap-1.5 text-zinc-500 font-bold text-xs uppercase tracking-widest">
                 <Sparkles className="w-3.5 h-3.5" />
-                <span>Technical Specifications</span>
+                <span>টেকনিক্যাল স্পেসিফিকেশন</span>
               </div>
 
               <h2 className="text-2xl sm:text-3xl font-black text-black">
-                {isRental ? 'Rental Vehicle Key Specs' : 'Detailed Vehicle Specifications'}
+                {isRental ? 'ভাড়ার গাড়ির মূল স্পেসিফিকেশন' : 'গাড়ির বিস্তারিত স্পেসিফিকেশন'}
               </h2>
 
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 pt-2">
                 <div className="p-3.5 rounded-2xl bg-zinc-50 border border-zinc-200">
-                  <span className="block text-[10px] uppercase font-bold text-zinc-400">Condition</span>
+                  <span className="block text-[10px] uppercase font-bold text-zinc-400">কন্ডিশন</span>
                   <span className="text-xs sm:text-sm font-black text-black capitalize">
-                    {car.condition === 'new' ? 'Brand New' : car.condition === 'certified' ? 'Certified' : 'Used'}
+                    {car.condition === 'new' ? 'ব্র্যান্ড নিউ' : car.condition === 'certified' ? 'সার্টিফায়েড' : 'ব্যবহৃত'}
                   </span>
                 </div>
 
                 <div className="p-3.5 rounded-2xl bg-zinc-50 border border-zinc-200">
-                  <span className="block text-[10px] uppercase font-bold text-zinc-400">Mileage</span>
+                  <span className="block text-[10px] uppercase font-bold text-zinc-400">মাইলেজ</span>
                   <span className="text-xs sm:text-sm font-black text-black">
-                    {car.condition === 'new' ? '0 km' : `${(car.mileage || car.specs?.mileage || 0).toLocaleString()} km`}
+                    {car.condition === 'new' ? '০ কি.মি.' : `${(car.mileage || car.specs?.mileage || 0).toLocaleString()} কি.মি.`}
                   </span>
                 </div>
 
                 <div className="p-3.5 rounded-2xl bg-zinc-50 border border-zinc-200">
-                  <span className="block text-[10px] uppercase font-bold text-zinc-400">Fuel Type</span>
+                  <span className="block text-[10px] uppercase font-bold text-zinc-400">জ্বালানির ধরন</span>
                   <span className="text-xs sm:text-sm font-black text-black">
                     {car.specs?.fuelType || car.fuelType || 'Petrol'}
                   </span>
                 </div>
 
                 <div className="p-3.5 rounded-2xl bg-zinc-50 border border-zinc-200">
-                  <span className="block text-[10px] uppercase font-bold text-zinc-400">Transmission</span>
+                  <span className="block text-[10px] uppercase font-bold text-zinc-400">ট্রান্সমিশন</span>
                   <span className="text-xs sm:text-sm font-black text-black">
                     {car.specs?.transmission || car.transmission || 'Automatic'}
                   </span>
@@ -797,40 +921,40 @@ export default function CarDetailClient() {
 
                 {car.engineCapacity && (
                   <div className="p-3.5 rounded-2xl bg-zinc-50 border border-zinc-200">
-                    <span className="block text-[10px] uppercase font-bold text-zinc-400">Engine</span>
+                    <span className="block text-[10px] uppercase font-bold text-zinc-400">ইঞ্জিন</span>
                     <span className="text-xs sm:text-sm font-black text-black">{car.engineCapacity}</span>
                   </div>
                 )}
 
                 {car.color && (
                   <div className="p-3.5 rounded-2xl bg-zinc-50 border border-zinc-200">
-                    <span className="block text-[10px] uppercase font-bold text-zinc-400">Exterior Color</span>
+                    <span className="block text-[10px] uppercase font-bold text-zinc-400">বাহ্যিক রঙ</span>
                     <span className="text-xs sm:text-sm font-black text-black">{car.color}</span>
                   </div>
                 )}
 
                 <div className="p-3.5 rounded-2xl bg-zinc-50 border border-zinc-200">
-                  <span className="block text-[10px] uppercase font-bold text-zinc-400">Seating</span>
+                  <span className="block text-[10px] uppercase font-bold text-zinc-400">আসন সংখ্যা</span>
                   <span className="text-xs sm:text-sm font-black text-black">
-                    {car.specs?.passengers || car.seats || 4} Passengers
+                    {car.specs?.passengers || car.seats || 4} জন যাত্রী
                   </span>
                 </div>
 
                 <div className="p-3.5 rounded-2xl bg-zinc-50 border border-zinc-200">
-                  <span className="block text-[10px] uppercase font-bold text-zinc-400">Model Year</span>
+                  <span className="block text-[10px] uppercase font-bold text-zinc-400">মডেল সাল</span>
                   <span className="text-xs sm:text-sm font-black text-black">{car.year}</span>
                 </div>
 
                 {car.registrationYear && (
                   <div className="p-3.5 rounded-2xl bg-zinc-50 border border-zinc-200">
-                    <span className="block text-[10px] uppercase font-bold text-zinc-400">Registration</span>
+                    <span className="block text-[10px] uppercase font-bold text-zinc-400">রেজিস্ট্রেশন</span>
                     <span className="text-xs sm:text-sm font-black text-black">{car.registrationYear}</span>
                   </div>
                 )}
 
                 {car.vin && (
                   <div className="p-3.5 rounded-2xl bg-zinc-50 border border-zinc-200">
-                    <span className="block text-[10px] uppercase font-bold text-zinc-400">VIN (Protected)</span>
+                    <span className="block text-[10px] uppercase font-bold text-zinc-400">ভিআইএন (সুরক্ষিত)</span>
                     <span className="text-xs sm:text-sm font-black text-black font-mono">
                       {car.vin.length > 8 ? `${car.vin.slice(0, 4)}•••••••${car.vin.slice(-3)}` : '••••••••'}
                     </span>
@@ -844,11 +968,11 @@ export default function CarDetailClient() {
               <div className="space-y-4 pt-4 border-t border-zinc-200">
                 <div className="inline-flex items-center gap-1.5 text-zinc-500 font-bold text-xs uppercase tracking-widest">
                   <Sparkles className="w-3.5 h-3.5" />
-                  <span>Amenities & Features</span>
+                  <span>সুবিধা ও ফিচারসমূহ</span>
                 </div>
 
                 <h2 className="text-2xl sm:text-3xl font-black text-black">
-                  Vehicle features & equipment
+                  গাড়ির ফিচার ও সরঞ্জামাদি
                 </h2>
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-2">
@@ -869,11 +993,11 @@ export default function CarDetailClient() {
             <div className="space-y-4 pt-4 border-t border-zinc-200">
               <div className="inline-flex items-center gap-1.5 text-zinc-500 font-bold text-xs uppercase tracking-widest">
                 <ShieldAlert className="w-3.5 h-3.5" />
-                <span>Buyer & Renter Guidelines</span>
+                <span>ক্রেতা ও ভাড়াগ্রহীতা নির্দেশিকা</span>
               </div>
 
               <h2 className="text-2xl sm:text-3xl font-black text-black">
-                Important details & safety guidelines
+                গুরুত্বপূর্ণ তথ্য ও নিরাপত্তা নির্দেশিকা
               </h2>
 
               <Accordion items={policyItems} defaultOpenId="contact" />
@@ -890,15 +1014,15 @@ export default function CarDetailClient() {
               <div className="space-y-2">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-black text-white text-xs font-bold uppercase tracking-wider">
                   <ShoppingBag className="w-3.5 h-3.5" />
-                  <span>{isRental ? 'More Rental Cars' : 'Similar Vehicles For Sale'}</span>
+                  <span>{isRental ? 'আরও ভাড়ার গাড়ি' : 'সমজাতীয় বিক্রয়যোগ্য গাড়ি'}</span>
                 </div>
                 <h2 className="text-2xl sm:text-3xl font-black text-black">
-                  {isRental ? 'Similar Rental Vehicles' : 'You Might Also Like'}
+                  {isRental ? 'সমজাতীয় ভাড়ার গাড়িসমূহ' : 'আপনার আরও পছন্দ হতে পারে'}
                 </h2>
                 <p className="text-zinc-500 text-xs sm:text-sm max-w-xl">
                   {isRental
-                    ? 'Explore other verified cars available for rent at competitive rates with transparent pricing.'
-                    : 'Discover other verified cars for sale with direct owner contact and clear title verification.'}
+                    ? 'স্বচ্ছ মূল্যে এবং সাশ্রয়ী রেটে ভাড়ার জন্য অন্যান্য যাচাইকৃত গাড়িগুলো দেখুন।'
+                    : 'সরাসরি মালিকের যোগাযোগ এবং যাচাইকৃত কাগজপত্র সহ বিক্রয়ের জন্য অন্যান্য গাড়িগুলো দেখুন।'}
                 </p>
               </div>
 
@@ -908,7 +1032,7 @@ export default function CarDetailClient() {
                   size="md"
                   rightIcon={<ArrowUpRight className="w-4 h-4" />}
                 >
-                  {isRental ? 'View All Rentals' : 'View All Cars for Sale'}
+                  {isRental ? 'সব ভাড়ার গাড়ি দেখুন' : 'বিক্রয়ের সব গাড়ি দেখুন'}
                 </Button>
               </Link>
             </div>
@@ -932,9 +1056,9 @@ export default function CarDetailClient() {
             </div>
 
             <div className="space-y-1.5">
-              <h3 className="text-lg font-black text-black">Sign in to View Contact</h3>
+              <h3 className="text-lg font-black text-black">যোগাযোগের তথ্য দেখতে লগ ইন করুন</h3>
               <p className="text-xs text-zinc-500">
-                To protect our car owners from spam, please sign in or register to reveal contact phone numbers.
+                গাড়ির মালিকদের স্প্যাম থেকে সুরক্ষিত রাখতে ফোন নম্বর দেখার জন্য অনুগ্রহ করে সাইন ইন বা রেজিস্টার করুন।
               </p>
             </div>
 
@@ -946,7 +1070,7 @@ export default function CarDetailClient() {
                 className="w-full font-bold shadow-md hover:bg-black"
                 rightIcon={<ArrowUpRight className="w-4 h-4" />}
               >
-                Sign In to View
+                দেখতে লগ ইন করুন
               </Button>
 
               <Button
@@ -955,7 +1079,7 @@ export default function CarDetailClient() {
                 onClick={() => router.push(`/register?redirect=/cars/${slug}`)}
                 className="w-full font-bold"
               >
-                Create Free Account
+                ফ্রি অ্যাকাউন্ট খুলুন
               </Button>
 
               <button
@@ -963,82 +1087,212 @@ export default function CarDetailClient() {
                 onClick={() => setLoginPromptOpen(false)}
                 className="text-xs font-semibold text-zinc-400 hover:text-black transition-colors pt-2 block mx-auto"
               >
-                Cancel
+                বাতিল করুন
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* DIRECT INQUIRY MODAL */}
+      {/* LIVE REAL-TIME CHAT WITH VEHICLE OWNER MODAL */}
       {inquiryModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full border border-zinc-200 shadow-2xl space-y-5">
-            <div className="flex items-center justify-between border-b border-zinc-100 pb-3">
-              <div className="flex items-center gap-2">
-                <Send className="w-5 h-5 text-black" />
-                <h3 className="text-base font-black text-black">Direct Seller Inquiry</h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white rounded-3xl max-w-lg w-full border border-zinc-200 shadow-2xl overflow-hidden flex flex-col max-h-[88vh]">
+            {/* Chat Header */}
+            <div className="bg-black text-white p-4 sm:p-5 flex items-center justify-between">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="relative shrink-0">
+                  <img
+                    src={car.coverImage}
+                    alt={car.title}
+                    className="w-12 h-12 rounded-2xl object-cover border border-zinc-700"
+                  />
+                  <span className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full bg-emerald-500 border-2 border-black" />
+                </div>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-sm sm:text-base font-black text-white truncate">
+                      {(car as any).providerId?.name || 'গাড়ির মালিক / বিক্রেতা'}
+                    </h3>
+                    <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-bold shrink-0">
+                      লাইভ চ্যাট
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-zinc-400 truncate mt-0.5">
+                    {car.title} •{' '}
+                    {isRental
+                      ? `${formatPrice(car.rentalPrice || 289)}/দিন`
+                      : formatPrice(car.salePrice || car.price || 89000)}
+                  </p>
+                </div>
               </div>
+
               <button
                 type="button"
                 onClick={() => setInquiryModalOpen(false)}
-                className="p-1 rounded-full text-zinc-400 hover:text-black"
+                className="p-2 rounded-full bg-white/10 text-zinc-300 hover:text-white hover:bg-white/20 transition-colors shrink-0"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
 
-            {inquirySubmitted ? (
-              <div className="p-6 rounded-2xl bg-emerald-50 text-emerald-800 text-center space-y-2">
-                <CheckCircle2 className="w-8 h-8 text-emerald-600 mx-auto" />
-                <h4 className="font-bold text-sm">Message Sent Successfully!</h4>
-                <p className="text-xs text-zinc-600">
-                  The vehicle owner will call or message you shortly.
-                </p>
-              </div>
-            ) : (
-              <form onSubmit={handleSendInquiry} className="space-y-4">
+            {/* Step 1 for Guest: Quick Name & Phone input before entering chat */}
+            {!user && !isChatProfileSet ? (
+              <form onSubmit={handleStartGuestChat} className="p-6 space-y-4">
+                <div className="p-4 rounded-2xl bg-zinc-50 border border-zinc-200 space-y-1">
+                  <h4 className="text-sm font-black text-black">
+                    গাড়ির মালিকের সাথে সরাসরি কথা বলুন
+                  </h4>
+                  <p className="text-xs text-zinc-500">
+                    লাইভ চ্যাট শুরু করতে অনুগ্রহ করে আপনার নাম ও মোবাইল নম্বর দিন।
+                  </p>
+                </div>
+
                 <Input
-                  label="Your Full Name"
+                  label="আপনার নাম *"
                   required
-                  value={inquiryName || user?.name || ''}
+                  value={inquiryName}
                   onChange={(e) => setInquiryName(e.target.value)}
-                  placeholder="e.g. John Doe"
+                  placeholder="যেমন: আতাউর রহমান"
                 />
 
                 <Input
-                  label="Your Contact Phone Number"
+                  label="আপনার মোবাইল নম্বর *"
                   type="tel"
                   required
                   value={inquiryPhone}
                   onChange={(e) => setInquiryPhone(e.target.value)}
-                  placeholder="e.g. 01712345678"
+                  placeholder="যেমন: 01712345678"
                 />
-
-                <div className="space-y-1.5">
-                  <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700">
-                    Your Message / Question
-                  </label>
-                  <textarea
-                    required
-                    rows={3}
-                    value={inquiryMessage}
-                    onChange={(e) => setInquiryMessage(e.target.value)}
-                    placeholder={`Hi, I am interested in your ${car.title}. Is it available for inspection?`}
-                    className="w-full text-xs font-semibold p-3.5 rounded-2xl border border-zinc-200 bg-white focus:outline-none focus:border-black"
-                  />
-                </div>
 
                 <Button
                   type="submit"
                   variant="dark"
                   size="md"
                   className="w-full font-bold shadow-md hover:bg-black"
-                  rightIcon={<Send className="w-4 h-4" />}
+                  rightIcon={<MessageCircle className="w-4 h-4" />}
                 >
-                  Send Inquiry to Seller
+                  লাইভ চ্যাট শুরু করুন
                 </Button>
               </form>
+            ) : (
+              <>
+                {/* Messages Area */}
+                <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3 bg-zinc-50 min-h-[290px] max-h-[420px]">
+                  {/* Welcome / Car Context Banner */}
+                  <div className="p-3.5 rounded-2xl bg-white border border-zinc-200 shadow-sm text-xs text-zinc-600 flex items-start gap-3">
+                    <Sparkles className="w-4 h-4 text-black shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-bold text-black">
+                        {car.title} নিয়ে লাইভ কথোপকথন
+                      </p>
+                      <p className="text-[11px] text-zinc-500 mt-0.5">
+                        আপনার মেসেজ সরাসরি গাড়ির মালিকের কাছে পৌঁছাবে এবং মালিক উত্তর দিলে এখানেই তাৎক্ষণিক দেখতে পাবেন।
+                      </p>
+                    </div>
+                  </div>
+
+                  {chatMessages.length === 0 ? (
+                    <div className="py-6 text-center space-y-3">
+                      <p className="text-xs font-bold text-zinc-400">
+                        নিচের যেকোনো একটি প্রশ্নে ক্লিক করুন অথবা আপনার মেসেজ লিখুন:
+                      </p>
+                      <div className="flex flex-wrap items-center justify-center gap-2">
+                        {[
+                          'গাড়িটি কি এখনো এভেইলেবল আছে?',
+                          isRental
+                            ? 'ভাড়ার শর্তাবলী ও ডিসকাউন্ট সম্পর্কে জানতে চাই।'
+                            : 'এই গাড়িটির সর্বশেষ দাম কত রাখা যাবে?',
+                          'আমি গাড়িটি সরাসরি দেখতে ও টেস্ট ড্রাইভ দিতে চাই।',
+                          'গাড়ির সব কাগজপত্র কি আপ-টু-ডেট আছে?',
+                        ].map((q) => (
+                          <button
+                            key={q}
+                            type="button"
+                            onClick={() => sendChatMessageText(q)}
+                            className="px-3 py-2 rounded-xl bg-white border border-zinc-200 hover:border-black text-xs font-bold text-zinc-800 transition-all shadow-sm text-left"
+                          >
+                            {q}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    chatMessages.map((msg, idx) => {
+                      const isBuyer = msg.senderRole === 'buyer';
+                      return (
+                        <div
+                          key={msg._id || idx}
+                          className={`flex flex-col ${isBuyer ? 'items-end' : 'items-start'}`}
+                        >
+                          <span className="text-[10px] font-bold text-zinc-400 mb-1 px-1">
+                            {isBuyer ? 'আপনি' : `${msg.senderName || 'গাড়ির মালিক'} (মালিক)`}
+                          </span>
+                          <div
+                            className={`max-w-[82%] px-4 py-2.5 rounded-2xl text-xs sm:text-sm leading-relaxed shadow-sm ${
+                              isBuyer
+                                ? 'bg-black text-white rounded-br-none'
+                                : 'bg-white text-zinc-900 border border-zinc-200 rounded-bl-none'
+                            }`}
+                          >
+                            <p style={{ whiteSpace: 'pre-wrap' }}>{msg.text}</p>
+                          </div>
+                          <span className="text-[10px] text-zinc-400 mt-1 px-1">
+                            {new Date(msg.createdAt).toLocaleTimeString('bn-BD', {
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            })}
+                          </span>
+                        </div>
+                      );
+                    })
+                  )}
+                  <div ref={chatEndRef} />
+                </div>
+
+                {/* Quick Chips Bar when conversation already started */}
+                {chatMessages.length > 0 && (
+                  <div className="px-4 py-2 bg-zinc-100/80 border-t border-zinc-200 flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+                    {[
+                      'সর্বশেষ দাম কত?',
+                      'গাড়িটি কোথায় দেখা যাবে?',
+                      'কাগজপত্র কি আপ-টু-ডেট?',
+                    ].map((chip) => (
+                      <button
+                        key={chip}
+                        type="button"
+                        onClick={() => sendChatMessageText(chip)}
+                        className="shrink-0 px-2.5 py-1 rounded-lg bg-white border border-zinc-200 hover:border-black text-[11px] font-bold text-zinc-700 transition-colors"
+                      >
+                        {chip}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {/* Chat Input Bar */}
+                <form
+                  onSubmit={handleSendInquiry}
+                  className="p-3.5 sm:p-4 bg-white border-t border-zinc-200 flex items-center gap-2"
+                >
+                  <input
+                    type="text"
+                    value={inquiryMessage}
+                    onChange={(e) => setInquiryMessage(e.target.value)}
+                    placeholder="গাড়িটি সম্পর্কে আপনার মেসেজ লিখুন..."
+                    className="flex-1 text-xs sm:text-sm font-semibold px-4 py-3 rounded-2xl border border-zinc-200 bg-zinc-50 focus:bg-white focus:outline-none focus:border-black transition-colors"
+                  />
+                  <Button
+                    type="submit"
+                    variant="dark"
+                    size="md"
+                    disabled={!inquiryMessage.trim() || isSendingChat}
+                    className="shrink-0 rounded-2xl px-4 py-3"
+                  >
+                    <Send className="w-4 h-4" />
+                  </Button>
+                </form>
+              </>
             )}
           </div>
         </div>

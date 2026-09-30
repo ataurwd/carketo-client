@@ -49,9 +49,9 @@ export default function ProviderProfilePage() {
         phone,
         address: { city, country },
       });
-      setMsg({ type: 'success', text: 'Dealership profile updated successfully.' });
+      setMsg({ type: 'success', text: 'ডিলারশিপ প্রোফাইল সফলভাবে আপডেট করা হয়েছে।' });
     } catch (err: any) {
-      setMsg({ type: 'error', text: err.message || 'Failed to update provider profile.' });
+      setMsg({ type: 'error', text: err.message || 'প্রোভাইডার প্রোফাইল আপডেট করতে ব্যর্থ হয়েছে।' });
     } finally {
       setIsLoading(false);
     }
@@ -65,10 +65,10 @@ export default function ProviderProfilePage() {
           className="inline-flex items-center gap-2 text-xs font-bold text-zinc-600 hover:text-black transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span>Back to Provider Hub</span>
+          <span>প্রোভাইডার হাবে ফিরে যান</span>
         </Link>
 
-        <h1 className="text-2xl sm:text-3xl font-black text-black">Dealership & Car Profile</h1>
+        <h1 className="text-2xl sm:text-3xl font-black text-black">ডিলারশিপ ও গাড়ির প্রোফাইল</h1>
 
         <div className="bg-white p-6 sm:p-10 rounded-3xl border border-zinc-200 shadow-sm space-y-6">
           {msg && (
@@ -90,64 +90,64 @@ export default function ProviderProfilePage() {
 
           <form onSubmit={handleUpdate} className="space-y-4">
             <Input
-              label="Business / Dealership Name"
+              label="ব্যবসা / ডিলারশিপের নাম"
               required
               value={businessName}
               onChange={(e) => setBusinessName(e.target.value)}
-              placeholder="e.g. Apex Luxury Motors LLC"
+              placeholder="যেমন: অ্যাপেক্স লাক্সারি মোটরস"
               leftIcon={<Building2 className="w-4 h-4" />}
             />
 
             <div className="space-y-1.5">
               <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700">
-                Car Business Model
+                গাড়ির ব্যবসায়িক মডেল
               </label>
               <select
                 value={providerType}
                 onChange={(e) => setProviderType(e.target.value)}
                 className="w-full text-xs font-semibold px-3 py-2.5 rounded-xl border border-zinc-200 bg-white focus:outline-none focus:border-black"
               >
-                <option value="both">Both Car Rental & Sales</option>
-                <option value="rental">Rental Cars Only</option>
-                <option value="seller">Car Dealership / Sales Only</option>
+                <option value="both">গাড়ি ভাড়া ও বিক্রয় উভয়ই</option>
+                <option value="rental">শুধুমাত্র গাড়ি ভাড়া</option>
+                <option value="seller">শুধুমাত্র গাড়ি ডিলারশিপ / বিক্রয়</option>
               </select>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Input
-                label="Contact Phone"
+                label="যোগাযোগের ফোন নম্বর"
                 required
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                placeholder="+1 (555) 0199"
+                placeholder="+৮৮০ ১৭১২-৩৪৫৬৭৮"
                 leftIcon={<Phone className="w-4 h-4" />}
               />
 
               <Input
-                label="Business Email"
+                label="ব্যবসায়িক ইমেইল"
                 value={email}
                 disabled
-                helperText="Email registered with account."
+                helperText="অ্যাকাউন্টের সাথে নিবন্ধিত ইমেইল।"
                 leftIcon={<Mail className="w-4 h-4" />}
               />
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Input
-                label="City / Region"
+                label="শহর / অঞ্চল"
                 required
                 value={city}
                 onChange={(e) => setCity(e.target.value)}
-                placeholder="New York"
+                placeholder="ঢাকা"
                 leftIcon={<MapPin className="w-4 h-4" />}
               />
 
               <Input
-                label="Country"
+                label="দেশ"
                 required
                 value={country}
                 onChange={(e) => setCountry(e.target.value)}
-                placeholder="USA"
+                placeholder="বাংলাদেশ"
               />
             </div>
 
@@ -159,7 +159,7 @@ export default function ProviderProfilePage() {
                 isLoading={isLoading}
                 className="w-full font-bold shadow-md hover:bg-black"
               >
-                Save Dealership Details
+                ডিলারশিপের তথ্য সংরক্ষণ করুন
               </Button>
             </div>
           </form>

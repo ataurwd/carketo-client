@@ -214,19 +214,19 @@ function CarsCatalogContent() {
           <div>
             <span className="text-zinc-500 font-bold text-xs uppercase tracking-widest flex items-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5 text-black" />
-              Verified Marketplace Inventory
+              ভেরিফায়েড মার্কেটপ্লেস ইনভেন্টরি
             </span>
             <h1 className="text-2xl sm:text-3xl font-black text-black mt-1">
-              Explore Cars
+              সব গাড়ি দেখুন
             </h1>
             <p className="text-xs sm:text-sm text-zinc-500 mt-1">
-              Search and filter certified vehicles for rent or purchase with 24/7 direct owner contact.
+              ভাড়া বা কেনার জন্য সার্টিফায়েড গাড়ি খুঁজুন এবং ফিল্টার করুন — ২৪/৭ সরাসরি মালিকের সাথে যোগাযোগের সুবিধাসহ।
             </p>
           </div>
 
           <div className="flex items-center gap-3">
             <span className="text-xs font-bold px-3 py-2 rounded-2xl bg-black text-white">
-              {filteredCars.length} Vehicles Found
+              {filteredCars.length} টি গাড়ি পাওয়া গেছে
             </span>
             {activeFiltersCount > 0 && (
               <Button
@@ -235,7 +235,7 @@ function CarsCatalogContent() {
                 onClick={handleResetAll}
                 leftIcon={<RotateCcw className="w-3.5 h-3.5" />}
               >
-                Reset ({activeFiltersCount})
+                রিসেট ({activeFiltersCount})
               </Button>
             )}
           </div>
@@ -251,7 +251,7 @@ function CarsCatalogContent() {
                 <Search className="w-4 h-4 text-zinc-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
                   type="text"
-                  placeholder="Search by title, brand, model, or city (e.g. BMW, Miami, Coupe)..."
+                  placeholder="নাম, ব্র্যান্ড, মডেল বা শহর দিয়ে খুঁজুন (যেমন: Toyota, ঢাকা, SUV)..."
                   value={draftFilters.search}
                   onChange={(e) => setDraftFilters((prev) => ({ ...prev, search: e.target.value }))}
                   onKeyDown={(e) => {
@@ -283,16 +283,16 @@ function CarsCatalogContent() {
                 className="px-4 py-2.5 rounded-2xl bg-black text-white hover:bg-zinc-800 text-xs font-bold transition-all shadow-sm flex items-center gap-1.5 shrink-0 active:scale-95"
               >
                 <Search className="w-3.5 h-3.5" />
-                <span>Search</span>
+                <span>খুঁজুন</span>
               </button>
             </div>
 
             {/* Listing Type Tabs */}
             <div className="flex items-center gap-1 bg-zinc-100 p-1 rounded-2xl border border-zinc-200 text-xs font-bold w-full lg:w-auto">
               {[
-                { key: 'all', label: 'All Listings' },
-                { key: 'rent', label: 'For Rent' },
-                { key: 'sale', label: 'For Sale' },
+                { key: 'all', label: 'সব তালিকা' },
+                { key: 'rent', label: 'ভাড়ার জন্য' },
+                { key: 'sale', label: 'বিক্রয়ের জন্য' },
               ].map((tab) => (
                 <button
                   key={tab.key}
@@ -315,10 +315,10 @@ function CarsCatalogContent() {
                 onChange={(e) => handleSortChange(e.target.value)}
                 className="w-full px-3 py-2.5 rounded-2xl border border-zinc-200 bg-white text-xs font-bold text-zinc-800 focus:outline-none focus:border-black cursor-pointer shadow-sm"
               >
-                <option value="newest">Sort: Newest First</option>
-                <option value="price_asc">Price: Low to High</option>
-                <option value="price_desc">Price: High to Low</option>
-                <option value="rating">Top Customer Rating</option>
+                <option value="newest">সাজান: নতুনগুলো আগে</option>
+                <option value="price_asc">মূল্য: কম থেকে বেশি</option>
+                <option value="price_desc">মূল্য: বেশি থেকে কম</option>
+                <option value="rating">সেরা গ্রাহক রেটিং</option>
               </select>
             </div>
 
@@ -332,7 +332,7 @@ function CarsCatalogContent() {
               }`}
             >
               <SlidersHorizontal className="w-4 h-4" />
-              <span>{advancedFiltersOpen ? 'Hide Filters' : 'Filters'}</span>
+              <span>{advancedFiltersOpen ? 'ফিল্টার লুকান' : 'ফিল্টার'}</span>
               {activeFiltersCount > 0 && (
                 <span className="h-5 px-1.5 rounded-full bg-white text-black text-[10px] font-black flex items-center justify-center">
                   {activeFiltersCount}
@@ -346,13 +346,13 @@ function CarsCatalogContent() {
             <div className="pt-4 border-t border-zinc-100 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 animate-in fade-in duration-150 text-xs font-semibold">
               {/* Brand */}
               <div>
-                <label className="block text-zinc-500 font-bold mb-1 text-[11px] uppercase">Brand</label>
+                <label className="block text-zinc-500 font-bold mb-1 text-[11px] uppercase">ব্র্যান্ড</label>
                 <select
                   value={draftFilters.brand}
                   onChange={(e) => setDraftFilters((prev) => ({ ...prev, brand: e.target.value }))}
                   className="w-full px-3 py-2 rounded-xl border border-zinc-200 bg-white text-xs font-semibold text-zinc-800 focus:outline-none focus:border-black cursor-pointer"
                 >
-                  <option value="all">All Brands</option>
+                  <option value="all">সব ব্র্যান্ড</option>
                   {POPULAR_BRANDS.map((b) => (
                     <option key={b} value={b}>
                       {b}
@@ -363,13 +363,13 @@ function CarsCatalogContent() {
 
               {/* Body Type */}
               <div>
-                <label className="block text-zinc-500 font-bold mb-1 text-[11px] uppercase">Body Type</label>
+                <label className="block text-zinc-500 font-bold mb-1 text-[11px] uppercase">বডি টাইপ</label>
                 <select
                   value={draftFilters.bodyType}
                   onChange={(e) => setDraftFilters((prev) => ({ ...prev, bodyType: e.target.value }))}
                   className="w-full px-3 py-2 rounded-xl border border-zinc-200 bg-white text-xs font-semibold text-zinc-800 focus:outline-none focus:border-black cursor-pointer"
                 >
-                  <option value="all">All Body Types</option>
+                  <option value="all">সব বডি টাইপ</option>
                   {BODY_TYPES.map((bt) => (
                     <option key={bt} value={bt}>
                       {bt}
@@ -380,41 +380,41 @@ function CarsCatalogContent() {
 
               {/* Transmission */}
               <div>
-                <label className="block text-zinc-500 font-bold mb-1 text-[11px] uppercase">Transmission</label>
+                <label className="block text-zinc-500 font-bold mb-1 text-[11px] uppercase">গিয়ারবক্স</label>
                 <select
                   value={draftFilters.transmission}
                   onChange={(e) => setDraftFilters((prev) => ({ ...prev, transmission: e.target.value }))}
                   className="w-full px-3 py-2 rounded-xl border border-zinc-200 bg-white text-xs font-semibold text-zinc-800 focus:outline-none focus:border-black cursor-pointer"
                 >
-                  <option value="all">All Transmissions</option>
-                  <option value="automatic">Automatic</option>
-                  <option value="manual">Manual</option>
+                  <option value="all">সব গিয়ারবক্স</option>
+                  <option value="automatic">অটোমেটিক</option>
+                  <option value="manual">ম্যানুয়াল</option>
                 </select>
               </div>
 
               {/* Fuel Type */}
               <div>
-                <label className="block text-zinc-500 font-bold mb-1 text-[11px] uppercase">Fuel Type</label>
+                <label className="block text-zinc-500 font-bold mb-1 text-[11px] uppercase">জ্বালানির ধরন</label>
                 <select
                   value={draftFilters.fuelType}
                   onChange={(e) => setDraftFilters((prev) => ({ ...prev, fuelType: e.target.value }))}
                   className="w-full px-3 py-2 rounded-xl border border-zinc-200 bg-white text-xs font-semibold text-zinc-800 focus:outline-none focus:border-black cursor-pointer"
                 >
-                  <option value="all">All Fuel Types</option>
-                  <option value="petrol">Petrol / Gasoline</option>
-                  <option value="diesel">Diesel</option>
-                  <option value="electric">Electric</option>
-                  <option value="hybrid">Hybrid</option>
+                  <option value="all">সব জ্বালানি</option>
+                  <option value="petrol">পেট্রোল / অকটেন</option>
+                  <option value="diesel">ডিজেল</option>
+                  <option value="electric">ইলেকট্রিক</option>
+                  <option value="hybrid">হাইব্রিড</option>
                 </select>
               </div>
 
               {/* Price Range */}
               <div>
-                <label className="block text-zinc-500 font-bold mb-1 text-[11px] uppercase">Price Range (৳)</label>
+                <label className="block text-zinc-500 font-bold mb-1 text-[11px] uppercase">মূল্য সীমা (৳)</label>
                 <div className="flex items-center gap-2">
                   <input
                     type="number"
-                    placeholder="Min"
+                    placeholder="সর্বনিম্ন"
                     value={draftFilters.minPrice}
                     onChange={(e) => setDraftFilters((prev) => ({ ...prev, minPrice: e.target.value }))}
                     onKeyDown={(e) => {
@@ -428,7 +428,7 @@ function CarsCatalogContent() {
                   <span className="text-zinc-400 font-bold">-</span>
                   <input
                     type="number"
-                    placeholder="Max"
+                    placeholder="সর্বোচ্চ"
                     value={draftFilters.maxPrice}
                     onChange={(e) => setDraftFilters((prev) => ({ ...prev, maxPrice: e.target.value }))}
                     onKeyDown={(e) => {
@@ -450,14 +450,14 @@ function CarsCatalogContent() {
                   className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold text-zinc-500 hover:text-black hover:bg-zinc-100 transition-colors w-full sm:w-auto justify-center"
                 >
                   <RotateCcw className="w-3.5 h-3.5" />
-                  <span>Reset All</span>
+                  <span>সব রিসেট করুন</span>
                 </button>
 
                 <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
                   {hasPendingChanges && (
                     <span className="text-[11px] font-semibold text-amber-700 bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-full flex items-center gap-1.5">
                       <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-                      Filters selected — click Apply
+                      ফিল্টার নির্বাচিত — প্রয়োগ করুন ক্লিক করুন
                     </span>
                   )}
                   <button
@@ -466,7 +466,7 @@ function CarsCatalogContent() {
                     className="flex items-center gap-2 px-6 py-2.5 rounded-2xl bg-black text-white hover:bg-zinc-800 text-xs font-bold transition-all shadow-md active:scale-95 w-full sm:w-auto justify-center"
                   >
                     <SlidersHorizontal className="w-3.5 h-3.5" />
-                    <span>Apply Filters</span>
+                    <span>ফিল্টার প্রয়োগ করুন</span>
                   </button>
                 </div>
               </div>
@@ -476,10 +476,10 @@ function CarsCatalogContent() {
           {/* Active Filter Chips */}
           {activeFiltersCount > 0 && (
             <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-zinc-100">
-              <span className="text-[11px] font-bold text-zinc-400">Active filters:</span>
+              <span className="text-[11px] font-bold text-zinc-400">সক্রিয় ফিল্টার:</span>
               {appliedFilters.type !== 'all' && (
                 <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-zinc-100 text-xs font-bold text-black border border-zinc-200">
-                  Type: {appliedFilters.type.toUpperCase()}
+                  ধরন: {appliedFilters.type === 'rent' ? 'ভাড়া' : 'বিক্রয়'}
                   <button onClick={() => handleRemoveAppliedFilter('type', 'all')}>
                     <X className="w-3 h-3 text-zinc-500 hover:text-black" />
                   </button>
@@ -487,7 +487,7 @@ function CarsCatalogContent() {
               )}
               {appliedFilters.brand !== 'all' && (
                 <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-zinc-100 text-xs font-bold text-black border border-zinc-200">
-                  Brand: {appliedFilters.brand}
+                  ব্র্যান্ড: {appliedFilters.brand}
                   <button onClick={() => handleRemoveAppliedFilter('brand', 'all')}>
                     <X className="w-3 h-3 text-zinc-500 hover:text-black" />
                   </button>
@@ -495,7 +495,7 @@ function CarsCatalogContent() {
               )}
               {appliedFilters.bodyType !== 'all' && (
                 <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-zinc-100 text-xs font-bold text-black border border-zinc-200">
-                  Body: {appliedFilters.bodyType}
+                  বডি: {appliedFilters.bodyType}
                   <button onClick={() => handleRemoveAppliedFilter('bodyType', 'all')}>
                     <X className="w-3 h-3 text-zinc-500 hover:text-black" />
                   </button>
@@ -503,7 +503,7 @@ function CarsCatalogContent() {
               )}
               {appliedFilters.transmission !== 'all' && (
                 <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-zinc-100 text-xs font-bold text-black border border-zinc-200">
-                  Transmission: {appliedFilters.transmission}
+                  গিয়ারবক্স: {appliedFilters.transmission}
                   <button onClick={() => handleRemoveAppliedFilter('transmission', 'all')}>
                     <X className="w-3 h-3 text-zinc-500 hover:text-black" />
                   </button>
@@ -511,7 +511,7 @@ function CarsCatalogContent() {
               )}
               {appliedFilters.fuelType !== 'all' && (
                 <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-zinc-100 text-xs font-bold text-black border border-zinc-200">
-                  Fuel: {appliedFilters.fuelType}
+                  জ্বালানি: {appliedFilters.fuelType}
                   <button onClick={() => handleRemoveAppliedFilter('fuelType', 'all')}>
                     <X className="w-3 h-3 text-zinc-500 hover:text-black" />
                   </button>
@@ -519,7 +519,7 @@ function CarsCatalogContent() {
               )}
               {(appliedFilters.minPrice || appliedFilters.maxPrice) && (
                 <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-zinc-100 text-xs font-bold text-black border border-zinc-200">
-                  Price: ${appliedFilters.minPrice || '0'} - ${appliedFilters.maxPrice || '∞'}
+                  মূল্য: ৳{appliedFilters.minPrice || '0'} - ৳{appliedFilters.maxPrice || '∞'}
                   <button
                     onClick={() => {
                       handleRemoveAppliedFilter('minPrice', '');
@@ -532,7 +532,7 @@ function CarsCatalogContent() {
               )}
               {appliedFilters.search && (
                 <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-zinc-100 text-xs font-bold text-black border border-zinc-200">
-                  Search: &ldquo;{appliedFilters.search}&rdquo;
+                  অনুসন্ধান: &ldquo;{appliedFilters.search}&rdquo;
                   <button onClick={() => handleRemoveAppliedFilter('search', '')}>
                     <X className="w-3 h-3 text-zinc-500 hover:text-black" />
                   </button>
@@ -542,7 +542,7 @@ function CarsCatalogContent() {
                 onClick={handleResetAll}
                 className="text-[11px] font-bold text-rose-600 hover:underline ml-auto"
               >
-                Clear all filters
+                সব ফিল্টার মুছুন
               </button>
             </div>
           )}
@@ -578,12 +578,12 @@ function CarsCatalogContent() {
         ) : (
           <div className="p-16 bg-white rounded-3xl border border-zinc-200 text-center space-y-4 shadow-sm">
             <CarIcon className="w-12 h-12 text-zinc-300 mx-auto" />
-            <h3 className="text-lg font-black text-black">No Vehicles Matched</h3>
+            <h3 className="text-lg font-black text-black">কোনো গাড়ি পাওয়া যায়নি</h3>
             <p className="text-xs text-zinc-500 max-w-sm mx-auto">
-              We couldn&apos;t find any vehicles matching your selected search and filter criteria.
+              আপনার নির্বাচিত অনুসন্ধান ও ফিল্টারের সাথে কোনো গাড়ি মেলেনি।
             </p>
             <Button variant="dark" size="sm" onClick={handleResetAll}>
-              Reset All Filters
+              সব ফিল্টার রিসেট করুন
             </Button>
           </div>
         )}

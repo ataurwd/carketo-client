@@ -48,9 +48,9 @@ export default function UserProfilePage() {
       const updated = await userService.updateProfile({ name, phone });
       const token = localStorage.getItem('access_token') || '';
       setAuth(updated, token);
-      setProfileMsg({ type: 'success', text: 'Profile updated successfully.' });
+      setProfileMsg({ type: 'success', text: 'প্রোফাইল সফলভাবে আপডেট হয়েছে।' });
     } catch (err: any) {
-      setProfileMsg({ type: 'error', text: err.message || 'Failed to update profile.' });
+      setProfileMsg({ type: 'error', text: err.message || 'প্রোফাইল আপডেট করতে ব্যর্থ হয়েছে।' });
     } finally {
       setIsUpdatingProfile(false);
     }
@@ -63,11 +63,11 @@ export default function UserProfilePage() {
 
     try {
       const res = await userService.changePassword(currentPassword, newPassword);
-      setPassMsg({ type: 'success', text: res.message || 'Password changed successfully.' });
+      setPassMsg({ type: 'success', text: res.message || 'পাসওয়ার্ড সফলভাবে পরিবর্তন হয়েছে।' });
       setCurrentPassword('');
       setNewPassword('');
     } catch (err: any) {
-      setPassMsg({ type: 'error', text: err.message || 'Failed to change password.' });
+      setPassMsg({ type: 'error', text: err.message || 'পাসওয়ার্ড পরিবর্তন করতে ব্যর্থ হয়েছে।' });
     } finally {
       setIsChangingPass(false);
     }
@@ -82,17 +82,17 @@ export default function UserProfilePage() {
           className="inline-flex items-center gap-2 text-xs font-bold text-zinc-600 hover:text-black transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span>Back to Dashboard</span>
+          <span>ড্যাশবোর্ডে ফিরে যান</span>
         </Link>
 
-        <h1 className="text-2xl sm:text-3xl font-black text-black">Account Settings</h1>
+        <h1 className="text-2xl sm:text-3xl font-black text-black">অ্যাকাউন্ট সেটিংস</h1>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Profile Details Form */}
           <div className="bg-white p-6 sm:p-8 rounded-3xl border border-zinc-200 shadow-sm space-y-6">
             <div>
-              <h2 className="text-lg font-black text-black">Personal Profile</h2>
-              <p className="text-xs text-zinc-500">Update your account name and phone number.</p>
+              <h2 className="text-lg font-black text-black">ব্যক্তিগত প্রোফাইল</h2>
+              <p className="text-xs text-zinc-500">আপনার অ্যাকাউন্টের নাম এবং ফোন নম্বর আপডেট করুন।</p>
             </div>
 
             {profileMsg && (
@@ -124,7 +124,7 @@ export default function UserProfilePage() {
                 </div>
                 <div>
                   <label className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-zinc-200 text-xs font-bold text-zinc-700 hover:bg-zinc-50 hover:text-black cursor-pointer shadow-sm transition-all">
-                    <span>Change Avatar</span>
+                    <span>ছবি পরিবর্তন করুন</span>
                     <input
                       type="file"
                       accept="image/jpeg, image/png, image/webp"
@@ -137,19 +137,19 @@ export default function UserProfilePage() {
                           const updated = await userService.updateProfile({ avatar: res.publicUrl });
                           const token = localStorage.getItem('access_token') || '';
                           setAuth(updated, token);
-                          setProfileMsg({ type: 'success', text: 'Avatar updated successfully.' });
+                          setProfileMsg({ type: 'success', text: 'প্রোফাইল ছবি সফলভাবে আপডেট হয়েছে।' });
                         } catch (err: any) {
-                          setProfileMsg({ type: 'error', text: err.message || 'Avatar upload failed.' });
+                          setProfileMsg({ type: 'error', text: err.message || 'ছবি আপলোড ব্যর্থ হয়েছে।' });
                         }
                       }}
                     />
                   </label>
-                  <p className="text-[10px] text-zinc-400 mt-1">JPEG, PNG, WebP (Max 2MB)</p>
+                  <p className="text-[10px] text-zinc-400 mt-1">JPEG, PNG, WebP (সর্বোচ্চ ২ মেগাবাইট)</p>
                 </div>
               </div>
 
               <Input
-                label="Full Name"
+                label="পূর্ণ নাম"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
@@ -157,18 +157,18 @@ export default function UserProfilePage() {
               />
 
               <Input
-                label="Email Address"
+                label="ইমেইল ঠিকানা"
                 value={email}
                 disabled
-                helperText="Email address cannot be changed directly."
+                helperText="ইমেইল ঠিকানা সরাসরি পরিবর্তন করা যাবে না।"
                 leftIcon={<Mail className="w-4 h-4" />}
               />
 
               <Input
-                label="Phone Number"
+                label="ফোন নম্বর"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                placeholder="+1 (555) 000-0000"
+                placeholder="017XX-XXXXXX"
                 leftIcon={<Phone className="w-4 h-4" />}
               />
 
@@ -179,7 +179,7 @@ export default function UserProfilePage() {
                 isLoading={isUpdatingProfile}
                 className="w-full font-bold"
               >
-                Save Profile
+                প্রোফাইল সংরক্ষণ করুন
               </Button>
             </form>
           </div>
@@ -187,8 +187,8 @@ export default function UserProfilePage() {
           {/* Change Password Form */}
           <div className="bg-white p-6 sm:p-8 rounded-3xl border border-zinc-200 shadow-sm space-y-6">
             <div>
-              <h2 className="text-lg font-black text-black">Security & Password</h2>
-              <p className="text-xs text-zinc-500">Ensure your account is protected with a strong password.</p>
+              <h2 className="text-lg font-black text-black">নিরাপত্তা ও পাসওয়ার্ড</h2>
+              <p className="text-xs text-zinc-500">একটি শক্তিশালী পাসওয়ার্ড দিয়ে আপনার অ্যাকাউন্ট সুরক্ষিত রাখুন।</p>
             </div>
 
             {passMsg && (
@@ -210,7 +210,7 @@ export default function UserProfilePage() {
 
             <form onSubmit={handleChangePassword} className="space-y-4">
               <Input
-                label="Current Password"
+                label="বর্তমান পাসওয়ার্ড"
                 type="password"
                 required
                 value={currentPassword}
@@ -220,13 +220,13 @@ export default function UserProfilePage() {
               />
 
               <Input
-                label="New Password"
+                label="নতুন পাসওয়ার্ড"
                 type="password"
                 required
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="Min. 8 characters"
-                helperText="Must include uppercase, lowercase, and numbers."
+                placeholder="কমপক্ষে ৮ অক্ষর"
+                helperText="বড় হাতের, ছোট হাতের অক্ষর এবং সংখ্যা থাকতে হবে।"
                 leftIcon={<Lock className="w-4 h-4" />}
               />
 
@@ -237,7 +237,7 @@ export default function UserProfilePage() {
                 isLoading={isChangingPass}
                 className="w-full font-bold"
               >
-                Update Password
+                পাসওয়ার্ড আপডেট করুন
               </Button>
             </form>
           </div>

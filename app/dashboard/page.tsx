@@ -56,14 +56,14 @@ export default function UserDashboardPage() {
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-xl sm:text-2xl font-black text-black">
-                  Welcome back, {user?.name || 'Member'}!
+                  স্বাগতম, {user?.name || 'সদস্য'}!
                 </h1>
                 <Badge variant="dark" size="sm">
-                  {user?.role === 'admin' ? 'Admin' : 'Member'}
+                  {user?.role === 'admin' ? 'অ্যাডমিন' : 'সদস্য'}
                 </Badge>
               </div>
               <p className="text-xs sm:text-sm text-zinc-500 mt-0.5">
-                {user?.email || 'Manage your active listings, rentals, and saved favorites.'}
+                {user?.email || 'আপনার সক্রিয় বিজ্ঞাপন, ভাড়া এবং পছন্দের গাড়িগুলো পরিচালনা করুন।'}
               </p>
             </div>
           </div>
@@ -71,17 +71,17 @@ export default function UserDashboardPage() {
           <div className="flex flex-wrap items-center gap-3">
             <Link href="/provider/cars/create">
               <Button variant="dark" size="sm" leftIcon={<Plus className="w-3.5 h-3.5" />}>
-                List Car
+                গাড়ি যুক্ত করুন
               </Button>
             </Link>
             <Link href="/provider/cars">
               <Button variant="outline" size="sm" leftIcon={<Car className="w-3.5 h-3.5" />}>
-                My Cars
+                আমার গাড়ি
               </Button>
             </Link>
             <Link href="/dashboard/profile">
               <Button variant="outline" size="sm" leftIcon={<UserIcon className="w-3.5 h-3.5" />}>
-                Profile
+                প্রোফাইল
               </Button>
             </Link>
           </div>
@@ -96,8 +96,8 @@ export default function UserDashboardPage() {
             <div className="h-10 w-10 rounded-2xl bg-zinc-100 flex items-center justify-center text-black group-hover:bg-black group-hover:text-white transition-colors">
               <Car className="w-5 h-5" />
             </div>
-            <h4 className="font-extrabold text-sm text-black">My Cars</h4>
-            <p className="text-[11px] text-zinc-400">View and manage your cars</p>
+            <h4 className="font-extrabold text-sm text-black">আমার গাড়ি</h4>
+            <p className="text-[11px] text-zinc-400">আপনার গাড়িগুলো দেখুন ও পরিচালনা করুন</p>
           </Link>
 
           <Link
@@ -107,8 +107,8 @@ export default function UserDashboardPage() {
             <div className="h-10 w-10 rounded-2xl bg-zinc-100 flex items-center justify-center text-black group-hover:bg-black group-hover:text-white transition-colors">
               <Heart className="w-5 h-5" />
             </div>
-            <h4 className="font-extrabold text-sm text-black">Saved Wishlist</h4>
-            <p className="text-[11px] text-zinc-400">View favorite vehicles</p>
+            <h4 className="font-extrabold text-sm text-black">পছন্দের তালিকা</h4>
+            <p className="text-[11px] text-zinc-400">সংরক্ষিত পছন্দের গাড়ি দেখুন</p>
           </Link>
 
           <Link
@@ -118,8 +118,8 @@ export default function UserDashboardPage() {
             <div className="h-10 w-10 rounded-2xl bg-zinc-100 flex items-center justify-center text-black group-hover:bg-black group-hover:text-white transition-colors">
               <ShoppingBag className="w-5 h-5" />
             </div>
-            <h4 className="font-extrabold text-sm text-black">My Inquiries</h4>
-            <p className="text-[11px] text-zinc-400">Direct seller messages</p>
+            <h4 className="font-extrabold text-sm text-black">আমার জিজ্ঞাসা</h4>
+            <p className="text-[11px] text-zinc-400">ক্রেতাদের সরাসরি বার্তা</p>
           </Link>
 
           <Link
@@ -129,8 +129,8 @@ export default function UserDashboardPage() {
             <div className="h-10 w-10 rounded-2xl bg-zinc-100 flex items-center justify-center text-black group-hover:bg-black group-hover:text-white transition-colors">
               <Bell className="w-5 h-5" />
             </div>
-            <h4 className="font-extrabold text-sm text-black">Notifications</h4>
-            <p className="text-[11px] text-zinc-400">Alerts & messages</p>
+            <h4 className="font-extrabold text-sm text-black">নোটিফিকেশন</h4>
+            <p className="text-[11px] text-zinc-400">অ্যালার্ট ও বার্তাসমূহ</p>
           </Link>
         </div>
 
@@ -138,46 +138,46 @@ export default function UserDashboardPage() {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           <div className="bg-white p-5 rounded-3xl border border-zinc-200 shadow-sm space-y-2">
             <div className="flex items-center justify-between text-zinc-400">
-              <span className="text-xs font-bold uppercase tracking-wider">Total Bookings</span>
+              <span className="text-xs font-bold uppercase tracking-wider">মোট বুকিং</span>
               <Calendar className="w-4 h-4 text-black" />
             </div>
             <p className="text-2xl sm:text-3xl font-black text-black">
               {data?.stats?.totalBookings ?? 0}
             </p>
-            <span className="text-[11px] font-semibold text-emerald-600">All-time reservations</span>
+            <span className="text-[11px] font-semibold text-emerald-600">সর্বমোট রিজার্ভেশন</span>
           </div>
 
           <div className="bg-white p-5 rounded-3xl border border-zinc-200 shadow-sm space-y-2">
             <div className="flex items-center justify-between text-zinc-400">
-              <span className="text-xs font-bold uppercase tracking-wider">Active Rentals</span>
+              <span className="text-xs font-bold uppercase tracking-wider">চলমান ভাড়া</span>
               <Clock className="w-4 h-4 text-black" />
             </div>
             <p className="text-2xl sm:text-3xl font-black text-black">
               {data?.stats?.activeRentals ?? 0}
             </p>
-            <span className="text-[11px] font-semibold text-zinc-500">Currently active</span>
+            <span className="text-[11px] font-semibold text-zinc-500">বর্তমানে সক্রিয়</span>
           </div>
 
           <div className="bg-white p-5 rounded-3xl border border-zinc-200 shadow-sm space-y-2">
             <div className="flex items-center justify-between text-zinc-400">
-              <span className="text-xs font-bold uppercase tracking-wider">Wishlist Cars</span>
+              <span className="text-xs font-bold uppercase tracking-wider">পছন্দের গাড়ি</span>
               <Heart className="w-4 h-4 text-black" />
             </div>
             <p className="text-2xl sm:text-3xl font-black text-black">
               {data?.stats?.wishlistCount ?? 0}
             </p>
-            <span className="text-[11px] font-semibold text-zinc-500">Saved for later</span>
+            <span className="text-[11px] font-semibold text-zinc-500">পরবর্তীতে দেখার জন্য সংরক্ষিত</span>
           </div>
 
           <div className="bg-white p-5 rounded-3xl border border-zinc-200 shadow-sm space-y-2">
             <div className="flex items-center justify-between text-zinc-400">
-              <span className="text-xs font-bold uppercase tracking-wider">Purchased Cars</span>
+              <span className="text-xs font-bold uppercase tracking-wider">ক্রয়কৃত গাড়ি</span>
               <ShoppingBag className="w-4 h-4 text-black" />
             </div>
             <p className="text-2xl sm:text-3xl font-black text-black">
               {data?.stats?.totalOrders ?? 0}
             </p>
-            <span className="text-[11px] font-semibold text-zinc-500">Verified vehicle ownership</span>
+            <span className="text-[11px] font-semibold text-zinc-500">ভেরিফায়েড মালিকানা</span>
           </div>
         </div>
 
@@ -185,11 +185,11 @@ export default function UserDashboardPage() {
         <div className="bg-white p-6 sm:p-8 rounded-3xl border border-zinc-200 shadow-sm space-y-6">
           <div className="flex items-center justify-between border-b border-zinc-100 pb-4">
             <div>
-              <h2 className="text-lg font-black text-black">Recent Activity</h2>
-              <p className="text-xs text-zinc-500">Your latest vehicle rentals and inquiries.</p>
+              <h2 className="text-lg font-black text-black">সাম্প্রতিক কার্যক্রম</h2>
+              <p className="text-xs text-zinc-500">আপনার সর্বশেষ গাড়ি ভাড়া এবং জিজ্ঞাসাসমূহ।</p>
             </div>
             <Link href="/cars?type=rent" className="text-xs font-bold text-black hover:underline">
-              Browse More Cars →
+              আরও গাড়ি দেখুন →
             </Link>
           </div>
 
@@ -207,7 +207,7 @@ export default function UserDashboardPage() {
                     )}
                     <div>
                       <h4 className="text-sm font-extrabold text-black">
-                        {b.carId?.title || 'Luxury Rental Vehicle'}
+                        {b.carId?.title || 'প্রিমিয়াম রেন্টাল গাড়ি'}
                       </h4>
                       <p className="text-xs text-zinc-400">
                         {new Date(b.startDate).toLocaleDateString()} – {new Date(b.endDate).toLocaleDateString()}
@@ -227,16 +227,16 @@ export default function UserDashboardPage() {
           ) : (
             <div className="text-center py-12 text-zinc-400 space-y-3">
               <Car className="w-10 h-10 mx-auto text-zinc-300" />
-              <p className="text-xs font-medium">No active reservations yet. Find your dream car or list your own!</p>
+              <p className="text-xs font-medium">এখনো কোনো সক্রিয় রিজার্ভেশন নেই। আপনার স্বপ্নের গাড়ি খুঁজুন অথবা নিজের গাড়ি তালিকাভুক্ত করুন!</p>
               <div className="flex items-center justify-center gap-3">
                 <Link href="/cars">
                   <Button variant="dark" size="sm">
-                    Explore Cars
+                    গাড়ি খুঁজুন
                   </Button>
                 </Link>
                 <Link href="/sell">
                   <Button variant="outline" size="sm" leftIcon={<Plus className="w-3.5 h-3.5" />}>
-                    List Your Car
+                    আপনার গাড়ি যুক্ত করুন
                   </Button>
                 </Link>
               </div>

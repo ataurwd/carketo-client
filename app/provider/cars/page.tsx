@@ -120,10 +120,10 @@ export default function ProviderCarsPage() {
 
   const handleDelete = async (carId: string) => {
     const isConfirmed = await confirmDialog({
-      title: 'Archive Listing?',
-      text: 'Are you sure you want to archive this vehicle listing? It will no longer be publicly visible to buyers.',
-      confirmButtonText: 'Yes, Archive',
-      cancelButtonText: 'Cancel',
+      title: 'বিজ্ঞাপনটি আর্কাইভ করবেন?',
+      text: 'আপনি কি নিশ্চিত যে আপনি এই গাড়ির বিজ্ঞাপনটি আর্কাইভ করতে চান? এটি আর ক্রেতাদের কাছে প্রকাশ্যে দৃশ্যমান থাকবে না।',
+      confirmButtonText: 'হ্যাঁ, আর্কাইভ করুন',
+      cancelButtonText: 'বাতিল করুন',
       icon: 'warning',
       isDestructive: true,
     });
@@ -132,9 +132,9 @@ export default function ProviderCarsPage() {
     try {
       await carService.deleteCar(carId);
       setCars(cars.filter((c) => c._id !== carId));
-      showToast('Vehicle listing archived successfully', 'success');
+      showToast('গাড়ির বিজ্ঞাপন সফলভাবে আর্কাইভ করা হয়েছে', 'success');
     } catch {
-      showToast('Failed to archive listing', 'error');
+      showToast('বিজ্ঞাপন আর্কাইভ করতে ব্যর্থ হয়েছে', 'error');
     }
   };
 
@@ -148,28 +148,28 @@ export default function ProviderCarsPage() {
               className="inline-flex items-center gap-2 text-xs font-bold text-zinc-600 hover:text-black transition-colors mb-2"
             >
               <ArrowLeft className="w-4 h-4" />
-              <span>Back to Dashboard</span>
+              <span>ড্যাশবোর্ডে ফিরে যান</span>
             </Link>
             <div className="flex items-center gap-3">
-              <h1 className="text-2xl sm:text-3xl font-black text-black">Car Inventory</h1>
+              <h1 className="text-2xl sm:text-3xl font-black text-black">গাড়ির ইনভেন্টরি</h1>
               <span className="h-6 px-2.5 rounded-full bg-black text-white text-xs font-bold flex items-center justify-center">
-                {cars.length} Listings
+                {cars.length} টি বিজ্ঞাপন
               </span>
             </div>
             <p className="text-xs sm:text-sm text-zinc-500 mt-1">
-              Manage your registered vehicles, pricing, availability, and live status.
+              আপনার নিবন্ধিত গাড়ি, মূল্য নির্ধারণ, প্রাপ্যতা এবং লাইভ স্ট্যাটাস পরিচালনা করুন।
             </p>
           </div>
 
           <div className="flex items-center gap-3">
             <Link href="/dashboard/inquiries">
               <Button variant="outline" size="md">
-                Inquiries Inbox
+                জিজ্ঞাসার ইনবক্স
               </Button>
             </Link>
             <Link href="/provider/cars/create">
               <Button variant="dark" size="md" leftIcon={<Plus className="w-4 h-4" />}>
-                List New Car
+                নতুন গাড়ি যুক্ত করুন
               </Button>
             </Link>
           </div>
@@ -179,7 +179,7 @@ export default function ProviderCarsPage() {
         {isLoading ? (
           <div className="p-16 bg-white rounded-3xl border border-zinc-200 text-center space-y-4 shadow-sm">
             <div className="h-10 w-10 border-4 border-black border-t-transparent rounded-full animate-spin mx-auto" />
-            <p className="text-xs font-bold text-zinc-500">Loading your cars...</p>
+            <p className="text-xs font-bold text-zinc-500">আপনার গাড়িগুলো লোড হচ্ছে...</p>
           </div>
         ) : cars.length > 0 ? (
           <div className="bg-white rounded-3xl border border-zinc-200 shadow-sm overflow-hidden">
@@ -187,12 +187,12 @@ export default function ProviderCarsPage() {
               <table className="w-full text-left text-xs">
                 <thead className="bg-zinc-50 text-zinc-500 font-bold uppercase tracking-wider border-b border-zinc-200">
                   <tr>
-                    <th className="py-4 px-6">Vehicle</th>
-                    <th className="py-4 px-6">Model & Year</th>
-                    <th className="py-4 px-6">Listing Type</th>
-                    <th className="py-4 px-6">Pricing</th>
-                    <th className="py-4 px-6">Availability Status</th>
-                    <th className="py-4 px-6 text-right">Actions</th>
+                    <th className="py-4 px-6">গাড়ি</th>
+                    <th className="py-4 px-6">মডেল ও সাল</th>
+                    <th className="py-4 px-6">বিজ্ঞাপনের ধরন</th>
+                    <th className="py-4 px-6">মূল্য</th>
+                    <th className="py-4 px-6">প্রাপ্যতা স্ট্যাটাস</th>
+                    <th className="py-4 px-6 text-right">অ্যাকশন</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-zinc-100 font-semibold text-zinc-800">
@@ -208,7 +208,7 @@ export default function ProviderCarsPage() {
                           <div>
                             <p className="font-extrabold text-black text-sm">{car.title}</p>
                             <p className="text-[11px] text-zinc-400">
-                              {car.location} • Phone: {car.contactPhone || 'N/A'}
+                              {car.location} • ফোন: {car.contactPhone || 'প্রযোজ্য নয়'}
                             </p>
                           </div>
                         </div>
@@ -221,13 +221,13 @@ export default function ProviderCarsPage() {
 
                       <td className="py-4 px-6">
                         <Badge variant={car.listingType === 'rent' ? 'dark' : 'slate'} size="sm">
-                          For {car.listingType}
+                          {car.listingType === 'rent' ? 'ভাড়ার জন্য' : 'বিক্রয়ের জন্য'}
                         </Badge>
                       </td>
 
                       <td className="py-4 px-6 font-bold text-black text-sm">
                         {car.listingType === 'rent'
-                          ? `${formatPrice(car.rentalPrice || 199)} / day`
+                          ? `${formatPrice(car.rentalPrice || 199)} / দিন`
                           : formatPrice(car.salePrice || car.price || 45000)}
                       </td>
 
@@ -237,11 +237,11 @@ export default function ProviderCarsPage() {
                           onChange={(e) => handleStatusChange(car._id, e.target.value)}
                           className="px-2.5 py-1.5 rounded-xl border border-zinc-200 bg-zinc-50 text-[11px] font-bold text-zinc-800 focus:outline-none focus:border-black cursor-pointer"
                         >
-                          <option value="published">🟢 Available</option>
-                          <option value="rented">🟡 Rented / In Use</option>
-                          <option value="sold">🔴 Sold</option>
-                          <option value="draft">⚪ Draft / Inactive</option>
-                          <option value="archived">⚫ Archived</option>
+                          <option value="published">🟢 এভেইলেবল</option>
+                          <option value="rented">🟡 ভাড়ায় আছে</option>
+                          <option value="sold">🔴 বিক্রি হয়ে গেছে</option>
+                          <option value="draft">⚪ ড্রাফট / নিষ্ক্রিয়</option>
+                          <option value="archived">⚫ আর্কাইভড</option>
                         </select>
                       </td>
 
@@ -250,7 +250,7 @@ export default function ProviderCarsPage() {
                           type="button"
                           onClick={() => openEditModal(car)}
                           className="inline-flex p-2 rounded-xl text-zinc-600 hover:text-black hover:bg-zinc-100 transition-colors"
-                          title="Quick Edit Vehicle"
+                          title="দ্রুত সম্পাদনা করুন"
                         >
                           <Edit className="w-4 h-4" />
                         </button>
@@ -258,7 +258,7 @@ export default function ProviderCarsPage() {
                           href={`/cars/${car.slug}`}
                           target="_blank"
                           className="inline-flex p-2 rounded-xl text-zinc-600 hover:text-black hover:bg-zinc-100 transition-colors"
-                          title="View Live Listing"
+                          title="লাইভ বিজ্ঞাপন দেখুন"
                         >
                           <ExternalLink className="w-4 h-4" />
                         </Link>
@@ -266,7 +266,7 @@ export default function ProviderCarsPage() {
                           type="button"
                           onClick={() => handleDelete(car._id)}
                           className="inline-flex p-2 rounded-xl text-rose-500 hover:text-rose-700 hover:bg-rose-50 transition-colors"
-                          title="Archive Listing"
+                          title="বিজ্ঞাপন আর্কাইভ করুন"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -280,13 +280,13 @@ export default function ProviderCarsPage() {
         ) : (
           <div className="p-16 bg-white rounded-3xl border border-zinc-200 text-center space-y-4 shadow-sm">
             <Car className="w-12 h-12 text-zinc-300 mx-auto" />
-            <h3 className="text-lg font-black text-black">No Cars in Your Inventory</h3>
+            <h3 className="text-lg font-black text-black">আপনার ইনভেন্টরিতে কোনো গাড়ি নেই</h3>
             <p className="text-xs text-zinc-500 max-w-sm mx-auto">
-              You have not listed any cars for rent or sale yet. Click below to add your first vehicle.
+              আপনি এখনো ভাড়া বা বিক্রয়ের জন্য কোনো গাড়ি তালিকাভুক্ত করেননি। আপনার প্রথম গাড়ি যুক্ত করতে নিচে ক্লিক করুন।
             </p>
             <Link href="/provider/cars/create">
               <Button variant="dark" size="sm" leftIcon={<Plus className="w-4 h-4" />}>
-                Add Your First Car
+                আপনার প্রথম গাড়ি যুক্ত করুন
               </Button>
             </Link>
           </div>
@@ -298,7 +298,7 @@ export default function ProviderCarsPage() {
             <div className="bg-white max-w-lg w-full rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl border border-zinc-200 animate-in fade-in zoom-in duration-200">
               <div className="flex items-center justify-between border-b border-zinc-100 pb-4">
                 <div>
-                  <h3 className="text-lg font-black text-black">Edit Vehicle Listing</h3>
+                  <h3 className="text-lg font-black text-black">গাড়ির বিজ্ঞাপন সম্পাদনা করুন</h3>
                   <p className="text-xs text-zinc-400">{editingCar.title}</p>
                 </div>
                 <button
@@ -312,14 +312,14 @@ export default function ProviderCarsPage() {
               {saveSuccess && (
                 <div className="p-3 rounded-2xl bg-emerald-50 text-emerald-800 text-xs font-bold flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                  <span>Changes saved successfully!</span>
+                  <span>পরিবর্তনগুলো সফলভাবে সংরক্ষিত হয়েছে!</span>
                 </div>
               )}
 
               <form onSubmit={handleSaveEdit} className="space-y-4 text-xs font-semibold">
                 <div>
                   <label className="block text-zinc-700 font-bold mb-1">
-                    {editingCar.listingType === 'rent' ? 'Daily Rental Rate (৳/day)' : 'Total Sale Price (৳)'}
+                    {editingCar.listingType === 'rent' ? 'দৈনিক ভাড়ার হার (৳/দিন)' : 'মোট বিক্রয় মূল্য (৳)'}
                   </label>
                   <div className="relative">
                     <span className="text-zinc-500 font-black absolute left-3 top-1/2 -translate-y-1/2 text-sm">৳</span>
@@ -334,7 +334,7 @@ export default function ProviderCarsPage() {
                 </div>
 
                 <div>
-                  <label className="block text-zinc-700 font-bold mb-1">Direct Contact Phone Number</label>
+                  <label className="block text-zinc-700 font-bold mb-1">সরাসরি যোগাযোগের ফোন নম্বর</label>
                   <div className="relative">
                     <Phone className="w-4 h-4 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2" />
                     <input
@@ -349,7 +349,7 @@ export default function ProviderCarsPage() {
                 </div>
 
                 <div>
-                  <label className="block text-zinc-700 font-bold mb-1">Location / Pickup Hub</label>
+                  <label className="block text-zinc-700 font-bold mb-1">লোকেশন / পিকআপ হাব</label>
                   <div className="relative">
                     <MapPin className="w-4 h-4 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2" />
                     <input
@@ -363,7 +363,7 @@ export default function ProviderCarsPage() {
                 </div>
 
                 <div>
-                  <label className="block text-zinc-700 font-bold mb-1">Vehicle Description</label>
+                  <label className="block text-zinc-700 font-bold mb-1">গাড়ির বিবরণ</label>
                   <textarea
                     rows={3}
                     value={editDescription}
@@ -379,7 +379,7 @@ export default function ProviderCarsPage() {
                     size="sm"
                     onClick={() => setEditingCar(null)}
                   >
-                    Cancel
+                    বাতিল করুন
                   </Button>
                   <Button
                     type="submit"
@@ -387,7 +387,7 @@ export default function ProviderCarsPage() {
                     size="sm"
                     disabled={isSaving}
                   >
-                    {isSaving ? 'Saving...' : 'Save Changes'}
+                    {isSaving ? 'সংরক্ষিত হচ্ছে...' : 'পরিবর্তন সংরক্ষণ করুন'}
                   </Button>
                 </div>
               </form>

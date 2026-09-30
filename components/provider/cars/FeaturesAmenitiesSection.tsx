@@ -3,24 +3,24 @@ import { Sparkles, Check, Plus, X } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 
 const PRESET_AMENITIES = [
-  'Bluetooth Connectivity',
-  'Apple CarPlay',
-  'Android Auto',
-  'Cruise Control',
-  'Air Conditioning',
-  'Leather Upholstery',
-  'GPS Navigation',
-  'Premium Sound System',
-  'Backup Camera',
-  'Sunroof / Moonroof',
-  'Heated Seats',
-  'Keyless Entry & Push Start',
-  'Blind Spot Monitor',
-  'Lane Departure Warning',
-  'Parking Sensors',
-  'Wireless Phone Charger',
-  'All-Wheel Drive (AWD)',
-  'Alloy Wheels',
+  'ব্লুটুথ কানেক্টিভিটি',
+  'অ্যাপল কারপ্লে',
+  'অ্যান্ড্রয়েড অটো',
+  'ক্রুজ কন্ট্রোল',
+  'এয়ার কন্ডিশনিং (এসি)',
+  'লেদার সিট',
+  'জিপিএস নেভিগেশন',
+  'প্রিমিয়াম সাউন্ড সিস্টেম',
+  'ব্যাকআপ ক্যামেরা',
+  'সানরুফ / মুনরুফ',
+  'হিটেড সিট',
+  'কি-লেস এন্ট্রি ও পুশ স্টার্ট',
+  'ব্লাইন্ড স্পট মনিটর',
+  'লেন ডিপার্চার ওয়ার্নিং',
+  'পার্কিং সেন্সর',
+  'ওয়্যারলেস ফোন চার্জার',
+  'অল-হুইল ড্রাইভ (AWD)',
+  'অ্যালয় হুইলস',
 ];
 
 interface FeaturesAmenitiesSectionProps {
@@ -59,20 +59,20 @@ export function FeaturesAmenitiesSection({
         <div className="flex items-center gap-2">
           <Sparkles className="w-5 h-5 text-black" />
           <div>
-            <h2 className="text-base font-black text-black">Features & Amenities Options</h2>
+            <h2 className="text-base font-black text-black">ফিচার ও সুবিধাসমূহ</h2>
             <p className="text-xs text-zinc-400">
-              Select standard options and add custom equipment to display on the vehicle page.
+              গাড়ির পেজে প্রদর্শনের জন্য স্ট্যান্ডার্ড অপশনগুলো নির্বাচন করুন এবং কাস্টম সরঞ্জাম যুক্ত করুন।
             </p>
           </div>
         </div>
         <span className="text-xs font-bold px-3 py-1 rounded-full bg-zinc-100 text-zinc-800 border border-zinc-200">
-          {selectedAmenities.length} Selected
+          {selectedAmenities.length} টি নির্বাচিত
         </span>
       </div>
 
       <div>
         <label className="block text-xs font-bold uppercase tracking-wider text-zinc-600 mb-3">
-          Standard Equipment & Packages (Click to toggle)
+          স্ট্যান্ডার্ড সরঞ্জাম ও প্যাকেজ (সিলেক্ট করতে ক্লিক করুন)
         </label>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
           {PRESET_AMENITIES.map((amenity) => {
@@ -105,12 +105,12 @@ export function FeaturesAmenitiesSection({
       {/* Custom Feature Input */}
       <div className="space-y-2 pt-2 border-t border-zinc-100">
         <label className="block text-xs font-bold uppercase tracking-wider text-zinc-600">
-          Add Custom Feature / Aftermarket Option
+          কাস্টম ফিচার / আফটারমার্কেট অপশন যুক্ত করুন
         </label>
         <div className="flex items-center gap-2">
           <input
             type="text"
-            placeholder="e.g. Carbon Ceramic Brakes, Custom Exhaust, Panoramic Sunroof, Sport Suspension..."
+            placeholder="যেমন: কার্বন সিরামিক ব্রেক, কাস্টম এক্সহস্ট, প্যানোরামিক সানরুফ, স্পোর্ট সাসপেনশন..."
             value={customAmenityInput}
             onChange={(e) => setCustomAmenityInput(e.target.value)}
             onKeyDown={(e) => {
@@ -128,7 +128,7 @@ export function FeaturesAmenitiesSection({
             onClick={handleAddCustomAmenity}
             leftIcon={<Plus className="w-3.5 h-3.5" />}
           >
-            Add Feature
+            ফিচার যুক্ত করুন
           </Button>
         </div>
       </div>
@@ -137,7 +137,7 @@ export function FeaturesAmenitiesSection({
       {selectedAmenities.filter((a) => !PRESET_AMENITIES.includes(a)).length > 0 && (
         <div className="space-y-2 pt-2">
           <label className="block text-[11px] font-bold text-zinc-400 uppercase">
-            Custom Added Features:
+            যুক্ত করা কাস্টম ফিচারসমূহ:
           </label>
           <div className="flex flex-wrap items-center gap-2">
             {selectedAmenities

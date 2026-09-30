@@ -1,17 +1,39 @@
 import { apiClient } from '@/lib/api-client';
 
+export interface IChatMessage {
+  _id?: string;
+  senderId?: string;
+  senderRole: 'buyer' | 'seller';
+  senderName: string;
+  text: string;
+  createdAt: string;
+}
+
 export interface IInquiry {
   _id: string;
-  carId: {
+  carId?: {
     _id: string;
     title: string;
     slug: string;
     coverImage: string;
-    brand: string;
-    model: string;
+    brand?: string;
+    model?: string;
     rentalPrice?: number;
     salePrice?: number;
-    listingType: string;
+    listingType?: string;
+    contactPhone?: string;
+  };
+  externalCarId?: string;
+  carSnapshot?: {
+    _id: string;
+    title: string;
+    slug: string;
+    coverImage: string;
+    brand?: string;
+    model?: string;
+    rentalPrice?: number;
+    salePrice?: number;
+    listingType?: string;
     contactPhone?: string;
   };
   sellerId?: {
@@ -25,6 +47,7 @@ export interface IInquiry {
   senderEmail: string;
   senderPhone: string;
   message: string;
+  messages?: IChatMessage[];
   status: 'new' | 'replied' | 'closed';
   createdAt: string;
   updatedAt: string;
@@ -32,10 +55,22 @@ export interface IInquiry {
 
 export const inquiryService = {
   /**
-   * Submit an inquiry on a car listing
+   * Submit an inquiry or initial live chat message on a car listing
    */
   async createInquiry(data: {
     carId: string;
+    carSnapshot?: {
+      _id?: string;
+      title: string;
+      slug: string;
+      coverImage: string;
+      brand?: string;
+      model?: string;
+      listingType?: string;
+      salePrice?: number;
+      rentalPrice?: number;
+      contactPhone?: string;
+    };
     senderName: string;
     senderEmail: string;
     senderPhone: string;
@@ -46,7 +81,40 @@ export const inquiryService = {
   },
 
   /**
-   * Get all incoming inquiries for the logged-in vehicle owner
+   * Get active live chat thread for a specific car and buyer
+   */
+  async getCarThread(carId: string, phone?: string): Promise<IInquiry | null> {
+    const res = await apiClient.get<IInquiry | null>('/inquiries/thread', {
+      params: { carId, ...(phone ? { phone } : {}) },
+    });
+    return res.data || null;
+  },
+
+  /**
+   * Get a single inquiry/chat conversation by ID
+   */
+  async getInquiryById(id: string): Promise<IInquiry> {
+    const res = await apiClient.get<IInquiry>(`/inquiries/${id}`);
+    return res.data;
+  },
+
+  /**
+   * Send a live chat message in an existing inquiry thread
+   */
+  async sendMessage(
+    inquiryId: string,
+    data: {
+      text: string;
+      senderName?: string;
+      senderRole?: 'buyer' | 'seller';
+    }
+  ): Promise<IInquiry> {
+    const res = await apiClient.post<IInquiry>(`/inquiries/${inquiryId}/messages`, data);
+    return res.data;
+  },
+
+  /**
+   * Get all inquiries/chat threads for the logged-in user (both as seller and buyer)
    */
   async getMyInquiries(): Promise<IInquiry[]> {
     const res = await apiClient.get<IInquiry[]>('/inquiries/my-inquiries');

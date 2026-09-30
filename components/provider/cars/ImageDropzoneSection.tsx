@@ -39,10 +39,10 @@ export function ImageDropzoneSection({
       <div className="flex items-center justify-between border-b border-zinc-100 pb-3">
         <div className="flex items-center gap-2">
           <ImageIcon className="w-5 h-5 text-black" />
-          <h2 className="text-base font-black text-black">Vehicle Photos (Max 3 Images)</h2>
+          <h2 className="text-base font-black text-black">গাড়ির ছবি (সর্বোচ্চ ৩টি ছবি)</h2>
         </div>
         <span className="text-xs font-bold text-zinc-500">
-          {uploadedPhotos.length}/3 Uploaded
+          {uploadedPhotos.length}/৩ আপলোড হয়েছে
         </span>
       </div>
 
@@ -76,10 +76,10 @@ export function ImageDropzoneSection({
             <UploadCloud className={`w-6 h-6 ${isDragging ? 'text-white' : 'text-black'}`} />
           </div>
           <p className="text-xs font-extrabold text-black">
-            {isDragging ? 'Release to upload photos!' : 'Click to select or drag & drop car photos'}
+            {isDragging ? 'ছবি আপলোড করতে ছেড়ে দিন!' : 'গাড়ির ছবি নির্বাচন করতে ক্লিক করুন অথবা ড্র্যাগ অ্যান্ড ড্রপ করুন'}
           </p>
           <p className="text-[11px] text-zinc-500 mt-1">
-            Upload up to {3 - uploadedPhotos.length} more images • Max file size: <strong>5MB</strong> each (JPEG, PNG, WebP)
+            আরও সর্বোচ্চ {3 - uploadedPhotos.length} টি ছবি আপলোড করুন • সর্বোচ্চ ফাইলের আকার: প্রতিটি <strong>৫ এমবি</strong> (JPEG, PNG, WebP)
           </p>
         </label>
       )}
@@ -110,7 +110,7 @@ export function ImageDropzoneSection({
                       />
                     </div>
                     <span className="text-[10px] font-black uppercase tracking-wider">
-                      Uploading to R2 {photo.uploadProgress}%
+                      আপলোড হচ্ছে {photo.uploadProgress}%
                     </span>
                   </div>
                 )}
@@ -128,7 +128,7 @@ export function ImageDropzoneSection({
 
                 {idx === 0 && (
                   <span className="absolute bottom-2 left-2 px-2 py-0.5 rounded-md bg-black text-white text-[10px] font-black uppercase tracking-wider">
-                    Cover Photo
+                    কভার ছবি
                   </span>
                 )}
               </div>

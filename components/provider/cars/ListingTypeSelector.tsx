@@ -12,9 +12,9 @@ export function ListingTypeSelector({ listingType, onChange }: ListingTypeSelect
       <div className="flex items-center gap-2 border-b border-zinc-100 pb-3">
         <DollarSign className="w-5 h-5 text-black" />
         <div>
-          <h2 className="text-base font-black text-black">Listing Type</h2>
+          <h2 className="text-base font-black text-black">বিজ্ঞাপনের ধরন</h2>
           <p className="text-xs text-zinc-400">
-            Choose whether you are posting a vehicle for outright sale or adding to rental cars.
+            আপনি কি গাড়িটি সরাসরি বিক্রয়ের জন্য পোস্ট করছেন নাকি ভাড়ার তালিকায় যুক্ত করছেন তা বেছে নিন।
           </p>
         </div>
       </div>
@@ -41,10 +41,10 @@ export function ListingTypeSelector({ listingType, onChange }: ListingTypeSelect
           </div>
           <div>
             <div className="text-sm font-black flex items-center gap-2">
-              <span>For Sale</span>
+              <span>বিক্রয়ের জন্য</span>
               {listingType === 'sale' && (
                 <span className="text-[10px] bg-white text-black px-2 py-0.5 rounded-full font-bold">
-                  Active
+                  সক্রিয়
                 </span>
               )}
             </div>
@@ -53,7 +53,7 @@ export function ListingTypeSelector({ listingType, onChange }: ListingTypeSelect
                 listingType === 'sale' ? 'text-zinc-300' : 'text-zinc-500'
               }`}
             >
-              Dealership inventory or private sale with condition, mileage, registration & VIN.
+              কন্ডিশন, মাইলেজ এবং স্পেসিফিকেশন সহ ডিলারশিপ ইনভেন্টরি বা ব্যক্তিগত গাড়ি বিক্রয়।
             </p>
           </div>
         </button>
@@ -79,10 +79,10 @@ export function ListingTypeSelector({ listingType, onChange }: ListingTypeSelect
           </div>
           <div>
             <div className="text-sm font-black flex items-center gap-2">
-              <span>For Rent</span>
+              <span>ভাড়ার জন্য</span>
               {listingType === 'rent' && (
                 <span className="text-[10px] bg-white text-black px-2 py-0.5 rounded-full font-bold">
-                  Active
+                  সক্রিয়
                 </span>
               )}
             </div>
@@ -91,7 +91,7 @@ export function ListingTypeSelector({ listingType, onChange }: ListingTypeSelect
                 listingType === 'rent' ? 'text-zinc-300' : 'text-zinc-500'
               }`}
             >
-              Rental car listing with daily pricing, direct renter contact & pickup hub.
+              দৈনিক ভাড়ার হার, সরাসরি ভাড়াটের যোগাযোগ এবং পিকআপ হাব সহ রেন্টাল গাড়ির বিজ্ঞাপন।
             </p>
           </div>
         </button>

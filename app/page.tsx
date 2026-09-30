@@ -14,9 +14,14 @@ import {
   ShieldCheck,
   Zap,
   Sparkles,
-  Headphones,
   Car as CarIcon,
   RotateCcw,
+  Building2,
+  TrendingUp,
+  BarChart3,
+  CheckCircle2,
+  ArrowRight,
+  BadgePercent,
 } from 'lucide-react';
 
 export default function HomePage() {
@@ -261,7 +266,7 @@ export default function HomePage() {
           {activeFiltersCount > 0 && (
             <div className="flex items-center justify-between pb-4 border-b border-zinc-200 text-xs">
               <span className="font-bold text-zinc-700">
-                Filtered Results: Showing <strong className="text-black">{displayCars.length}</strong> vehicles
+                ফিল্টারকৃত ফলাফল: <strong className="text-black">{displayCars.length}</strong>টি গাড়ি দেখানো হচ্ছে
               </span>
               <button
                 type="button"
@@ -269,7 +274,7 @@ export default function HomePage() {
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-zinc-600 hover:text-black hover:bg-zinc-200 transition-colors"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
-                <span>Reset Filters</span>
+                <span>ফিল্টার রিসেট করুন</span>
               </button>
             </div>
           )}
@@ -291,13 +296,13 @@ export default function HomePage() {
             /* Empty State */
             <div className="p-12 sm:p-16 rounded-3xl bg-white border border-zinc-200 text-center space-y-4 max-w-xl mx-auto shadow-sm">
               <CarIcon className="w-12 h-12 text-zinc-300 mx-auto" />
-              <h3 className="text-lg font-bold text-black">No vehicles match your active filters</h3>
+              <h3 className="text-lg font-bold text-black">আপনার নির্বাচিত ফিল্টারে কোনো গাড়ি পাওয়া যায়নি</h3>
               <p className="text-xs text-zinc-500 leading-relaxed">
-                Try loosening your filters, changing price range, or reset all filters to view our full collection of 20 vehicles.
+                ফিল্টার পরিবর্তন করে বা দামের সীমা বদলে আবার চেষ্টা করুন, অথবা সব গাড়ি দেখতে ফিল্টার রিসেট করুন।
               </p>
               <div className="pt-2">
                 <Button variant="dark" size="sm" onClick={handleResetAll} leftIcon={<RotateCcw className="w-4 h-4" />}>
-                  Reset All Filters
+                  সব ফিল্টার রিসেট করুন
                 </Button>
               </div>
             </div>
@@ -309,62 +314,164 @@ export default function HomePage() {
       {/* 3. FEATURED CARS CAROUSEL SLIDER (UNIQUE LUXURY CARD STYLE) */}
       <FeaturedCarsSlider cars={cars} />
 
-      {/* 3. TRUSTED PARTNER & ASSURANCE SECTION */}
-      <section className="py-20 border-t border-zinc-200 bg-white">
+      {/* 4. BUSINESS PROFILE BENEFITS & PROFITABILITY SECTION */}
+      <section className="py-20 sm:py-24 border-t border-zinc-200 bg-white overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            {/* Left Visual */}
-            <div className="relative flex justify-center">
-              <div className="relative w-[340px] sm:w-[420px] h-[340px] sm:h-[420px]">
-                <img
-                  src="https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=600&q=80"
-                  alt="Happy Driver"
-                  className="w-48 sm:w-60 h-48 sm:h-60 rounded-full object-cover shadow-2xl border-4 border-white absolute top-0 left-0"
-                />
-                <img
-                  src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80"
-                  alt="Luxury Car Renter"
-                  className="w-52 sm:w-64 h-52 sm:h-64 rounded-full object-cover shadow-2xl border-4 border-white absolute bottom-0 right-0"
-                />
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-16 w-16 rounded-full bg-black flex items-center justify-center text-white shadow-2xl border-2 border-white">
-                  <Sparkles className="w-8 h-8" />
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-14 items-center">
+            
+            {/* Left Visual: Interactive Business Profile & Profit Preview */}
+            <div className="lg:col-span-5 relative">
+              <div className="relative mx-auto max-w-md lg:max-w-none">
+                {/* Main Dealership Showcase Card */}
+                <div className="rounded-3xl bg-zinc-950 text-white p-6 sm:p-7 shadow-2xl border border-zinc-800 space-y-6 relative overflow-hidden">
+                  <div className="absolute -top-24 -right-24 w-56 h-56 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+
+                  {/* Dealership Header */}
+                  <div className="flex items-center justify-between border-b border-zinc-800 pb-4">
+                    <div className="flex items-center gap-3.5">
+                      <div className="h-12 w-12 rounded-2xl bg-white text-black flex items-center justify-center shadow-md shrink-0">
+                        <Building2 className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-1.5">
+                          <h3 className="font-black text-base text-white">রয়্যাল অটোস বিডি</h3>
+                          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                        </div>
+                        <p className="text-[11px] text-zinc-400">ভেরিফাইড বিজনেস প্রোফাইল • ঢাকা</p>
+                      </div>
+                    </div>
+                    <span className="px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold">
+                      প্রো ডিলার
+                    </span>
+                  </div>
+
+                  {/* Showroom Image Banner */}
+                  <div className="relative h-40 rounded-2xl overflow-hidden border border-zinc-800">
+                    <img
+                      src="https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=900&q=80"
+                      alt="Car Dealership Showroom"
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end p-4">
+                      <div className="flex items-center justify-between w-full text-xs">
+                        <span className="font-bold text-white">সক্রিয় ইনভেন্টরি: ২৪টি গাড়ি</span>
+                        <span className="px-2 py-0.5 rounded-md bg-white/20 backdrop-blur-md text-white font-semibold text-[11px]">
+                          বিক্রয় ও ভাড়া
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Profit & Growth Metrics Grid */}
+                  <div className="grid grid-cols-2 gap-3.5">
+                    <div className="p-4 rounded-2xl bg-zinc-900/90 border border-zinc-800 space-y-1">
+                      <div className="flex items-center justify-between text-zinc-400 text-[11px]">
+                        <span>মাসিক গড় আয় বৃদ্ধি</span>
+                        <TrendingUp className="w-4 h-4 text-emerald-400" />
+                      </div>
+                      <p className="text-2xl font-black text-white">+৩.৫ গুণ</p>
+                      <span className="text-[10px] text-emerald-400 font-semibold block">
+                        সরাসরি ক্রেতা ও ভাড়াটে লিড
+                      </span>
+                    </div>
+
+                    <div className="p-4 rounded-2xl bg-zinc-900/90 border border-zinc-800 space-y-1">
+                      <div className="flex items-center justify-between text-zinc-400 text-[11px]">
+                        <span>প্ল্যাটফর্ম কমিশন</span>
+                        <BadgePercent className="w-4 h-4 text-emerald-400" />
+                      </div>
+                      <p className="text-2xl font-black text-white">০% চার্জ</p>
+                      <span className="text-[10px] text-zinc-400 font-semibold block">
+                        ১০০% লাভ সরাসরি আপনার
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Bottom Highlight Strip */}
+                  <div className="flex items-center justify-between pt-1 text-xs text-zinc-300">
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 text-amber-400" />
+                      <span>তাৎক্ষণিক কল ও হোয়াটসঅ্যাপ ইনকোয়ারি</span>
+                    </div>
+                    <span className="text-emerald-400 font-bold">সক্রিয় ২৪/৭</span>
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Right Copy */}
-            <div className="space-y-6">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-100 text-black text-xs font-bold uppercase tracking-wider border border-zinc-200">
-                <ShieldCheck className="w-3.5 h-3.5" />
-                <span>Direct Customer Experience</span>
+            {/* Right Copy: Business Profile Advantages & Benefits */}
+            <div className="lg:col-span-7 space-y-6">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-zinc-100 text-black text-xs font-bold tracking-wide border border-zinc-200">
+                <Building2 className="w-3.5 h-3.5" />
+                <span>বিজনেস প্রোফাইলের বিশেষ সুবিধাসমূহ</span>
               </div>
 
               <h2 className="text-3xl sm:text-4xl font-black text-black leading-tight">
-                We make luxury automotive rentals &amp; sales completely hassle-free.
+                বিজনেস প্রোফাইল খুলে আপনার গাড়ি বিক্রি ও ভাড়ার ব্যবসা বাড়ান বহুগুণ।
               </h2>
 
               <p className="text-zinc-600 text-xs sm:text-sm leading-relaxed">
-                Carketo empowers renters and buyers to directly connect with verified vehicle owners. Enjoy zero hidden booking commissions, transparent pricing, and instant contact reveal.
+                আপনার গাড়ির শোরুম, রেন্ট-এ-কার ব্যবসা কিংবা একাধিক ব্যক্তিগত গাড়ি থাকলে কারকেটোতে একটি <strong>বিজনেস প্রোফাইল</strong> খুলুন। কোনো মধ্যস্বত্বভোগী বা বুকিং কমিশন ছাড়াই সরাসরি হাজারো যাচাইকৃত ক্রেতা ও ভাড়াগ্রহীতার কাছে পৌঁছে আপনার মুনাফা সর্বোচ্চ করুন।
               </p>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-                <div className="p-4 rounded-2xl bg-zinc-50 border border-zinc-200 space-y-1">
-                  <Zap className="w-5 h-5 text-black mb-2" />
-                  <h4 className="font-bold text-sm text-black">Direct Contact</h4>
-                  <p className="text-xs text-zinc-500">
-                    Instant phone numbers and WhatsApp links for seamless communication.
+              {/* 4 Key Benefit Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+                <div className="p-4 sm:p-5 rounded-2xl bg-zinc-50 border border-zinc-200 hover:border-black transition-colors space-y-1.5">
+                  <div className="h-9 w-9 rounded-xl bg-black text-white flex items-center justify-center mb-2">
+                    <BadgePercent className="w-4 h-4" />
+                  </div>
+                  <h4 className="font-black text-sm text-black">০% কমিশন — ১০০% লাভ আপনার</h4>
+                  <p className="text-xs text-zinc-500 leading-relaxed">
+                    গাড়ি বিক্রি বা দৈনিক ভাড়ার সম্পূর্ণ টাকা সরাসরি আপনার কাছে যাবে। কোনো লুকানো চার্জ বা বুকিং কমিশন নেই।
                   </p>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-zinc-50 border border-zinc-200 space-y-1">
-                  <Headphones className="w-5 h-5 text-black mb-2" />
-                  <h4 className="font-bold text-sm text-black">24/7 Support</h4>
-                  <p className="text-xs text-zinc-500">
-                    Dedicated automotive concierge always on standby.
+                <div className="p-4 sm:p-5 rounded-2xl bg-zinc-50 border border-zinc-200 hover:border-black transition-colors space-y-1.5">
+                  <div className="h-9 w-9 rounded-xl bg-black text-white flex items-center justify-center mb-2">
+                    <ShieldCheck className="w-4 h-4" />
+                  </div>
+                  <h4 className="font-black text-sm text-black">ভেরিফাইড ডিলারশিপ ব্র্যান্ডিং</h4>
+                  <p className="text-xs text-zinc-500 leading-relaxed">
+                    আপনার প্রতিষ্ঠানের নামে আলাদা প্রোফাইল ও ভেরিফাইড ব্যাজ ক্রেতাদের আস্থা এবং বিক্রির সম্ভাবনা বহুগুণ বাড়িয়ে দেয়।
+                  </p>
+                </div>
+
+                <div className="p-4 sm:p-5 rounded-2xl bg-zinc-50 border border-zinc-200 hover:border-black transition-colors space-y-1.5">
+                  <div className="h-9 w-9 rounded-xl bg-black text-white flex items-center justify-center mb-2">
+                    <Zap className="w-4 h-4" />
+                  </div>
+                  <h4 className="font-black text-sm text-black">সরাসরি কল ও হোয়াটসঅ্যাপ লিড</h4>
+                  <p className="text-xs text-zinc-500 leading-relaxed">
+                    আগ্রহী ক্রেতা ও ভাড়াটেরা কোনো অপেক্ষা ছাড়াই সরাসরি আপনার ফোনে বা হোয়াটসঅ্যাপে যোগাযোগ করে দ্রুত ডিল সম্পন্ন করতে পারবে।
+                  </p>
+                </div>
+
+                <div className="p-4 sm:p-5 rounded-2xl bg-zinc-50 border border-zinc-200 hover:border-black transition-colors space-y-1.5">
+                  <div className="h-9 w-9 rounded-xl bg-black text-white flex items-center justify-center mb-2">
+                    <BarChart3 className="w-4 h-4" />
+                  </div>
+                  <h4 className="font-black text-sm text-black">স্মার্ট ইনভেন্টরি ও আয় ট্র্যাকিং</h4>
+                  <p className="text-xs text-zinc-500 leading-relaxed">
+                    এক ড্যাশবোর্ড থেকেই আপনার সব গাড়ির বিজ্ঞাপন, ভাড়ার শিডিউল, প্রাপ্যতা স্ট্যাটাস এবং মোট আয়ের হিসাব সহজে পরিচালনা করুন।
                   </p>
                 </div>
               </div>
+
+              {/* Action Buttons */}
+              <div className="flex flex-wrap items-center gap-3 pt-3">
+                <Link href="/provider/profile">
+                  <Button variant="dark" size="md" rightIcon={<ArrowRight className="w-4 h-4" />}>
+                    বিজনেস প্রোফাইল খুলুন
+                  </Button>
+                </Link>
+                <Link href="/sell">
+                  <Button variant="outline" size="md">
+                    আপনার গাড়ি তালিকাভুক্ত করুন
+                  </Button>
+                </Link>
+              </div>
             </div>
+
           </div>
         </div>
       </section>

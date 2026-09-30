@@ -23,7 +23,7 @@ export const CarCard: React.FC<CarCardProps> = ({ car }) => {
   const isRental = car.listingType === 'rent';
 
   const displayPrice = isRental
-    ? `${formatPrice(car.rentalPrice || 199)} / day`
+    ? `${formatPrice(car.rentalPrice || 199)} / দিন`
     : formatPrice(car.salePrice || car.price || 45000);
 
   return (
@@ -36,7 +36,7 @@ export const CarCard: React.FC<CarCardProps> = ({ car }) => {
             size="sm"
             className="uppercase tracking-wider font-bold"
           >
-            For {isRental ? 'Rent' : 'Sale'}
+            {isRental ? 'ভাড়ার জন্য' : 'বিক্রয়ের জন্য'}
           </Badge>
           <span className="text-xs font-black text-zinc-900 bg-zinc-100 px-2.5 py-0.5 rounded-full border border-zinc-200">
             {car.brand} {car.model}
@@ -57,7 +57,7 @@ export const CarCard: React.FC<CarCardProps> = ({ car }) => {
           {car.condition && car.condition !== 'used' && (
             <div className="absolute top-2.5 left-2.5">
               <span className="px-2.5 py-1 rounded-full bg-black/85 backdrop-blur text-white text-[10px] font-extrabold uppercase tracking-wider">
-                {car.condition === 'new' ? 'Brand New' : 'Certified'}
+                {car.condition === 'new' ? 'ব্র্যান্ড নিউ' : 'সার্টিফায়েড'}
               </span>
             </div>
           )}
@@ -84,7 +84,7 @@ export const CarCard: React.FC<CarCardProps> = ({ car }) => {
         <div className="grid grid-cols-3 gap-2 py-2.5 border-y border-zinc-100 text-[11px] font-semibold text-zinc-600 mb-3">
           <div className="flex items-center gap-1.5 truncate">
             <Users className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
-            <span className="truncate">{car.specs?.passengers || car.seats || 4} Seats</span>
+            <span className="truncate">{car.specs?.passengers || car.seats || 4} সিট</span>
           </div>
           <div className="flex items-center gap-1.5 truncate">
             <Gauge className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
@@ -101,7 +101,7 @@ export const CarCard: React.FC<CarCardProps> = ({ car }) => {
       <div className="pt-2 flex items-center justify-between">
         <div>
           <span className="block text-[10px] uppercase font-bold text-zinc-400">
-            {isRental ? 'Daily Rate' : 'Purchase Price'}
+            {isRental ? 'দৈনিক ভাড়া' : 'বিক্রয় মূল্য'}
           </span>
           <span className="text-base sm:text-lg font-black text-black">{displayPrice}</span>
         </div>
@@ -109,9 +109,9 @@ export const CarCard: React.FC<CarCardProps> = ({ car }) => {
         <Link
           href={`/cars/${car.slug}`}
           className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-black text-white text-xs font-bold hover:bg-zinc-800 group-hover:scale-105 transition-all shadow-sm"
-          title="View Details & Contact Seller"
+          title="বিস্তারিত দেখুন ও যোগাযোগ করুন"
         >
-          <span>View Details</span>
+          <span>বিস্তারিত দেখুন</span>
           <ArrowUpRight className="w-3.5 h-3.5" />
         </Link>
       </div>

@@ -23,7 +23,7 @@ export const FeaturedCarCard: React.FC<FeaturedCarCardProps> = ({ car }) => {
   const isRental = car.listingType === 'rent';
 
   const displayPrice = isRental
-    ? `${formatPrice(car.rentalPrice || car.price || 5000)} / day`
+    ? `${formatPrice(car.rentalPrice || car.price || 5000)} / দিন`
     : formatPrice(car.salePrice || car.price || 4500000);
 
   return (
@@ -37,11 +37,11 @@ export const FeaturedCarCard: React.FC<FeaturedCarCardProps> = ({ car }) => {
         <div className="flex items-center justify-between gap-2 mb-3.5 relative z-10">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 text-black text-[10px] font-black uppercase tracking-wider shadow-md shadow-amber-500/20">
             <Sparkles className="w-3 h-3 fill-black text-black" />
-            <span>VIP Featured</span>
+            <span>ভিআইপি ফিচার্ড</span>
           </div>
 
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-800/90 backdrop-blur-md border border-zinc-700 text-zinc-300 text-[10px] font-extrabold uppercase tracking-wider">
-            <span>{isRental ? 'For Rent' : 'For Sale'}</span>
+            <span>{isRental ? 'ভাড়ার জন্য' : 'বিক্রয়ের জন্য'}</span>
           </div>
         </div>
 
@@ -63,7 +63,7 @@ export const FeaturedCarCard: React.FC<FeaturedCarCardProps> = ({ car }) => {
           {car.condition && car.condition !== 'used' && (
             <div className="absolute top-2.5 left-2.5">
               <span className="px-2.5 py-1 rounded-lg bg-emerald-500 text-black text-[10px] font-black uppercase tracking-wider shadow-sm">
-                {car.condition === 'new' ? 'Brand New' : 'Certified'}
+                {car.condition === 'new' ? 'ব্র্যান্ড নিউ' : 'সার্টিফায়েড'}
               </span>
             </div>
           )}
@@ -96,7 +96,7 @@ export const FeaturedCarCard: React.FC<FeaturedCarCardProps> = ({ car }) => {
           </Link>
           <p className="text-xs font-medium text-zinc-400 flex items-center gap-1.5">
             <MapPin className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-            <span className="truncate">{car.location || 'Dhaka, Bangladesh'}</span>
+            <span className="truncate">{car.location || 'ঢাকা, বাংলাদেশ'}</span>
           </p>
         </div>
 
@@ -104,7 +104,7 @@ export const FeaturedCarCard: React.FC<FeaturedCarCardProps> = ({ car }) => {
         <div className="grid grid-cols-3 gap-2 py-3 border-y border-zinc-800/80 mb-4 text-[11px] font-semibold text-zinc-300">
           <div className="bg-zinc-800/50 rounded-xl p-2 flex items-center justify-center gap-1.5 border border-zinc-800">
             <Users className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
-            <span className="truncate">{car.specs?.passengers || car.seats || 4} Seats</span>
+            <span className="truncate">{car.specs?.passengers || car.seats || 4} সিট</span>
           </div>
           <div className="bg-zinc-800/50 rounded-xl p-2 flex items-center justify-center gap-1.5 border border-zinc-800">
             <Gauge className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
@@ -121,7 +121,7 @@ export const FeaturedCarCard: React.FC<FeaturedCarCardProps> = ({ car }) => {
       <div className="flex items-center justify-between gap-3 pt-1">
         <div>
           <span className="block text-[10px] font-bold uppercase tracking-wider text-zinc-400">
-            {isRental ? 'Daily Rate' : 'Purchase Price'}
+            {isRental ? 'দৈনিক ভাড়া' : 'বিক্রয় মূল্য'}
           </span>
           <span className="text-lg sm:text-xl font-black text-white tracking-tight">
             {displayPrice}
@@ -132,7 +132,7 @@ export const FeaturedCarCard: React.FC<FeaturedCarCardProps> = ({ car }) => {
           href={`/cars/${car.slug}`}
           className="px-4 py-2.5 rounded-xl bg-white hover:bg-amber-400 text-black hover:text-black font-extrabold text-xs transition-all shadow-md flex items-center gap-1 shrink-0 active:scale-95 group-hover:shadow-amber-500/20"
         >
-          <span>Explore</span>
+          <span>বিস্তারিত</span>
           <ArrowUpRight className="w-3.5 h-3.5" />
         </Link>
       </div>

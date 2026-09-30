@@ -36,10 +36,10 @@ export function PricingDurationSection({
         <DollarSign className="w-5 h-5 text-black" />
         <div>
           <h2 className="text-base font-black text-black">
-            {listingType === 'sale' ? 'Sale Pricing & Direct Contact' : 'Rental Rates & Direct Contact'}
+            {listingType === 'sale' ? 'বিক্রয় মূল্য ও সরাসরি যোগাযোগ' : 'ভাড়ার হার ও সরাসরি যোগাযোগ'}
           </h2>
           <p className="text-xs text-zinc-400">
-            Set customer pricing, phone number, and visibility duration (Max 2 Months).
+            গ্রাহকের জন্য মূল্য, ফোন নম্বর এবং বিজ্ঞাপনের মেয়াদ নির্ধারণ করুন (সর্বোচ্চ ২ মাস)।
           </p>
         </div>
       </div>
@@ -47,7 +47,7 @@ export function PricingDurationSection({
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {listingType === 'rent' ? (
           <Input
-            label="Daily Rental Rate (৳ / Day) *"
+            label="দৈনিক ভাড়ার হার (৳ / দিন) *"
             type="text"
             inputMode="numeric"
             required
@@ -57,12 +57,12 @@ export function PricingDurationSection({
               setRentalPrice(cleanVal === '' ? '' : Number(cleanVal));
               setFieldErrors((p) => ({ ...p, rentalPrice: '' }));
             }}
-            placeholder="Enter daily rental rate in ৳ (e.g. 5000)"
+            placeholder="দৈনিক ভাড়ার হার ৳-তে লিখুন (যেমন: 5000)"
             error={fieldErrors['rentalPrice']}
           />
         ) : (
           <Input
-            label="Total Outright Sale Price (৳) *"
+            label="মোট বিক্রয় মূল্য (৳) *"
             type="text"
             inputMode="numeric"
             required
@@ -72,7 +72,7 @@ export function PricingDurationSection({
               setSalePrice(cleanVal === '' ? '' : Number(cleanVal));
               setFieldErrors((p) => ({ ...p, salePrice: '' }));
             }}
-            placeholder="Enter outright sale price in ৳ (e.g. 3500000)"
+            placeholder="মোট বিক্রয় মূল্য ৳-তে লিখুন (যেমন: 3500000)"
             error={fieldErrors['salePrice']}
           />
         )}
@@ -80,10 +80,10 @@ export function PricingDurationSection({
         {/* Direct Contact Phone Number - Exactly max 11 digits */}
         <div className="space-y-1.5">
           <Input
-            label="Direct Contact Phone Number *"
+            label="সরাসরি যোগাযোগের ফোন নম্বর *"
             type="tel"
             inputMode="numeric"
-            placeholder="Enter 11-digit mobile number (e.g. 01712345678)"
+            placeholder="১১ সংখ্যার মোবাইল নম্বর লিখুন (যেমন: 01712345678)"
             required
             maxLength={11}
             value={contactPhone}
@@ -101,7 +101,7 @@ export function PricingDurationSection({
       {/* Listing Visibility Duration / Expiry Date (Custom Modern DatePicker) */}
       <div className="space-y-1.5 p-4 rounded-2xl bg-zinc-50 border border-zinc-200">
         <DatePicker
-          label="Listing Active Visibility Duration"
+          label="বিজ্ঞাপনের সক্রিয় মেয়াদ"
           value={expiresAt}
           onChange={(date) => setExpiresAt(date)}
           maxMonthsAhead={2}

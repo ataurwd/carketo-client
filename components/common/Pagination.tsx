@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { usePathname } from 'next/navigation';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useAdminTheme } from '@/context/AdminThemeContext';
 
@@ -25,6 +26,9 @@ export const Pagination: React.FC<PaginationProps> = ({
   variant = 'light',
   itemLabel = 'records',
 }) => {
+  const pathname = usePathname();
+  const isAdmin = pathname?.startsWith('/admin');
+
   if (totalItems <= limit || totalPages <= 1) {
     return null;
   }
@@ -62,9 +66,19 @@ export const Pagination: React.FC<PaginationProps> = ({
       } ${className}`}
     >
       <p className="text-xs font-semibold order-2 sm:order-1">
-        Showing <span className={`font-black ${isDark ? 'text-white' : 'text-slate-900'}`}>{from}</span> to{' '}
-        <span className={`font-black ${isDark ? 'text-white' : 'text-slate-900'}`}>{to}</span> of{' '}
-        <span className="font-black text-orange-500">{totalItems}</span> {itemLabel}
+        {isAdmin ? (
+          <>
+            Showing <span className={`font-black ${isDark ? 'text-white' : 'text-slate-900'}`}>{from}</span> to{' '}
+            <span className={`font-black ${isDark ? 'text-white' : 'text-slate-900'}`}>{to}</span> of{' '}
+            <span className="font-black text-orange-500">{totalItems}</span> {itemLabel}
+          </>
+        ) : (
+          <>
+            মোট <span className="font-black text-orange-500">{totalItems}</span> টির মধ্যে{' '}
+            <span className={`font-black ${isDark ? 'text-white' : 'text-slate-900'}`}>{from}</span> থেকে{' '}
+            <span className={`font-black ${isDark ? 'text-white' : 'text-slate-900'}`}>{to}</span> দেখানো হচ্ছে
+          </>
+        )}
       </p>
 
       <div className="flex items-center gap-1.5 order-1 sm:order-2">
@@ -84,7 +98,7 @@ export const Pagination: React.FC<PaginationProps> = ({
           }`}
         >
           <ChevronLeft className="w-4 h-4" />
-          <span className="hidden sm:inline">Previous</span>
+          <span className="hidden sm:inline">{isAdmin ? 'Previous' : 'পূর্ববর্তী'}</span>
         </button>
 
         {/* Number Pills */}
@@ -138,7 +152,7 @@ export const Pagination: React.FC<PaginationProps> = ({
               : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100 hover:text-slate-900 hover:border-slate-300 disabled:bg-slate-100 disabled:text-slate-400 disabled:border-slate-200 disabled:pointer-events-none'
           }`}
         >
-          <span className="hidden sm:inline">Next</span>
+          <span className="hidden sm:inline">{isAdmin ? 'Next' : 'পরবর্তী'}</span>
           <ChevronRight className="w-4 h-4" />
         </button>
       </div>

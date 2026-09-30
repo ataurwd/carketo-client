@@ -290,10 +290,10 @@ function BuyCarContent() {
           <div className="space-y-8">
             <div className="flex items-center justify-between text-xs text-zinc-500 font-semibold px-1">
               <span>
-                Showing <strong className="text-black font-black">{cars.length}</strong> of{' '}
-                <strong className="text-black font-black">{pagination.total}</strong> verified cars for sale
+                মোট <strong className="text-black font-black">{pagination.total}</strong> টি ভেরিফায়েড গাড়ির মধ্যে{' '}
+                <strong className="text-black font-black">{cars.length}</strong> টি দেখানো হচ্ছে
               </span>
-              <span>Page {pagination.page} of {pagination.totalPages}</span>
+              <span>পৃষ্ঠা {pagination.page} / {pagination.totalPages}</span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">

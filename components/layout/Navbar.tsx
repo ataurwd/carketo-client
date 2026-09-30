@@ -35,11 +35,11 @@ import {
 } from 'lucide-react';
 
 const OFF_CANVAS_NAV = [
-  { label: 'Home', href: '/', icon: Home, desc: 'Featured vehicles & deals' },
-  { label: 'Rent Car', href: '/rent', icon: Car, desc: 'Daily, weekly & monthly rentals' },
-  { label: 'Buy Car', href: '/buy', icon: ShoppingBag, desc: 'Verified vehicles for sale' },
-  { label: 'Sell Car', href: '/sell', icon: DollarSign, desc: 'List & sell your car today' },
-  { label: 'Contact Us', href: '/contact', icon: PhoneCall, desc: '24/7 support & assistance' },
+  { label: 'হোম', href: '/', icon: Home, desc: 'ফিচার্ড গাড়ি ও সেরা ডিল' },
+  { label: 'গাড়ি ভাড়া', href: '/rent', icon: Car, desc: 'দৈনিক, সাপ্তাহিক ও মাসিক ভাড়া' },
+  { label: 'গাড়ি কিনুন', href: '/buy', icon: ShoppingBag, desc: 'যাচাইকৃত বিক্রয়যোগ্য গাড়ি' },
+  { label: 'গাড়ি বিক্রি', href: '/sell', icon: DollarSign, desc: 'আজই আপনার গাড়ি লিস্ট ও বিক্রি করুন' },
+  { label: 'যোগাযোগ', href: '/contact', icon: PhoneCall, desc: '২৪/৭ সাপোর্ট ও সহায়তা' },
 ];
 
 export const Navbar: React.FC = () => {
@@ -175,10 +175,10 @@ export const Navbar: React.FC = () => {
                   <div className="absolute right-0 mt-2 w-80 sm:w-96 rounded-3xl bg-white border border-zinc-200 shadow-2xl py-3 z-50 animate-in fade-in zoom-in duration-150 space-y-2">
                     <div className="px-4 py-2 flex items-center justify-between border-b border-zinc-100">
                       <div className="flex items-center gap-2">
-                        <span className="text-xs font-black text-black">Notifications</span>
+                        <span className="text-xs font-black text-black">নোটিফিকেশন</span>
                         {unreadCount > 0 && (
                           <span className="px-2 py-0.5 rounded-full bg-black text-white text-[10px] font-bold">
-                            {unreadCount} new
+                            {unreadCount}টি নতুন
                           </span>
                         )}
                       </div>
@@ -188,7 +188,7 @@ export const Navbar: React.FC = () => {
                           className="text-[11px] font-bold text-zinc-500 hover:text-black transition-colors flex items-center gap-1"
                         >
                           <CheckCheck className="w-3 h-3" />
-                          <span>Mark all read</span>
+                          <span>সব পঠিত করুন</span>
                         </button>
                       )}
                     </div>
@@ -214,7 +214,7 @@ export const Navbar: React.FC = () => {
                           </Link>
                         ))
                       ) : (
-                        <p className="text-center text-xs text-zinc-400 py-6">No notifications</p>
+                        <p className="text-center text-xs text-zinc-400 py-6">কোনো নোটিফিকেশন নেই</p>
                       )}
                     </div>
 
@@ -224,7 +224,7 @@ export const Navbar: React.FC = () => {
                         onClick={() => setNotificationsOpen(false)}
                         className="text-xs font-bold text-black hover:underline inline-block py-1"
                       >
-                        View All Notifications →
+                        সব নোটিফিকেশন দেখুন →
                       </Link>
                     </div>
                   </div>
@@ -312,7 +312,7 @@ export const Navbar: React.FC = () => {
                           className="flex items-center gap-2 px-4 py-2 text-xs font-semibold text-zinc-700 hover:bg-zinc-100 hover:text-black"
                         >
                           <LayoutDashboard className="w-4 h-4" />
-                          <span>Dashboard</span>
+                          <span>ড্যাশবোর্ড</span>
                         </Link>
                         <Link
                           href="/provider/cars"
@@ -320,7 +320,7 @@ export const Navbar: React.FC = () => {
                           className="flex items-center gap-2 px-4 py-2 text-xs font-semibold text-zinc-700 hover:bg-zinc-100 hover:text-black"
                         >
                           <Car className="w-4 h-4" />
-                          <span>My Cars</span>
+                          <span>আমার গাড়িসমূহ</span>
                         </Link>
                         <Link
                           href="/dashboard/inquiries"
@@ -328,7 +328,7 @@ export const Navbar: React.FC = () => {
                           className="flex items-center gap-2 px-4 py-2 text-xs font-semibold text-zinc-700 hover:bg-zinc-100 hover:text-black"
                         >
                           <MessageSquare className="w-4 h-4" />
-                          <span>Inquiries Inbox</span>
+                          <span>ইনবক্স ও জিজ্ঞাসা</span>
                         </Link>
                         <Link
                           href="/dashboard/wishlist"
@@ -336,7 +336,7 @@ export const Navbar: React.FC = () => {
                           className="flex items-center gap-2 px-4 py-2 text-xs font-semibold text-zinc-700 hover:bg-zinc-100 hover:text-black"
                         >
                           <Heart className="w-4 h-4" />
-                          <span>Saved Wishlist</span>
+                          <span>পছন্দের তালিকা</span>
                         </Link>
                       </>
                     )}
@@ -348,7 +348,7 @@ export const Navbar: React.FC = () => {
                         className="flex items-center gap-2 w-full px-4 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50"
                       >
                         <LogOut className="w-4 h-4" />
-                        <span>Sign Out</span>
+                        <span>লগ আউট</span>
                       </button>
                     </div>
                   </div>
@@ -359,7 +359,7 @@ export const Navbar: React.FC = () => {
             <div className="flex items-center gap-2">
               <Link href="/login">
                 <Button variant="ghost" size="sm" className="font-bold text-xs">
-                  Sign In
+                  লগ ইন
                 </Button>
               </Link>
               <Link href="/cars?type=rent">
@@ -368,7 +368,7 @@ export const Navbar: React.FC = () => {
                   size="md"
                   rightIcon={<ArrowUpRight className="w-4 h-4" />}
                 >
-                  Book A Rental
+                  গাড়ি ভাড়া নিন
                 </Button>
               </Link>
             </div>
@@ -490,7 +490,7 @@ export const Navbar: React.FC = () => {
               {/* Main Navigation Links */}
               <div className="space-y-1.5">
                 <span className="text-[10px] font-black uppercase tracking-wider text-zinc-400 px-3">
-                  Explore Carketo
+                  কারকেটো এক্সপ্লোর করুন
                 </span>
                 <div className="space-y-1">
                   {OFF_CANVAS_NAV.map((item) => {
@@ -544,7 +544,7 @@ export const Navbar: React.FC = () => {
               {isAuthenticated && (
                 <div className="space-y-1.5 pt-2 border-t border-zinc-100">
                   <span className="text-[10px] font-black uppercase tracking-wider text-zinc-400 px-3">
-                    Account & Fleet
+                    অ্যাকাউন্ট ও গাড়ি
                   </span>
                   <div className="space-y-1">
                     {user?.role === 'admin' ? (
@@ -592,7 +592,7 @@ export const Navbar: React.FC = () => {
                         >
                           <div className="flex items-center gap-2.5">
                             <LayoutDashboard className="w-4 h-4 text-black" />
-                            <span>Dashboard Overview</span>
+                            <span>ড্যাশবোর্ড ওভারভিউ</span>
                           </div>
                           <ChevronRight className="w-3.5 h-3.5 text-zinc-400" />
                         </Link>
@@ -603,7 +603,7 @@ export const Navbar: React.FC = () => {
                         >
                           <div className="flex items-center gap-2.5">
                             <Car className="w-4 h-4 text-black" />
-                            <span>My Cars & Listings</span>
+                            <span>আমার গাড়ি ও বিজ্ঞাপন</span>
                           </div>
                           <ChevronRight className="w-3.5 h-3.5 text-zinc-400" />
                         </Link>
@@ -614,7 +614,7 @@ export const Navbar: React.FC = () => {
                         >
                           <div className="flex items-center gap-2.5">
                             <MessageSquare className="w-4 h-4 text-black" />
-                            <span>Inquiries Inbox</span>
+                            <span>ইনবক্স ও জিজ্ঞাসা</span>
                           </div>
                           <ChevronRight className="w-3.5 h-3.5 text-zinc-400" />
                         </Link>
@@ -625,7 +625,7 @@ export const Navbar: React.FC = () => {
                         >
                           <div className="flex items-center gap-2.5">
                             <Heart className="w-4 h-4 text-black" />
-                            <span>Saved Vehicles</span>
+                            <span>পছন্দের তালিকা</span>
                           </div>
                           <ChevronRight className="w-3.5 h-3.5 text-zinc-400" />
                         </Link>
@@ -639,10 +639,10 @@ export const Navbar: React.FC = () => {
               <div className="p-3.5 rounded-2xl bg-zinc-50 border border-zinc-200 space-y-1.5">
                 <div className="flex items-center gap-2">
                   <Headphones className="w-4 h-4 text-black" />
-                  <span className="text-xs font-black text-black">Need Assistance?</span>
+                  <span className="text-xs font-black text-black">সহায়তা প্রয়োজন?</span>
                 </div>
                 <p className="text-[11px] text-zinc-500 leading-relaxed">
-                  Our concierge team is available 24/7 for booking help & queries.
+                  বুকিং বা যেকোনো তথ্যের জন্য আমাদের সাপোর্ট টিম ২৪/৭ প্রস্তুত আছে।
                 </p>
                 <a
                   href="tel:+8801700000000"
@@ -660,12 +660,12 @@ export const Navbar: React.FC = () => {
                 <div className="space-y-2">
                   <Link href="/cars?type=rent" onClick={() => setMobileMenuOpen(false)} className="block">
                     <Button variant="dark" size="md" className="w-full">
-                      Book A Rental
+                      গাড়ি ভাড়া নিন
                     </Button>
                   </Link>
                   <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="block">
                     <Button variant="outline" size="md" className="w-full font-bold">
-                      Sign In to Account
+                      অ্যাকাউন্টে লগ ইন করুন
                     </Button>
                   </Link>
                 </div>
@@ -677,7 +677,7 @@ export const Navbar: React.FC = () => {
                     className="block"
                   >
                     <Button variant="dark" size="md" className="w-full">
-                      {user?.role === 'admin' ? 'Open Admin Panel' : 'Open Dashboard'}
+                      {user?.role === 'admin' ? 'Open Admin Panel' : 'ড্যাশবোর্ডে যান'}
                     </Button>
                   </Link>
                   <button
@@ -686,7 +686,7 @@ export const Navbar: React.FC = () => {
                     className="w-full py-2.5 px-3 rounded-xl border border-rose-200 bg-rose-50 text-rose-600 hover:bg-rose-100 text-xs font-bold transition-colors flex items-center justify-center gap-2 cursor-pointer"
                   >
                     <LogOut className="w-3.5 h-3.5" />
-                    <span>Sign Out of Account</span>
+                    <span>লগ আউট করুন</span>
                   </button>
                 </div>
               )}

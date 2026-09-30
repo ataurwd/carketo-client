@@ -178,24 +178,24 @@ function RentCarContent() {
           <div className="max-w-2xl space-y-3 relative z-10">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-xs font-bold text-zinc-300">
               <KeyRound className="w-3.5 h-3.5 text-white" />
-              <span>Direct Rental Cars</span>
+              <span>সরাসরি গাড়ি ভাড়া</span>
             </div>
             <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-white">
-              Rent Premium Vehicles
+              প্রিমিয়াম গাড়ি ভাড়া নিন
             </h1>
             <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed">
-              Rent verified vehicles directly from owners. Click any car card to reveal masked phone numbers and connect via call or WhatsApp.
+              মালিকের কাছ থেকে সরাসরি ভেরিফায়েড গাড়ি ভাড়া নিন। যেকোনো গাড়ির কার্ডে ক্লিক করে ফোন নম্বর দেখুন এবং কল বা হোয়াটসঅ্যাপের মাধ্যমে যোগাযোগ করুন।
             </p>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 pt-6 max-w-lg relative z-10 text-xs">
             <div className="flex items-center gap-2 text-zinc-300">
               <CalendarCheck className="w-4 h-4 text-white shrink-0" />
-              <span>Direct Owner Booking</span>
+              <span>মালিকের সাথে সরাসরি বুকিং</span>
             </div>
             <div className="flex items-center gap-2 text-zinc-300">
               <ShieldCheck className="w-4 h-4 text-white shrink-0" />
-              <span>Zero Commissions</span>
+              <span>শূন্য কমিশন</span>
             </div>
           </div>
         </div>
@@ -209,7 +209,7 @@ function RentCarContent() {
                 <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
                 <input
                   type="text"
-                  placeholder="Search by vehicle title, make, or model..."
+                  placeholder="গাড়ির নাম, ব্র্যান্ড বা মডেল দিয়ে খুঁজুন..."
                   value={draftFilters.search}
                   onChange={(e) => setDraftFilters((prev) => ({ ...prev, search: e.target.value }))}
                   onKeyDown={(e) => {
@@ -241,7 +241,7 @@ function RentCarContent() {
                 className="px-4 py-2.5 rounded-2xl bg-black text-white hover:bg-zinc-800 text-xs font-bold transition-all shadow-sm flex items-center gap-1.5 shrink-0 active:scale-95"
               >
                 <Search className="w-3.5 h-3.5" />
-                <span>Search</span>
+                <span>খুঁজুন</span>
               </button>
             </div>
 
@@ -252,7 +252,7 @@ function RentCarContent() {
                 onChange={(e) => setDraftFilters((prev) => ({ ...prev, brand: e.target.value }))}
                 className="px-3 py-2.5 rounded-2xl border border-zinc-200 bg-white text-xs font-semibold text-zinc-700 focus:outline-none focus:border-black cursor-pointer"
               >
-                <option value="All">All Makes</option>
+                <option value="All">সব ব্র্যান্ড</option>
                 {POPULAR_BRANDS.map((b) => (
                   <option key={b} value={b}>
                     {b}
@@ -265,7 +265,7 @@ function RentCarContent() {
                 onChange={(e) => setDraftFilters((prev) => ({ ...prev, bodyType: e.target.value }))}
                 className="px-3 py-2.5 rounded-2xl border border-zinc-200 bg-white text-xs font-semibold text-zinc-700 focus:outline-none focus:border-black cursor-pointer"
               >
-                <option value="All">All Body Types</option>
+                <option value="All">সব বডি টাইপ</option>
                 {BODY_TYPES.map((bt) => (
                   <option key={bt} value={bt}>
                     {bt}
@@ -278,7 +278,7 @@ function RentCarContent() {
                 onChange={(e) => setDraftFilters((prev) => ({ ...prev, transmission: e.target.value }))}
                 className="px-3 py-2.5 rounded-2xl border border-zinc-200 bg-white text-xs font-semibold text-zinc-700 focus:outline-none focus:border-black col-span-2 sm:col-span-1 cursor-pointer"
               >
-                <option value="All">All Transmissions</option>
+                <option value="All">সব গিয়ারবক্স</option>
                 {TRANSMISSION_TYPES.map((t) => (
                   <option key={t} value={t}>
                     {t}
@@ -292,7 +292,7 @@ function RentCarContent() {
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-3 border-t border-zinc-100 text-xs">
             <div className="flex items-center gap-3 w-full sm:w-auto">
               <span className="font-bold text-zinc-700 whitespace-nowrap">
-                Max Daily Rate: <span className="text-black font-black">${draftFilters.maxPrice}/day</span>
+                সর্বোচ্চ দৈনিক ভাড়া: <span className="text-black font-black">৳{draftFilters.maxPrice}/দিন</span>
               </span>
               <input
                 type="range"
@@ -312,13 +312,13 @@ function RentCarContent() {
                 className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold text-zinc-500 hover:text-black hover:bg-zinc-100 transition-colors"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
-                <span>Reset</span>
+                <span>রিসেট</span>
               </button>
 
               {hasPendingChanges && (
                 <span className="text-[11px] font-semibold text-amber-700 bg-amber-50 border border-amber-200 px-3 py-1 rounded-full flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
-                  Filters selected
+                  ফিল্টার নির্বাচন করা হয়েছে
                 </span>
               )}
 
@@ -328,7 +328,7 @@ function RentCarContent() {
                 className="flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-black text-white hover:bg-zinc-800 text-xs font-bold transition-all shadow-md active:scale-95"
               >
                 <SlidersHorizontal className="w-3.5 h-3.5" />
-                <span>Apply Filters</span>
+                <span>ফিল্টার প্রয়োগ করুন</span>
               </button>
             </div>
           </div>
@@ -336,10 +336,10 @@ function RentCarContent() {
           {/* Active Filter Chips */}
           {activeFiltersCount > 0 && (
             <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-zinc-100">
-              <span className="text-[11px] font-bold text-zinc-400">Active filters:</span>
+              <span className="text-[11px] font-bold text-zinc-400">সক্রিয় ফিল্টার:</span>
               {appliedFilters.brand !== 'All' && (
                 <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-zinc-100 text-xs font-bold text-black border border-zinc-200">
-                  Make: {appliedFilters.brand}
+                  ব্র্যান্ড: {appliedFilters.brand}
                   <button onClick={() => handleRemoveAppliedFilter('brand', 'All')}>
                     <X className="w-3 h-3 text-zinc-500 hover:text-black" />
                   </button>
@@ -347,7 +347,7 @@ function RentCarContent() {
               )}
               {appliedFilters.bodyType !== 'All' && (
                 <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-zinc-100 text-xs font-bold text-black border border-zinc-200">
-                  Body: {appliedFilters.bodyType}
+                  বডি: {appliedFilters.bodyType}
                   <button onClick={() => handleRemoveAppliedFilter('bodyType', 'All')}>
                     <X className="w-3 h-3 text-zinc-500 hover:text-black" />
                   </button>
@@ -355,7 +355,7 @@ function RentCarContent() {
               )}
               {appliedFilters.transmission !== 'All' && (
                 <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-zinc-100 text-xs font-bold text-black border border-zinc-200">
-                  Transmission: {appliedFilters.transmission}
+                  গিয়ারবক্স: {appliedFilters.transmission}
                   <button onClick={() => handleRemoveAppliedFilter('transmission', 'All')}>
                     <X className="w-3 h-3 text-zinc-500 hover:text-black" />
                   </button>
@@ -363,7 +363,7 @@ function RentCarContent() {
               )}
               {appliedFilters.maxPrice < 2000 && (
                 <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-zinc-100 text-xs font-bold text-black border border-zinc-200">
-                  Up to ${appliedFilters.maxPrice}/day
+                  সর্বোচ্চ ৳{appliedFilters.maxPrice}/দিন
                   <button onClick={() => handleRemoveAppliedFilter('maxPrice', 2000)}>
                     <X className="w-3 h-3 text-zinc-500 hover:text-black" />
                   </button>
@@ -371,7 +371,7 @@ function RentCarContent() {
               )}
               {appliedFilters.search && (
                 <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-zinc-100 text-xs font-bold text-black border border-zinc-200">
-                  Search: &ldquo;{appliedFilters.search}&rdquo;
+                  অনুসন্ধান: &ldquo;{appliedFilters.search}&rdquo;
                   <button onClick={() => handleRemoveAppliedFilter('search', '')}>
                     <X className="w-3 h-3 text-zinc-500 hover:text-black" />
                   </button>
@@ -381,16 +381,16 @@ function RentCarContent() {
                 onClick={handleResetAll}
                 className="text-[11px] font-bold text-rose-600 hover:underline ml-auto"
               >
-                Clear all filters
+                সব ফিল্টার মুছুন
               </button>
             </div>
           )}
 
           <div className="pt-2 flex items-center justify-between text-xs text-zinc-500 font-semibold">
             <span>
-              Showing <strong className="text-black font-black">{pagination.total}</strong> rental vehicles
+              মোট <strong className="text-black font-black">{pagination.total}</strong> টি ভাড়ার গাড়ি দেখানো হচ্ছে
             </span>
-            <span>Page {pagination.page} of {pagination.totalPages}</span>
+            <span>পৃষ্ঠা {pagination.page} / {pagination.totalPages}</span>
           </div>
         </div>
 
@@ -424,13 +424,13 @@ function RentCarContent() {
         ) : (
           <div className="p-16 bg-white rounded-3xl border border-zinc-200 text-center space-y-4 shadow-sm">
             <KeyRound className="w-12 h-12 text-zinc-300 mx-auto" />
-            <h3 className="text-lg font-black text-black">No Rental Vehicles Found</h3>
+            <h3 className="text-lg font-black text-black">কোনো ভাড়ার গাড়ি পাওয়া যায়নি</h3>
             <p className="text-xs text-zinc-500 max-w-sm mx-auto">
-              No rental cars match your search filters or none are listed in the database yet.
+              আপনার সার্চ ফিল্টারের সাথে কোনো ভাড়ার গাড়ি মেলেনি অথবা এখনো কোনো গাড়ি তালিকাভুক্ত করা হয়নি।
             </p>
             <Link href="/sell">
               <Button variant="dark" size="sm" leftIcon={<Plus className="w-4 h-4" />}>
-                List Car for Rent
+                ভাড়ার জন্য গাড়ি যুক্ত করুন
               </Button>
             </Link>
           </div>

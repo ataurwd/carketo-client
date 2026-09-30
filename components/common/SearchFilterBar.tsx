@@ -35,7 +35,7 @@ export const SearchFilterBar: React.FC = () => {
               : 'text-zinc-400 hover:text-white'
           }`}
         >
-          Rent A Car
+          গাড়ি ভাড়া নিন
         </button>
         <button
           type="button"
@@ -46,7 +46,7 @@ export const SearchFilterBar: React.FC = () => {
               : 'text-zinc-400 hover:text-white'
           }`}
         >
-          Buy A Car
+          গাড়ি কিনুন
         </button>
       </div>
 
@@ -58,7 +58,7 @@ export const SearchFilterBar: React.FC = () => {
         {/* Pickup Location */}
         <div className="space-y-1 sm:border-r border-zinc-200 pr-3">
           <label className="block text-[11px] font-bold uppercase tracking-wider text-zinc-400">
-            Pick-Up Location
+            পিক-আপ লোকেশন
           </label>
           <div className="flex items-center gap-2">
             <MapPin className="w-4 h-4 text-black shrink-0" />
@@ -66,7 +66,7 @@ export const SearchFilterBar: React.FC = () => {
               type="text"
               value={pickupLocation}
               onChange={(e) => setPickupLocation(e.target.value)}
-              placeholder="City, Airport or Address"
+              placeholder="শহর, বিমানবন্দর বা ঠিকানা"
               className="w-full text-xs sm:text-sm font-semibold text-zinc-900 placeholder:text-zinc-400 focus:outline-none bg-transparent"
             />
           </div>
@@ -75,7 +75,7 @@ export const SearchFilterBar: React.FC = () => {
         {/* Return Location */}
         <div className="space-y-1 sm:border-r border-zinc-200 pr-3">
           <label className="block text-[11px] font-bold uppercase tracking-wider text-zinc-400">
-            Return Location
+            রিটার্ন লোকেশন
           </label>
           <div className="flex items-center gap-2">
             <MapPin className="w-4 h-4 text-black shrink-0" />
@@ -83,7 +83,7 @@ export const SearchFilterBar: React.FC = () => {
               type="text"
               value={returnLocation}
               onChange={(e) => setReturnLocation(e.target.value)}
-              placeholder="City, Airport or Address"
+              placeholder="শহর, বিমানবন্দর বা ঠিকানা"
               className="w-full text-xs sm:text-sm font-semibold text-zinc-900 placeholder:text-zinc-400 focus:outline-none bg-transparent"
             />
           </div>
@@ -92,7 +92,7 @@ export const SearchFilterBar: React.FC = () => {
         {/* Pickup Date */}
         <div className="space-y-1 sm:border-r border-zinc-200 pr-3">
           <label className="block text-[11px] font-bold uppercase tracking-wider text-zinc-400">
-            Pick-Up Date
+            পিক-আপ তারিখ
           </label>
           <div className="flex items-center gap-2">
             <Calendar className="w-4 h-4 text-black shrink-0" />
@@ -108,7 +108,7 @@ export const SearchFilterBar: React.FC = () => {
         {/* Return Date */}
         <div className="space-y-1 pr-3">
           <label className="block text-[11px] font-bold uppercase tracking-wider text-zinc-400">
-            Return Date
+            ফেরতের তারিখ
           </label>
           <div className="flex items-center gap-2">
             <Calendar className="w-4 h-4 text-black shrink-0" />
@@ -130,7 +130,7 @@ export const SearchFilterBar: React.FC = () => {
             className="w-full h-12 text-sm font-bold shadow-md hover:bg-black"
             rightIcon={<Search className="w-4 h-4" />}
           >
-            Search Cars
+            গাড়ি খুঁজুন
           </Button>
         </div>
       </form>

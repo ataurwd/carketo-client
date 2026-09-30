@@ -22,9 +22,9 @@ export default function ForgotPasswordPage() {
 
     try {
       const data = await authService.forgotPassword(email);
-      setSuccess(data.message || 'Password reset link has been dispatched to your email.');
+      setSuccess(data.message || 'পাসওয়ার্ড রিসেট লিংক আপনার ইমেইলে পাঠানো হয়েছে।');
     } catch (err: any) {
-      setError(err.message || 'Unable to request password reset.');
+      setError(err.message || 'পাসওয়ার্ড রিসেট অনুরোধ পাঠাতে ব্যর্থ হয়েছে।');
     } finally {
       setIsLoading(false);
     }
@@ -38,10 +38,10 @@ export default function ForgotPasswordPage() {
             <Logo variant="dark" size="lg" />
           </Link>
           <h2 className="text-2xl sm:text-3xl font-black text-black tracking-tight">
-            Reset Password
+            পাসওয়ার্ড রিসেট করুন
           </h2>
           <p className="text-xs sm:text-sm text-zinc-500">
-            Enter your account email and we’ll send you recovery instructions.
+            আপনার অ্যাকাউন্টের ইমেইল লিখুন, আমরা পাসওয়ার্ড পুনরুদ্ধারের নির্দেশাবলী পাঠিয়ে দেব।
           </p>
         </div>
 
@@ -61,7 +61,7 @@ export default function ForgotPasswordPage() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <Input
-            label="Account Email"
+            label="অ্যাকাউন্টের ইমেইল"
             type="email"
             required
             value={email}
@@ -78,7 +78,7 @@ export default function ForgotPasswordPage() {
             className="w-full text-sm font-bold shadow-md hover:bg-black mt-2"
             rightIcon={<ArrowRight className="w-4 h-4" />}
           >
-            Send Reset Link
+            রিসেট লিংক পাঠান
           </Button>
         </form>
 
@@ -88,7 +88,7 @@ export default function ForgotPasswordPage() {
             className="inline-flex items-center gap-1.5 text-xs font-bold text-zinc-600 hover:text-black transition-colors"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
-            <span>Back to Sign In</span>
+            <span>সাইন ইন পৃষ্ঠায় ফিরে যান</span>
           </Link>
         </div>
       </div>

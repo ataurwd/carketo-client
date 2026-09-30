@@ -40,7 +40,7 @@ export function CarAssistantChatbot() {
   // Initial welcome message
   const initialGreeting: ChatMessage = {
     role: 'assistant',
-    content: `Hello! 👋 I'm your **Carketo AI** assistant.\n\nAre you looking to **rent** a car or **buy** a vehicle? Tell me what you need, and I'll find the best options from our real inventory!`,
+    content: `হ্যালো! 👋 আমি আপনার **কারকেটো এআই** অ্যাসিস্ট্যান্ট।\n\nআপনি কি গাড়ি **ভাড়া** নিতে চাচ্ছেন নাকি **কিনতে** চাচ্ছেন? আপনার চাহিদা আমাকে জানান, আমি আমাদের রিয়েল ইনভেন্টরি থেকে সেরা গাড়িগুলো খুঁজে দেব!`,
     timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
   };
 
@@ -243,13 +243,13 @@ export function CarAssistantChatbot() {
             <Sparkles className="w-3.5 h-3.5 text-white" />
           </div>
           <div className="flex-1 text-[11px] leading-tight">
-            <p className="font-bold text-slate-900">Need car advice?</p>
-            <p className="text-slate-500">Ask our AI for rent or buy!</p>
+            <p className="font-bold text-slate-900">গাড়ি বিষয়ক পরামর্শ প্রয়োজন?</p>
+            <p className="text-slate-500">ভাড়া বা কেনার জন্য আমাদের এআই-কে জিজ্ঞাসা করুন!</p>
           </div>
           <button
             onClick={() => setShowTeaser(false)}
             className="text-slate-400 hover:text-slate-600 p-0.5"
-            title="Dismiss"
+            title="বন্ধ করুন"
           >
             <X className="w-3 h-3" />
           </button>
@@ -269,7 +269,7 @@ export function CarAssistantChatbot() {
             </div>
             <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-400 rounded-full border-2 border-zinc-950 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
           </div>
-          <span className="hidden sm:inline font-semibold text-xs tracking-wide">AI Assistant</span>
+          <span className="hidden sm:inline font-semibold text-xs tracking-wide">এআই অ্যাসিস্ট্যান্ট</span>
           <Sparkles className="hidden sm:inline w-3.5 h-3.5 text-zinc-300 animate-spin-slow" />
         </button>
       )}
@@ -288,21 +288,21 @@ export function CarAssistantChatbot() {
               </div>
               <div>
                 <div className="flex items-center gap-1.5">
-                  <h3 className="font-extrabold text-slate-900 text-sm tracking-wide">CARKETO AI</h3>
+                  <h3 className="font-extrabold text-slate-900 text-sm tracking-wide">কারকেটো এআই</h3>
                   <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 bg-zinc-100 text-zinc-900 border border-zinc-300 rounded">
-                    Advisor
+                    পরামর্শক
                   </span>
                 </div>
                 <p className="text-[11px] text-slate-500 flex items-center gap-1 mt-0.5">
                   {isAuthenticated ? (
                     <>
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                      Live Car Search • Zero Hallucination
+                      লাইভ গাড়ি অনুসন্ধান • সঠিক তথ্য
                     </>
                   ) : (
                     <>
                       <Lock className="w-3 h-3 text-slate-500" />
-                      <span>Sign in to unlock AI</span>
+                      <span>এআই আনলক করতে লগ ইন করুন</span>
                     </>
                   )}
                 </p>
@@ -493,7 +493,7 @@ export function CarAssistantChatbot() {
                     <span className="w-1.5 h-1.5 rounded-full bg-zinc-900 animate-bounce" style={{ animationDelay: '150ms' }} />
                     <span className="w-1.5 h-1.5 rounded-full bg-zinc-900 animate-bounce" style={{ animationDelay: '300ms' }} />
                   </div>
-                  <span className="text-xs text-slate-500 font-medium">Checking live cars & criteria...</span>
+                  <span className="text-xs text-slate-500 font-medium">লাইভ গাড়ি ও তথ্য খোঁজা হচ্ছে...</span>
                 </div>
               </div>
             )}
@@ -506,7 +506,7 @@ export function CarAssistantChatbot() {
             <div className="px-4 py-2 border-t border-slate-200 bg-white">
               <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5 flex items-center gap-1">
                 <Compass className="w-3 h-3 text-zinc-900" />
-                Suggested Inquiries
+                পরামর্শকৃত প্রশ্নসমূহ
               </div>
               <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none">
                 {suggestedPrompts.map((p) => (
@@ -536,7 +536,7 @@ export function CarAssistantChatbot() {
                   className="px-3.5 py-2 rounded-xl bg-zinc-950 hover:bg-zinc-800 text-white font-bold text-xs flex items-center gap-1.5 transition-colors shadow-xs"
                 >
                   <LogIn className="w-3.5 h-3.5" />
-                  Log In
+                  লগ ইন
                 </Link>
               </div>
             </div>
@@ -554,7 +554,7 @@ export function CarAssistantChatbot() {
                   type="text"
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
-                  placeholder="Ask about rental, purchase, budget..."
+                  placeholder="ভাড়া, কেনা বা বাজেট সম্পর্কে জিজ্ঞাসা করুন..."
                   disabled={isLoading}
                   className="flex-1 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-zinc-900 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none transition-colors disabled:opacity-60 shadow-inner-xs"
                 />
@@ -568,8 +568,8 @@ export function CarAssistantChatbot() {
                 </button>
               </form>
               <div className="flex items-center justify-between text-[10px] text-slate-400 mt-1.5 px-1 font-medium">
-                <span>Powered by Google Gemini</span>
-                <span>Live database • Real inventory</span>
+                <span>গুগল জেমিনি দ্বারা চালিত</span>
+                <span>লাইভ ডাটাবেস • আসল ইনভেন্টরি</span>
               </div>
             </div>
           )}

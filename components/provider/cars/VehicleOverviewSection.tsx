@@ -4,12 +4,22 @@ import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { POPULAR_BRANDS, BODY_TYPES } from '@/lib/constants';
 
-const FUEL_TYPES = ['Petrol', 'Diesel', 'Hybrid', 'Electric', 'CNG'];
-const TRANSMISSIONS = ['Automatic', 'Manual', 'Dual-Clutch'];
+const FUEL_TYPES = [
+  { value: 'Petrol', label: 'পেট্রোল (Petrol)' },
+  { value: 'Diesel', label: 'ডিজেল (Diesel)' },
+  { value: 'Hybrid', label: 'হাইব্রিড (Hybrid)' },
+  { value: 'Electric', label: 'ইলেকট্রিক (Electric)' },
+  { value: 'CNG', label: 'সিএনজি (CNG)' },
+];
+const TRANSMISSIONS = [
+  { value: 'Automatic', label: 'অটোমেটিক (Automatic)' },
+  { value: 'Manual', label: 'ম্যানুয়াল (Manual)' },
+  { value: 'Dual-Clutch', label: 'ডুয়েল-ক্লাচ (Dual-Clutch)' },
+];
 const CONDITIONS = [
-  { value: 'used', label: 'Used / Pre-Owned' },
-  { value: 'new', label: 'Brand New (0 km)' },
-  { value: 'certified', label: 'Certified Pre-Owned' },
+  { value: 'used', label: 'ব্যবহৃত / রিকন্ডিশনড' },
+  { value: 'new', label: 'একদম নতুন (০ কিমি)' },
+  { value: 'certified', label: 'সার্টিফাইড প্রি-ওনড' },
 ];
 
 interface VehicleOverviewSectionProps {
@@ -77,22 +87,22 @@ export function VehicleOverviewSection({
         <div className="flex items-center gap-2">
           <Car className="w-5 h-5 text-black" />
           <div>
-            <h2 className="text-base font-black text-black">Vehicle Overview</h2>
+            <h2 className="text-base font-black text-black">গাড়ির সংক্ষিপ্ত বিবরণ</h2>
             <p className="text-xs text-zinc-400">
-              Basic vehicle information and technical specifications.
+              গাড়ির প্রাথমিক তথ্য এবং কারিগরি স্পেসিফিকেশন।
             </p>
           </div>
         </div>
         <span className="text-[11px] font-bold text-zinc-600 bg-zinc-100 px-3 py-1 rounded-full">
-          * Required Fields
+          * চিহ্নিত ঘরগুলো আবশ্যক
         </span>
       </div>
 
       <div className="space-y-5">
         {/* Title (Full Width) */}
         <Input
-          label="Vehicle Title *"
-          placeholder="Enter vehicle title (e.g. 2024 Toyota Land Cruiser Prado TX-L)"
+          label="গাড়ির শিরোনাম *"
+          placeholder="গাড়ির শিরোনাম লিখুন (যেমন: 2024 Toyota Land Cruiser Prado TX-L)"
           maxLength={100}
           required
           value={title}
@@ -107,8 +117,8 @@ export function VehicleOverviewSection({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
           {/* Row 1: Brand & Year */}
           <Select
-            label="Brand / Make *"
-            placeholder="Select one"
+            label="ব্র্যান্ড / নির্মাতা *"
+            placeholder="একটি নির্বাচন করুন"
             value={brand}
             onChange={(val) => {
               setBrand(val);
@@ -119,10 +129,10 @@ export function VehicleOverviewSection({
           />
 
           <Input
-            label="Manufacturing Year *"
+            label="উৎপাদন সাল *"
             type="text"
             inputMode="numeric"
-            placeholder="Enter 4-digit year (e.g. 2024)"
+            placeholder="৪ সংখ্যার সাল লিখুন (যেমন: 2024)"
             maxLength={4}
             required
             value={year === '' ? '' : year}
@@ -136,8 +146,8 @@ export function VehicleOverviewSection({
 
           {/* Row 2: Condition & Mileage */}
           <Select
-            label="Condition *"
-            placeholder="Select one"
+            label="কন্ডিশন *"
+            placeholder="একটি নির্বাচন করুন"
             value={condition}
             onChange={(val) => {
               const newCond = val as 'new' | 'used' | 'certified' | '';
@@ -150,7 +160,7 @@ export function VehicleOverviewSection({
           />
 
           <Input
-            label={`Mileage (km) ${condition !== 'new' ? '*' : '(Brand New = 0)'}`}
+            label={`মাইলেজ (কিমি) ${condition !== 'new' ? '*' : '(নতুন = ০)'}`}
             type="text"
             inputMode="numeric"
             maxLength={7}
@@ -162,14 +172,14 @@ export function VehicleOverviewSection({
               setMileage(val === '' ? '' : Number(val));
               setFieldErrors((p) => ({ ...p, mileage: '' }));
             }}
-            placeholder="Enter mileage in km (e.g. 45000)"
+            placeholder="মাইলেজ কিমি-তে লিখুন (যেমন: 45000)"
             error={fieldErrors['mileage']}
           />
 
           {/* Row 3: Fuel Type & Transmission */}
           <Select
-            label="Fuel Type *"
-            placeholder="Select one"
+            label="জ্বালানির ধরন *"
+            placeholder="একটি নির্বাচন করুন"
             value={fuelType}
             onChange={(val) => {
               setFuelType(val);
@@ -180,8 +190,8 @@ export function VehicleOverviewSection({
           />
 
           <Select
-            label="Transmission *"
-            placeholder="Select one"
+            label="ট্রান্সমিশন *"
+            placeholder="একটি নির্বাচন করুন"
             value={transmission}
             onChange={(val) => {
               setTransmission(val);
@@ -193,8 +203,8 @@ export function VehicleOverviewSection({
 
           {/* Row 4: Body Type & Engine Capacity */}
           <Select
-            label="Body Type *"
-            placeholder="Select one"
+            label="বডি টাইপ *"
+            placeholder="একটি নির্বাচন করুন"
             value={bodyType}
             onChange={(val) => {
               setBodyType(val);
@@ -205,8 +215,8 @@ export function VehicleOverviewSection({
           />
 
           <Input
-            label="Engine Capacity"
-            placeholder="Enter engine capacity (e.g. 1500cc or 2.0L Turbo)"
+            label="ইঞ্জিন ক্ষমতা"
+            placeholder="ইঞ্জিন ক্ষমতা লিখুন (যেমন: 1500cc বা 2.0L Turbo)"
             maxLength={30}
             value={engineCapacity}
             onChange={(e) => setEngineCapacity(e.target.value.slice(0, 30))}

@@ -30,31 +30,31 @@ export default function SellRedirectPage() {
 
         <div className="space-y-2">
           <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
-            Seller & Vehicle Portal
+            বিক্রেতা ও গাড়ির পোর্টাল
           </span>
           <h1 className="text-2xl font-black tracking-tight text-black">
-            Sell Your Car on Carketo
+            কারকেটো-তে আপনার গাড়ি বিক্রি করুন
           </h1>
           <p className="text-xs text-zinc-500 leading-relaxed">
-            Reach thousands of verified buyers and renters. Sign in to list your vehicle in minutes.
+            হাজার হাজার ভেরিফায়েড ক্রেতা এবং ভাড়াটেদের কাছে পৌঁছান। কয়েক মিনিটের মধ্যে আপনার গাড়ি তালিকাভুক্ত করতে সাইন ইন করুন।
           </p>
         </div>
 
         <div className="flex flex-col items-center justify-center space-y-2 pt-2">
           <div className="h-8 w-8 border-4 border-black border-t-transparent rounded-full animate-spin" />
           <p className="text-xs font-bold text-zinc-500">
-            {isAuthenticated ? 'Redirecting to vehicle listing form...' : 'Redirecting to login...'}
+            {isAuthenticated ? 'গাড়ি তালিকাভুক্ত করার ফর্মে নিয়ে যাওয়া হচ্ছে...' : 'লগইন পৃষ্ঠায় নিয়ে যাওয়া হচ্ছে...'}
           </p>
         </div>
 
         <div className="pt-4 border-t border-zinc-100 grid grid-cols-2 gap-3 text-[11px] text-zinc-400">
           <div className="flex items-center justify-center gap-1.5">
             <ShieldCheck className="w-3.5 h-3.5 text-black" />
-            <span>Instant Valuation</span>
+            <span>তাৎক্ষণিক মূল্যায়ন</span>
           </div>
           <div className="flex items-center justify-center gap-1.5">
             <Sparkles className="w-3.5 h-3.5 text-black" />
-            <span>0% Listing Fee</span>
+            <span>০% লিস্টিং ফি</span>
           </div>
         </div>
       </div>

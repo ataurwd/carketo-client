@@ -13,24 +13,24 @@ interface DatePickerProps {
 }
 
 const MONTH_NAMES = [
-  'January',
-  'February',
-  'March',
-  'April',
-  'May',
-  'June',
-  'July',
-  'August',
-  'September',
-  'October',
-  'November',
-  'December',
+  'জানুয়ারি',
+  'ফেব্রুয়ারি',
+  'মার্চ',
+  'এপ্রিল',
+  'মে',
+  'জুন',
+  'জুলাই',
+  'আগস্ট',
+  'সেপ্টেম্বর',
+  'অক্টোবর',
+  'নভেম্বর',
+  'ডিসেম্বর',
 ];
 
-const WEEKDAY_NAMES = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+const WEEKDAY_NAMES = ['রবি', 'সোম', 'মঙ্গল', 'বুধ', 'বৃহঃ', 'শুক্র', 'শনি'];
 
 export const DatePicker: React.FC<DatePickerProps> = ({
-  label = 'Visibility Expiration Date',
+  label = 'বিজ্ঞাপনের মেয়াদ উত্তীর্ণের তারিখ',
   value,
   onChange,
   maxMonthsAhead = 2,
@@ -125,7 +125,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
             {label}
           </label>
           <span className="text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-            Max 2 Months (60 Days)
+            সর্বোচ্চ ২ মাস (৬০ দিন)
           </span>
         </div>
       )}
@@ -148,7 +148,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
             {selectedDate ? (
               <div className="flex items-center gap-2">
                 <span className="text-xs sm:text-sm font-black text-black truncate">
-                  {selectedDate.toLocaleDateString('en-US', {
+                  {selectedDate.toLocaleDateString('bn-BD', {
                     weekday: 'short',
                     month: 'short',
                     day: 'numeric',
@@ -157,20 +157,20 @@ export const DatePicker: React.FC<DatePickerProps> = ({
                 </span>
                 {daysRemaining !== null && (
                   <span className="shrink-0 px-2 py-0.5 rounded-md bg-black text-white text-[10px] font-black">
-                    {daysRemaining} {daysRemaining === 1 ? 'day' : 'days'} active
+                    {daysRemaining} দিন সক্রিয় থাকবে
                   </span>
                 )}
               </div>
             ) : (
               <span className="text-xs sm:text-sm font-semibold text-zinc-400">
-                Choose visibility expiry date...
+                বিজ্ঞাপনের মেয়াদ উত্তীর্ণের তারিখ বেছে নিন...
               </span>
             )}
           </div>
         </div>
 
         <div className="flex items-center gap-1.5 text-zinc-400 text-xs font-bold shrink-0 ml-2">
-          <span>Change</span>
+          <span>পরিবর্তন</span>
         </div>
       </button>
 
@@ -183,14 +183,14 @@ export const DatePicker: React.FC<DatePickerProps> = ({
           <div>
             <div className="flex items-center gap-1.5 text-[11px] font-bold text-zinc-400 uppercase tracking-wider mb-2">
               <Sparkles className="w-3 h-3 text-amber-500" />
-              <span>Quick Visibility Presets</span>
+              <span>দ্রুত মেয়াদ নির্বাচন</span>
             </div>
             <div className="grid grid-cols-4 gap-1.5">
               {[
-                { label: '7 Days', days: 7 },
-                { label: '15 Days', days: 15 },
-                { label: '30 Days', days: 30 },
-                { label: '60 Days', days: 60 },
+                { label: '৭ দিন', days: 7 },
+                { label: '১৫ দিন', days: 15 },
+                { label: '৩০ দিন', days: 30 },
+                { label: '৬০ দিন', days: 60 },
               ].map((preset) => {
                 const presetTarget = new Date(today);
                 presetTarget.setDate(presetTarget.getDate() + preset.days);
@@ -227,7 +227,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
                   type="button"
                   onClick={prevMonth}
                   className="p-1.5 rounded-lg hover:bg-zinc-100 text-zinc-700 transition-colors"
-                  title="Previous Month"
+                  title="পূর্ববর্তী মাস"
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </button>
@@ -235,7 +235,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
                   type="button"
                   onClick={nextMonth}
                   className="p-1.5 rounded-lg hover:bg-zinc-100 text-zinc-700 transition-colors"
-                  title="Next Month"
+                  title="পরবর্তী মাস"
                 >
                   <ChevronRight className="w-4 h-4" />
                 </button>
@@ -308,7 +308,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
           {/* Footer Note */}
           <div className="pt-2 border-t border-zinc-100 flex items-center gap-1.5 text-[10px] text-zinc-400 font-semibold">
             <Clock className="w-3 h-3 text-zinc-400 shrink-0" />
-            <span>Listing automatically hides after expiry. Max 2 months.</span>
+            <span>মেয়াদ শেষ হওয়ার পর বিজ্ঞাপনটি স্বয়ংক্রিয়ভাবে লুকিয়ে যাবে। সর্বোচ্চ ২ মাস।</span>
           </div>
         </div>
       )}

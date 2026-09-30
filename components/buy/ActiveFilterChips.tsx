@@ -64,12 +64,12 @@ export function ActiveFilterChips({
   return (
     <div className="flex flex-wrap items-center gap-2 pt-3 border-t border-zinc-100 text-xs animate-fade-in">
       <span className="text-zinc-400 font-bold text-[11px] uppercase tracking-wider">
-        Active filters:
+        সক্রিয় ফিল্টার:
       </span>
 
       {search.trim() && (
         <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-black text-white font-bold text-[11px] shadow-sm">
-          Search: "{search}"
+          অনুসন্ধান: "{search}"
           <button onClick={() => setSearch('')}>
             <X className="w-3 h-3 text-zinc-300 hover:text-white" />
           </button>
@@ -78,7 +78,7 @@ export function ActiveFilterChips({
 
       {selectedBrand !== 'all' && (
         <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-100 text-zinc-900 font-bold text-[11px] border border-zinc-200">
-          Brand: {selectedBrand}
+          ব্র্যান্ড: {selectedBrand}
           <button onClick={() => setSelectedBrand('all')}>
             <X className="w-3 h-3 text-zinc-500 hover:text-black" />
           </button>
@@ -87,7 +87,7 @@ export function ActiveFilterChips({
 
       {selectedModel.trim() && (
         <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-100 text-zinc-900 font-bold text-[11px] border border-zinc-200">
-          Model: {selectedModel}
+          মডেল: {selectedModel}
           <button onClick={() => setSelectedModel('')}>
             <X className="w-3 h-3 text-zinc-500 hover:text-black" />
           </button>
@@ -96,7 +96,7 @@ export function ActiveFilterChips({
 
       {selectedCondition !== 'all' && (
         <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-100 text-zinc-900 font-bold text-[11px] border border-zinc-200">
-          Condition: {selectedCondition.toUpperCase()}
+          কন্ডিশন: {selectedCondition.toUpperCase()}
           <button onClick={() => setSelectedCondition('all')}>
             <X className="w-3 h-3 text-zinc-500 hover:text-black" />
           </button>
@@ -105,7 +105,7 @@ export function ActiveFilterChips({
 
       {(minYear || maxYear) && (
         <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-100 text-zinc-900 font-bold text-[11px] border border-zinc-200">
-          Mfg. Year: {minYear || 'Any'} - {maxYear || 'Present'}
+          সাল: {minYear || 'যেকোনো'} - {maxYear || 'বর্তমান'}
           <button
             onClick={() => {
               setMinYear('');
@@ -119,7 +119,7 @@ export function ActiveFilterChips({
 
       {selectedFuel !== 'all' && (
         <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-100 text-zinc-900 font-bold text-[11px] border border-zinc-200">
-          Fuel: {selectedFuel}
+          জ্বালানি: {selectedFuel}
           <button onClick={() => setSelectedFuel('all')}>
             <X className="w-3 h-3 text-zinc-500 hover:text-black" />
           </button>
@@ -128,8 +128,8 @@ export function ActiveFilterChips({
 
       {(minPrice || maxPrice) && (
         <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-100 text-zinc-900 font-bold text-[11px] border border-zinc-200">
-          Price: {minPrice ? formatPrice(Number(minPrice)) : '৳0'} -{' '}
-          {maxPrice ? formatPrice(Number(maxPrice)) : 'Any'}
+          মূল্য: {minPrice ? formatPrice(Number(minPrice)) : '৳০'} -{' '}
+          {maxPrice ? formatPrice(Number(maxPrice)) : 'যেকোনো'}
           <button
             onClick={() => {
               setMinPrice('');
@@ -143,7 +143,7 @@ export function ActiveFilterChips({
 
       {selectedTransmission !== 'all' && (
         <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-100 text-zinc-900 font-bold text-[11px] border border-zinc-200">
-          Transmission: {selectedTransmission}
+          ট্রান্সমিশন: {selectedTransmission}
           <button onClick={() => setSelectedTransmission('all')}>
             <X className="w-3 h-3 text-zinc-500 hover:text-black" />
           </button>
@@ -152,7 +152,7 @@ export function ActiveFilterChips({
 
       {selectedBodyType !== 'all' && (
         <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-100 text-zinc-900 font-bold text-[11px] border border-zinc-200">
-          Body: {selectedBodyType}
+          বডি: {selectedBodyType}
           <button onClick={() => setSelectedBodyType('all')}>
             <X className="w-3 h-3 text-zinc-500 hover:text-black" />
           </button>
@@ -161,7 +161,7 @@ export function ActiveFilterChips({
 
       {selectedLocation !== 'all' && (
         <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-100 text-zinc-900 font-bold text-[11px] border border-zinc-200">
-          City: {selectedLocation}
+          শহর: {selectedLocation}
           <button onClick={() => setSelectedLocation('all')}>
             <X className="w-3 h-3 text-zinc-500 hover:text-black" />
           </button>
@@ -170,7 +170,7 @@ export function ActiveFilterChips({
 
       {maxMileage && (
         <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-100 text-zinc-900 font-bold text-[11px] border border-zinc-200">
-          Max Mileage: {Number(maxMileage).toLocaleString()} km
+          সর্বোচ্চ মাইলেজ: {Number(maxMileage).toLocaleString()} কি.মি.
           <button onClick={() => setMaxMileage('')}>
             <X className="w-3 h-3 text-zinc-500 hover:text-black" />
           </button>
@@ -183,7 +183,7 @@ export function ActiveFilterChips({
         className="text-[11px] font-bold text-rose-600 hover:underline ml-auto flex items-center gap-1"
       >
         <RotateCcw className="w-3 h-3" />
-        Clear All Filters
+        সব ফিল্টার মুছুন
       </button>
     </div>
   );

@@ -33,14 +33,14 @@ export default function PurchaseCheckoutPage() {
           className="inline-flex items-center gap-2 text-xs font-bold text-zinc-600 hover:text-black transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span>Back to Showroom</span>
+          <span>শোরুমে ফিরে যান</span>
         </Link>
 
         <div>
           <span className="text-xs font-bold uppercase tracking-widest text-zinc-400">
-            Certified Purchase
+            সার্টিফায়েড ক্রয়
           </span>
-          <h1 className="text-2xl sm:text-3xl font-black text-black">Vehicle Purchase Order</h1>
+          <h1 className="text-2xl sm:text-3xl font-black text-black">গাড়ি ক্রয়ের অর্ডার</h1>
         </div>
 
         {isSuccess ? (
@@ -48,27 +48,27 @@ export default function PurchaseCheckoutPage() {
             <div className="h-16 w-16 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto">
               <CheckCircle2 className="w-8 h-8" />
             </div>
-            <h2 className="text-2xl font-black text-black">Purchase Order Dispatched!</h2>
+            <h2 className="text-2xl font-black text-black">ক্রয়ের অর্ডার পাঠানো হয়েছে!</h2>
             <p className="text-xs text-zinc-500 max-w-sm mx-auto">
-              The verified dealership has received your order and title transfer documentation. An automotive concierge will contact you for delivery scheduling.
+              ভেরিফায়েড ডিলারশিপ আপনার অর্ডার এবং মালিকানা হস্তান্তরের তথ্য পেয়েছে। ডেলিভারির সময় নির্ধারণের জন্য আমাদের প্রতিনিধি আপনার সাথে যোগাযোগ করবেন।
             </p>
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             <div className="lg:col-span-7 bg-white p-6 sm:p-8 rounded-3xl border border-zinc-200 shadow-sm space-y-6">
               <h3 className="text-base font-black text-black border-b border-zinc-100 pb-3">
-                Buyer & Title Details
+                ক্রেতা ও নিবন্ধনের বিবরণ
               </h3>
 
               <form onSubmit={handleSubmit} className="space-y-4">
-                <Input label="Full Legal Name (For Registration)" required placeholder="John Doe" />
-                <Input label="Email Address" type="email" required placeholder="john@example.com" />
-                <Input label="Phone Number" required placeholder="+1 (555) 0199" />
-                <Input label="Delivery Street Address" required placeholder="123 Luxury Blvd, Suite 4B" />
+                <Input label="পূর্ণ আইনি নাম (নিবন্ধনের জন্য)" required placeholder="আপনার পূর্ণ নাম" />
+                <Input label="ইমেইল ঠিকানা" type="email" required placeholder="you@example.com" />
+                <Input label="ফোন নম্বর" required placeholder="017XX-XXXXXX" />
+                <Input label="ডেলিভারির ঠিকানা" required placeholder="বাড়ি নং, রোড নং, এলাকা" />
 
                 <div className="grid grid-cols-2 gap-4">
-                  <Input label="City" required placeholder="Miami" />
-                  <Input label="ZIP Code" required placeholder="33139" />
+                  <Input label="শহর" required placeholder="ঢাকা" />
+                  <Input label="পোস্ট কোড" required placeholder="1212" />
                 </div>
 
                 <div className="pt-2">
@@ -79,7 +79,7 @@ export default function PurchaseCheckoutPage() {
                     isLoading={isProcessing}
                     className="w-full font-bold shadow-md hover:bg-black"
                   >
-                    Submit Purchase & Initiate Title Transfer
+                    ক্রয় নিশ্চিত করুন ও মালিকানা হস্তান্তর শুরু করুন
                   </Button>
                 </div>
               </form>
@@ -87,7 +87,7 @@ export default function PurchaseCheckoutPage() {
 
             <div className="lg:col-span-5 bg-white p-6 sm:p-8 rounded-3xl border border-zinc-200 shadow-sm space-y-6">
               <h3 className="text-base font-black text-black border-b border-zinc-100 pb-3">
-                Order Summary
+                অর্ডারের সারসংক্ষেপ
               </h3>
 
               <div className="flex items-center gap-4">
@@ -98,25 +98,25 @@ export default function PurchaseCheckoutPage() {
                 />
                 <div>
                   <h4 className="text-sm font-black text-black">Porsche 911 Carrera 4S</h4>
-                  <p className="text-xs text-zinc-400">2024 • Certified Pre-Owned</p>
+                  <p className="text-xs text-zinc-400">২০২৪ • সার্টিফায়েড প্রি-ওনড</p>
                 </div>
               </div>
 
               <div className="space-y-2 text-xs border-t border-zinc-100 pt-4 text-zinc-600">
                 <div className="flex justify-between">
-                  <span>Vehicle Purchase Price</span>
+                  <span>গাড়ির ক্রয়মূল্য</span>
                   <span className="font-bold text-black">{formatPrice(142000)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Sales Tax & Documentation</span>
+                  <span>ট্যাক্স ও ডকুমেন্টেশন</span>
                   <span className="font-bold text-black">{formatPrice(9940)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Enclosed Doorstep Delivery</span>
+                  <span>হোম ডেলিভারি চার্জ</span>
                   <span className="font-bold text-black">{formatPrice(499)}</span>
                 </div>
                 <div className="flex justify-between text-base font-black text-black border-t border-zinc-200 pt-3">
-                  <span>Total Purchase Price</span>
+                  <span>সর্বমোট মূল্য</span>
                   <span>{formatPrice(152439)}</span>
                 </div>
               </div>

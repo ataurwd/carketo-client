@@ -15,26 +15,26 @@ import {
 import { ActiveFilterChips } from './ActiveFilterChips';
 
 const CONDITIONS_LIST = [
-  { value: 'all', label: 'All Conditions' },
-  { value: 'new', label: 'Brand New' },
-  { value: 'reconditioned', label: 'Reconditioned' },
-  { value: 'used', label: 'Used / Pre-Owned' },
+  { value: 'all', label: 'সব কন্ডিশন' },
+  { value: 'new', label: 'ব্র্যান্ড নিউ' },
+  { value: 'reconditioned', label: 'রিকন্ডিশনড' },
+  { value: 'used', label: 'ব্যবহৃত / প্রি-ওনড' },
 ];
 
 const FUEL_TYPES_LIST = [
-  { value: 'all', label: 'All Fuel Types' },
-  { value: 'petrol', label: 'Petrol / Octane' },
-  { value: 'hybrid', label: 'Hybrid' },
-  { value: 'electric', label: '100% Electric (EV)' },
-  { value: 'diesel', label: 'Diesel' },
-  { value: 'cng', label: 'CNG / LPG' },
+  { value: 'all', label: 'সব জ্বালানি' },
+  { value: 'petrol', label: 'পেট্রোল / অকটেন' },
+  { value: 'hybrid', label: 'হাইব্রিড' },
+  { value: 'electric', label: '১০০% ইলেকট্রিক (EV)' },
+  { value: 'diesel', label: 'ডিজেল' },
+  { value: 'cng', label: 'সিএনজি / এলপিজি' },
 ];
 
 const TRANSMISSIONS_LIST = [
-  { value: 'all', label: 'All Transmissions' },
-  { value: 'automatic', label: 'Automatic' },
-  { value: 'manual', label: 'Manual' },
-  { value: 'dual-clutch', label: 'Dual-Clutch / Tiptronic' },
+  { value: 'all', label: 'সব ট্রান্সমিশন' },
+  { value: 'automatic', label: 'অটোমেটিক' },
+  { value: 'manual', label: 'ম্যানুয়াল' },
+  { value: 'dual-clutch', label: 'ডুয়াল-ক্লাচ / টিপট্রনিক' },
 ];
 
 const LOCATIONS_LIST = [
@@ -160,7 +160,7 @@ export function BuyFilterBar({
             <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
             <input
               type="text"
-              placeholder="Search by title, brand, model name (e.g. Premio, Civic), location..."
+              placeholder="নাম, ব্র্যান্ড, মডেল (যেমন: Premio, Civic) বা অবস্থান দিয়ে খুঁজুন..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               onKeyDown={(e) => {
@@ -192,7 +192,7 @@ export function BuyFilterBar({
             className="px-4 py-2.5 rounded-2xl bg-black text-white hover:bg-zinc-800 text-xs font-bold transition-all shadow-sm flex items-center gap-1.5 shrink-0 active:scale-95"
           >
             <Search className="w-3.5 h-3.5" />
-            <span>Search</span>
+            <span>খুঁজুন</span>
           </button>
         </div>
         {/* Sort Selector */}
@@ -204,12 +204,12 @@ export function BuyFilterBar({
             }}
             className="w-full px-3.5 py-2.5 rounded-2xl border border-zinc-200 bg-white text-xs font-bold text-zinc-800 focus:outline-none focus:border-black cursor-pointer shadow-sm"
           >
-            <option value="newest">Sort: Newest Listed</option>
-            <option value="price_asc">Price: Low to High</option>
-            <option value="price_desc">Price: High to Low</option>
-            <option value="year_desc">Year: Newest Models</option>
-            <option value="year_asc">Year: Older Models</option>
-            <option value="mileage_asc">Mileage: Lowest First</option>
+            <option value="newest">সাজান: নতুন যুক্ত</option>
+            <option value="price_asc">মূল্য: কম থেকে বেশি</option>
+            <option value="price_desc">মূল্য: বেশি থেকে কম</option>
+            <option value="year_desc">সাল: নতুন মডেল</option>
+            <option value="year_asc">সাল: পুরাতন মডেল</option>
+            <option value="mileage_asc">মাইলেজ: কম থেকে বেশি</option>
           </select>
         </div>
 
@@ -224,7 +224,7 @@ export function BuyFilterBar({
           }`}
         >
           <SlidersHorizontal className="w-4 h-4" />
-          <span>{advancedFiltersOpen ? 'Hide Filters' : 'All Filters'}</span>
+          <span>{advancedFiltersOpen ? 'ফিল্টার লুকান' : 'সব ফিল্টার'}</span>
           {activeFiltersCount > 0 && (
             <span className="h-5 px-1.5 rounded-full bg-white text-black text-[10px] font-black flex items-center justify-center">
               {activeFiltersCount}
@@ -246,14 +246,14 @@ export function BuyFilterBar({
             {/* 1. Brand Selector */}
             <div>
               <label className="block text-zinc-500 font-bold mb-1.5 text-[11px] uppercase tracking-wider">
-                Brand / Make
+                ব্র্যান্ড / মেক
               </label>
               <select
                 value={selectedBrand}
                 onChange={(e) => setSelectedBrand(e.target.value)}
                 className="w-full px-3 py-2.5 rounded-xl border border-zinc-200 bg-white text-xs font-bold text-zinc-800 focus:outline-none focus:border-black cursor-pointer"
               >
-                <option value="all">All Brands</option>
+                <option value="all">সব ব্র্যান্ড</option>
                 {POPULAR_BRANDS.map((b) => (
                   <option key={b} value={b}>
                     {b}
@@ -265,11 +265,11 @@ export function BuyFilterBar({
             {/* 2. Model Input */}
             <div>
               <label className="block text-zinc-500 font-bold mb-1.5 text-[11px] uppercase tracking-wider">
-                Model Name
+                মডেলের নাম
               </label>
               <input
                 type="text"
-                placeholder="e.g. Premio, Civic..."
+                placeholder="যেমন: Premio, Civic..."
                 value={selectedModel}
                 onChange={(e) => setSelectedModel(e.target.value)}
                 onKeyDown={(e) => {
@@ -285,7 +285,7 @@ export function BuyFilterBar({
             {/* 3. Condition */}
             <div>
               <label className="block text-zinc-500 font-bold mb-1.5 text-[11px] uppercase tracking-wider">
-                Condition
+                কন্ডিশন
               </label>
               <select
                 value={selectedCondition}
@@ -303,7 +303,7 @@ export function BuyFilterBar({
             {/* 4. Fuel Type */}
             <div>
               <label className="block text-zinc-500 font-bold mb-1.5 text-[11px] uppercase tracking-wider">
-                Fuel Type
+                জ্বালানির ধরন
               </label>
               <select
                 value={selectedFuel}
@@ -321,12 +321,12 @@ export function BuyFilterBar({
             {/* 5. Price Range */}
             <div>
               <label className="block text-zinc-500 font-bold mb-1.5 text-[11px] uppercase tracking-wider">
-                Price Range (৳)
+                মূল্য সীমা (৳)
               </label>
               <div className="flex items-center gap-1.5">
                 <input
                   type="number"
-                  placeholder="Min ৳"
+                  placeholder="সর্বনিম্ন ৳"
                   value={minPrice}
                   onChange={(e) => setMinPrice(e.target.value)}
                   onKeyDown={(e) => {
@@ -340,7 +340,7 @@ export function BuyFilterBar({
                 <span className="text-zinc-400 font-bold">-</span>
                 <input
                   type="number"
-                  placeholder="Max ৳"
+                  placeholder="সর্বোচ্চ ৳"
                   value={maxPrice}
                   onChange={(e) => setMaxPrice(e.target.value)}
                   onKeyDown={(e) => {
@@ -360,7 +360,7 @@ export function BuyFilterBar({
             <div>
               <label className="block text-zinc-500 font-bold mb-1.5 text-[11px] uppercase tracking-wider flex items-center gap-1">
                 <Calendar className="w-3.5 h-3.5 text-black" />
-                <span>Mfg. Year Range</span>
+                <span>তৈরির সাল</span>
               </label>
               <div className="flex items-center gap-1.5">
                 <select
@@ -368,7 +368,7 @@ export function BuyFilterBar({
                   onChange={(e) => setMinYear(e.target.value)}
                   className="w-full px-2 py-2.5 rounded-xl border border-zinc-200 bg-white text-xs font-semibold text-zinc-800 focus:outline-none focus:border-black cursor-pointer"
                 >
-                  <option value="">Min Year</option>
+                  <option value="">শুরুর সাল</option>
                   {YEAR_OPTIONS.map((y) => (
                     <option key={`min-${y}`} value={y}>
                       {y}
@@ -381,7 +381,7 @@ export function BuyFilterBar({
                   onChange={(e) => setMaxYear(e.target.value)}
                   className="w-full px-2 py-2.5 rounded-xl border border-zinc-200 bg-white text-xs font-semibold text-zinc-800 focus:outline-none focus:border-black cursor-pointer"
                 >
-                  <option value="">Max Year</option>
+                  <option value="">শেষ সাল</option>
                   {YEAR_OPTIONS.map((y) => (
                     <option key={`max-${y}`} value={y}>
                       {y}
@@ -395,7 +395,7 @@ export function BuyFilterBar({
             <div>
               <label className="block text-zinc-500 font-bold mb-1.5 text-[11px] uppercase tracking-wider flex items-center gap-1">
                 <Gauge className="w-3.5 h-3.5 text-black" />
-                <span>Transmission</span>
+                <span>ট্রান্সমিশন</span>
               </label>
               <select
                 value={selectedTransmission}
@@ -413,14 +413,14 @@ export function BuyFilterBar({
             {/* 8. Body Type */}
             <div>
               <label className="block text-zinc-500 font-bold mb-1.5 text-[11px] uppercase tracking-wider">
-                Body Class
+                বডি টাইপ
               </label>
               <select
                 value={selectedBodyType}
                 onChange={(e) => setSelectedBodyType(e.target.value)}
                 className="w-full px-3 py-2.5 rounded-xl border border-zinc-200 bg-white text-xs font-bold text-zinc-800 focus:outline-none focus:border-black cursor-pointer"
               >
-                <option value="all">All Body Classes</option>
+                <option value="all">সব বডি টাইপ</option>
                 {BODY_TYPES.map((bt) => (
                   <option key={bt} value={bt}>
                     {bt}
@@ -433,7 +433,7 @@ export function BuyFilterBar({
             <div>
               <label className="block text-zinc-500 font-bold mb-1.5 text-[11px] uppercase tracking-wider flex items-center gap-1">
                 <MapPin className="w-3.5 h-3.5 text-black" />
-                <span>Location / City</span>
+                <span>অবস্থান / শহর</span>
               </label>
               <select
                 value={selectedLocation}
@@ -442,7 +442,7 @@ export function BuyFilterBar({
               >
                 {LOCATIONS_LIST.map((loc) => (
                   <option key={loc} value={loc === 'All Locations' ? 'all' : loc}>
-                    {loc}
+                    {loc === 'All Locations' ? 'সব অবস্থান' : loc}
                   </option>
                 ))}
               </select>
@@ -451,18 +451,18 @@ export function BuyFilterBar({
             {/* 10. Max Mileage Range */}
             <div>
               <label className="block text-zinc-500 font-bold mb-1.5 text-[11px] uppercase tracking-wider">
-                Max Mileage
+                সর্বোচ্চ মাইলেজ
               </label>
               <select
                 value={maxMileage}
                 onChange={(e) => setMaxMileage(e.target.value)}
                 className="w-full px-3 py-2.5 rounded-xl border border-zinc-200 bg-white text-xs font-bold text-zinc-800 focus:outline-none focus:border-black cursor-pointer"
               >
-                <option value="">Any Mileage</option>
-                <option value="20000">Under 20,000 km</option>
-                <option value="50000">Under 50,000 km</option>
-                <option value="80000">Under 80,000 km</option>
-                <option value="120000">Under 120,000 km</option>
+                <option value="">যেকোনো মাইলেজ</option>
+                <option value="20000">২০,০০০ কি.মি. এর নিচে</option>
+                <option value="50000">৫০,০০০ কি.মি. এর নিচে</option>
+                <option value="80000">৮০,০০০ কি.মি. এর নিচে</option>
+                <option value="120000">১,২০,০০০ কি.মি. এর নিচে</option>
               </select>
             </div>
           </div>
@@ -471,7 +471,7 @@ export function BuyFilterBar({
           <div className="pt-2 border-t border-zinc-100 flex flex-wrap items-center gap-2 text-xs">
             <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-1">
               <Tag className="w-3.5 h-3.5" />
-              Quick Presets:
+              দ্রুত ফিল্টার:
             </span>
             <button
               type="button"
@@ -486,7 +486,7 @@ export function BuyFilterBar({
               }}
               className="px-3 py-1 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-800 font-bold text-[11px] transition-colors"
             >
-              Under ৳20 Lakh
+              ৳২০ লাখের নিচে
             </button>
             <button
               type="button"
@@ -501,7 +501,7 @@ export function BuyFilterBar({
               }}
               className="px-3 py-1 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-800 font-bold text-[11px] transition-colors"
             >
-              ৳20L - ৳40L
+              ৳২০ লাখ - ৳৪০ লাখ
             </button>
             <button
               type="button"
@@ -516,7 +516,7 @@ export function BuyFilterBar({
               }}
               className="px-3 py-1 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-800 font-bold text-[11px] transition-colors"
             >
-              ৳40L - ৳80L
+              ৳৪০ লাখ - ৳৮০ লাখ
             </button>
             <button
               type="button"
@@ -531,7 +531,7 @@ export function BuyFilterBar({
               }}
               className="px-3 py-1 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-800 font-bold text-[11px] transition-colors"
             >
-              ৳80L+ Luxury
+              ৳৮০ লাখ+ লাক্সারি
             </button>
             <button
               type="button"
@@ -545,7 +545,7 @@ export function BuyFilterBar({
               }}
               className="px-3 py-1 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-800 font-bold text-[11px] transition-colors"
             >
-              Hybrid Cars
+              হাইব্রিড গাড়ি
             </button>
             <button
               type="button"
@@ -559,7 +559,7 @@ export function BuyFilterBar({
               }}
               className="px-3 py-1 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-800 font-bold text-[11px] transition-colors"
             >
-              2021 & Newer
+              ২০২১ ও নতুন
             </button>
           </div>
 
@@ -571,14 +571,14 @@ export function BuyFilterBar({
               className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold text-zinc-500 hover:text-black hover:bg-zinc-100 transition-colors w-full sm:w-auto justify-center"
             >
               <RotateCcw className="w-3.5 h-3.5" />
-              <span>Reset All</span>
+              <span>সব রিসেট করুন</span>
             </button>
 
             <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
               {hasPendingChanges && (
                 <span className="text-[11px] font-semibold text-amber-700 bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-full flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-                  Filters selected — click Apply
+                  ফিল্টার নির্বাচিত — প্রয়োগ করুন ক্লিক করুন
                 </span>
               )}
               <button
@@ -587,7 +587,7 @@ export function BuyFilterBar({
                 className="flex items-center gap-2 px-6 py-2.5 rounded-2xl bg-black text-white hover:bg-zinc-800 text-xs font-bold transition-all shadow-md active:scale-95 w-full sm:w-auto justify-center"
               >
                 <SlidersHorizontal className="w-3.5 h-3.5" />
-                <span>Apply Filters</span>
+                <span>ফিল্টার প্রয়োগ করুন</span>
               </button>
             </div>
           </div>

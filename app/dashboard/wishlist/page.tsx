@@ -31,16 +31,16 @@ export default function WishlistPage() {
             className="inline-flex items-center gap-2 text-xs font-bold text-zinc-600 hover:text-black transition-colors mb-2"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span>Back to Dashboard</span>
+            <span>ড্যাশবোর্ডে ফিরে যান</span>
           </Link>
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl sm:text-3xl font-black text-black">Saved Wishlist</h1>
+            <h1 className="text-2xl sm:text-3xl font-black text-black">পছন্দের তালিকা</h1>
             <span className="h-6 px-2.5 rounded-full bg-black text-white text-xs font-bold flex items-center justify-center">
               {cars.length}
             </span>
           </div>
           <p className="text-xs sm:text-sm text-zinc-500 mt-1">
-            Your saved favorite vehicles ready for immediate rental or purchase.
+            তাৎক্ষণিক ভাড়া বা ক্রয়ের জন্য আপনার সংরক্ষিত পছন্দের গাড়িগুলো।
           </p>
         </div>
 
@@ -61,13 +61,13 @@ export default function WishlistPage() {
             <div className="h-16 w-16 mx-auto rounded-full bg-rose-50 flex items-center justify-center text-rose-500">
               <Heart className="w-8 h-8" />
             </div>
-            <h3 className="text-lg font-bold text-black">Your wishlist is empty</h3>
+            <h3 className="text-lg font-bold text-black">আপনার পছন্দের তালিকা খালি</h3>
             <p className="text-xs text-zinc-500 max-w-sm mx-auto">
-              Save your favorite luxury sports cars and crossovers to quickly book them anytime.
+              আপনার পছন্দের গাড়িগুলো সংরক্ষণ করে রাখুন যাতে যেকোনো সময় দ্রুত বুক বা ক্রয় করতে পারেন।
             </p>
             <Link href="/cars">
               <Button variant="dark" size="sm">
-                Explore Available Cars
+                উপলব্ধ গাড়িগুলো দেখুন
               </Button>
             </Link>
           </div>

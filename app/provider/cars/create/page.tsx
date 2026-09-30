@@ -93,7 +93,7 @@ export default function CreateCarPage() {
 
     const availableSlots = 3 - uploadedPhotos.length;
     if (availableSlots <= 0) {
-      setError('You can upload a maximum of 3 photos.');
+      setError('আপনি সর্বোচ্চ ৩টি ছবি আপলোড করতে পারবেন।');
       return;
     }
 
@@ -101,11 +101,11 @@ export default function CreateCarPage() {
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       if (!file.type.startsWith('image/')) {
-        setError(`"${file.name}" is not a supported image file. Please upload JPEG, PNG, or WebP.`);
+        setError(`"${file.name}" একটি সমর্থিত ছবি ফাইল নয়। অনুগ্রহ করে JPEG, PNG, বা WebP আপলোড করুন।`);
         return;
       }
       if (file.size > 5 * 1024 * 1024) {
-        setError(`"${file.name}" exceeds the 5MB size limit.`);
+        setError(`"${file.name}" ফাইলের আকার ৫ এমবি সীমার বেশি।`);
         return;
       }
       validImageFiles.push(file);
@@ -153,7 +153,7 @@ export default function CreateCarPage() {
         );
       } catch (err: any) {
         setUploadedPhotos((prev) => prev.filter((p) => p.file !== file));
-        setError(`Failed to upload "${file.name}": ${err.message || 'Storage error'}`);
+        setError(`"${file.name}" আপলোড করতে ব্যর্থ হয়েছে: ${err.message || 'স্টোরেজ ত্রুটি'}`);
       }
     }
   };
@@ -205,50 +205,50 @@ export default function CreateCarPage() {
     const errs: Record<string, string> = {};
     const trimmedTitle = title.trim();
     if (!trimmedTitle) {
-      errs.title = 'Vehicle title is required';
+      errs.title = 'গাড়ির শিরোনাম আবশ্যক';
     } else if (trimmedTitle.length < 3) {
-      errs.title = 'Vehicle title must be at least 3 characters';
+      errs.title = 'গাড়ির শিরোনাম কমপক্ষে ৩ অক্ষরের হতে হবে';
     } else if (trimmedTitle.length > 100) {
-      errs.title = 'Vehicle title cannot exceed 100 characters';
+      errs.title = 'গাড়ির শিরোনাম ১০০ অক্ষরের বেশি হতে পারবে না';
     }
 
     if (!brand.trim()) {
-      errs.brand = 'Please select a vehicle brand / make';
+      errs.brand = 'অনুগ্রহ করে গাড়ির ব্র্যান্ড নির্বাচন করুন';
     }
 
     const yearStr = year !== '' && year !== undefined ? year.toString() : '';
     const currentYear = new Date().getFullYear();
     if (!yearStr) {
-      errs.year = 'Manufacturing year is required';
+      errs.year = 'উৎপাদন সাল আবশ্যক';
     } else if (yearStr.length !== 4) {
-      errs.year = 'Manufacturing year must be exactly 4 digits (e.g. 2024)';
+      errs.year = 'উৎপাদন সাল অবশ্যই ৪ সংখ্যার হতে হবে (যেমন: 2024)';
     } else {
       const yearNum = Number(year);
       if (isNaN(yearNum) || yearNum < 1950 || yearNum > currentYear + 2) {
-        errs.year = `Manufacturing year must be between 1950 and ${currentYear + 2}`;
+        errs.year = `উৎপাদন সাল ১৯৫০ এবং ${currentYear + 2} এর মধ্যে হতে হবে`;
       }
     }
 
     if (!condition) {
-      errs.condition = 'Please select vehicle condition';
+      errs.condition = 'অনুগ্রহ করে গাড়ির কন্ডিশন নির্বাচন করুন';
     } else if (condition !== 'new') {
       if (mileage === '' || isNaN(Number(mileage)) || Number(mileage) < 0) {
-        errs.mileage = 'Valid mileage is required for pre-owned vehicles';
+        errs.mileage = 'ব্যবহৃত গাড়ির জন্য সঠিক মাইলেজ আবশ্যক';
       } else if (Number(mileage) > 9999999) {
-        errs.mileage = 'Mileage cannot exceed 9,999,999 km';
+        errs.mileage = 'মাইলেজ ৯৯,৯৯,৯৯৯ কিমি এর বেশি হতে পারবে না';
       }
     }
 
     if (!fuelType) {
-      errs.fuelType = 'Please select fuel type';
+      errs.fuelType = 'অনুগ্রহ করে জ্বালানির ধরন নির্বাচন করুন';
     }
 
     if (!transmission) {
-      errs.transmission = 'Please select transmission';
+      errs.transmission = 'অনুগ্রহ করে ট্রান্সমিশন নির্বাচন করুন';
     }
 
     if (!bodyType) {
-      errs.bodyType = 'Please select body type';
+      errs.bodyType = 'অনুগ্রহ করে বডি টাইপ নির্বাচন করুন';
     }
 
     setFieldErrors(errs);
@@ -259,25 +259,25 @@ export default function CreateCarPage() {
     const errs: Record<string, string> = {};
     if (listingType === 'rent') {
       if (rentalPrice === '' || isNaN(Number(rentalPrice)) || Number(rentalPrice) <= 0) {
-        errs.rentalPrice = 'Valid daily rate is required (greater than 0)';
+        errs.rentalPrice = 'সঠিক দৈনিক ভাড়ার হার আবশ্যক (০ এর বেশি)';
       } else if (Number(rentalPrice) > 10000000) {
-        errs.rentalPrice = 'Daily rental rate cannot exceed ৳ 10,000,000';
+        errs.rentalPrice = 'দৈনিক ভাড়ার হার ৳ ১,০০,০০,০০০ এর বেশি হতে পারবে না';
       }
     } else {
       if (salePrice === '' || isNaN(Number(salePrice)) || Number(salePrice) <= 0) {
-        errs.salePrice = 'Valid sale price is required (greater than 0)';
+        errs.salePrice = 'সঠিক বিক্রয় মূল্য আবশ্যক (০ এর বেশি)';
       } else if (Number(salePrice) > 1000000000) {
-        errs.salePrice = 'Sale price cannot exceed ৳ 1,000,000,000';
+        errs.salePrice = 'বিক্রয় মূল্য ৳ ১০০,০০,০০,০০০ এর বেশি হতে পারবে না';
       }
     }
 
     const cleanPhone = contactPhone.replace(/\D/g, '');
     if (!cleanPhone) {
-      errs.contactPhone = 'Direct contact phone number is required';
+      errs.contactPhone = 'সরাসরি যোগাযোগের ফোন নম্বর আবশ্যক';
     } else if (cleanPhone.length !== 11) {
-      errs.contactPhone = `Phone number must be exactly 11 digits (current: ${cleanPhone.length} digits)`;
+      errs.contactPhone = `ফোন নম্বর অবশ্যই ১১ সংখ্যার হতে হবে (বর্তমান: ${cleanPhone.length} সংখ্যা)`;
     } else if (!/^01[3-9]\d{8}$/.test(cleanPhone)) {
-      errs.contactPhone = 'Enter a valid Bangladeshi mobile number starting with 01 (e.g. 01712345678)';
+      errs.contactPhone = '01 দিয়ে শুরু হওয়া সঠিক বাংলাদেশি মোবাইল নম্বর দিন (যেমন: 01712345678)';
     }
 
     setFieldErrors(errs);
@@ -288,14 +288,14 @@ export default function CreateCarPage() {
     setError('');
     if (currentStep === 1) {
       if (!validateStep1()) {
-        setError('Please fill in the required fields before proceeding.');
+        setError('এগিয়ে যাওয়ার আগে অনুগ্রহ করে প্রয়োজনীয় ঘরগুলো পূরণ করুন।');
         return;
       }
       setCurrentStep(2);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } else if (currentStep === 2) {
       if (!validateStep2()) {
-        setError('Please enter valid pricing and contact information.');
+        setError('অনুগ্রহ করে সঠিক মূল্য এবং যোগাযোগের তথ্য দিন।');
         return;
       }
       setCurrentStep(3);
@@ -321,12 +321,12 @@ export default function CreateCarPage() {
     setSuccess('');
 
     if (!validateStep1() || !validateStep2()) {
-      setError('Please resolve all validation errors before publishing.');
+      setError('প্রকাশ করার আগে অনুগ্রহ করে সকল ত্রুটি সমাধান করুন।');
       return;
     }
 
     if (uploadedPhotos.some((p) => p.isUploading)) {
-      setError('Photos are still uploading. Please wait a moment.');
+      setError('ছবি এখনো আপলোড হচ্ছে। অনুগ্রহ করে একটু অপেক্ষা করুন।');
       return;
     }
 
@@ -377,12 +377,12 @@ export default function CreateCarPage() {
 
     try {
       await carService.createCar(carData);
-      setSuccess('Vehicle listing published successfully!');
+      setSuccess('গাড়ির বিজ্ঞাপন সফলভাবে প্রকাশিত হয়েছে!');
       setTimeout(() => {
         router.push('/provider/cars');
       }, 1500);
     } catch (err: any) {
-      setError(err.message || 'Failed to create vehicle listing. Please check required fields.');
+      setError(err.message || 'গাড়ির বিজ্ঞাপন তৈরি করতে ব্যর্থ হয়েছে। অনুগ্রহ করে প্রয়োজনীয় তথ্যগুলো যাচাই করুন।');
     } finally {
       setIsLoading(false);
     }
@@ -398,16 +398,16 @@ export default function CreateCarPage() {
             className="inline-flex items-center gap-2 text-xs font-bold text-zinc-500 hover:text-black transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
-            Back to Inventory
+            ইনভেন্টরিতে ফিরে যান
           </Link>
         </div>
 
         <div>
           <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-black">
-            Add New Vehicle
+            নতুন গাড়ি যুক্ত করুন
           </h1>
           <p className="text-xs sm:text-sm text-zinc-500 mt-1">
-            Create a verified vehicle listing for outright sale or daily rental in Bangladesh.
+            বাংলাদেশে সরাসরি বিক্রয় বা দৈনিক ভাড়ার জন্য একটি ভেরিফাইড গাড়ির বিজ্ঞাপন তৈরি করুন।
           </p>
         </div>
 
@@ -489,12 +489,12 @@ export default function CreateCarPage() {
               <div className="bg-white p-6 sm:p-8 rounded-3xl border border-zinc-200 shadow-sm space-y-6">
                 <div className="flex items-center gap-2 border-b border-zinc-100 pb-3">
                   <Sparkles className="w-5 h-5 text-black" />
-                  <h2 className="text-base font-black text-black">Description & Highlights</h2>
+                  <h2 className="text-base font-black text-black">বিবরণ ও মূল বৈশিষ্ট্য</h2>
                 </div>
 
                 <div className="space-y-1.5">
                   <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700">
-                    Detailed Vehicle Description
+                    গাড়ির বিস্তারিত বিবরণ
                   </label>
                   <textarea
                     rows={4}
@@ -503,8 +503,8 @@ export default function CreateCarPage() {
                     onChange={(e) => setDescription(e.target.value.slice(0, 2000))}
                     placeholder={
                       listingType === 'rent'
-                        ? 'Enter rental terms, daily mileage limits, chauffeur option, fuel policy, and pickup details...'
-                        : 'Enter vehicle highlights, condition, service history, test-drive options, and inspection details...'
+                        ? 'ভাড়ার শর্তাবলী, দৈনিক মাইলেজ সীমা, ড্রাইভার অপশন, জ্বালানি নীতি এবং পিকআপের বিবরণ লিখুন...'
+                        : 'গাড়ির মূল বৈশিষ্ট্য, কন্ডিশন, সার্ভিস হিস্ট্রি, টেস্ট-ড্রাইভ অপশন এবং পরিদর্শনের বিবরণ লিখুন...'
                     }
                     className="w-full text-xs font-semibold p-4 rounded-2xl border border-zinc-200 bg-white focus:outline-none focus:border-black leading-relaxed"
                   />
@@ -548,12 +548,12 @@ export default function CreateCarPage() {
                   disabled={isLoading}
                   leftIcon={<ArrowLeft className="w-4 h-4" />}
                 >
-                  Back
+                  পেছনে
                 </Button>
               ) : (
                 <Link href="/provider/cars">
                   <Button type="button" variant="outline" size="md" disabled={isLoading}>
-                    Cancel
+                    বাতিল করুন
                   </Button>
                 </Link>
               )}
@@ -568,7 +568,7 @@ export default function CreateCarPage() {
                   onClick={handleNext}
                   rightIcon={<ArrowRight className="w-4 h-4" />}
                 >
-                  Next
+                  পরবর্তী
                 </Button>
               ) : (
                 <Button
@@ -578,7 +578,7 @@ export default function CreateCarPage() {
                   isLoading={isLoading}
                   leftIcon={<Plus className="w-4 h-4" />}
                 >
-                  Publish Vehicle Listing
+                  গাড়ির বিজ্ঞাপন প্রকাশ করুন
                 </Button>
               )}
             </div>

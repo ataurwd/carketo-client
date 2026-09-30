@@ -22,7 +22,7 @@ export default function ContactPage() {
     setErrorMessage(null);
 
     if (!name.trim() || !email.trim() || !subject.trim() || !message.trim()) {
-      showToast('Please fill out all required fields.', 'error');
+      showToast('অনুগ্রহ করে সকল আবশ্যক ঘর পূরণ করুন।', 'error');
       return;
     }
 
@@ -42,9 +42,9 @@ export default function ContactPage() {
       setPhone('');
       setSubject('');
       setMessage('');
-      showToast('Your message has been sent successfully!', 'success');
+      showToast('আপনার বার্তা সফলভাবে পাঠানো হয়েছে!', 'success');
     } catch (err: any) {
-      const msg = err.message || 'Failed to submit your message. Please try again.';
+      const msg = err.message || 'বার্তা পাঠাতে ব্যর্থ হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।';
       setErrorMessage(msg);
       showToast(msg, 'error');
     } finally {
@@ -58,13 +58,13 @@ export default function ContactPage() {
         {/* Header */}
         <div className="text-center space-y-3 max-w-2xl mx-auto">
           <span className="text-xs font-bold uppercase tracking-widest text-zinc-400">
-            Get In Touch
+            যোগাযোগ করুন
           </span>
           <h1 className="text-3xl sm:text-4xl font-black text-black">
-            We are here to assist your journey
+            আপনার যাত্রায় সহায়তা করতে আমরা প্রস্তুত
           </h1>
           <p className="text-xs sm:text-sm text-zinc-500">
-            Have questions about custom rentals, car bookings, or vehicle sales? Reach out to our 24/7 concierge team.
+            গাড়ি ভাড়া, বুকিং বা গাড়ি ক্রয়-বিক্রয় সম্পর্কে কোনো প্রশ্ন আছে? আমাদের ২৪/৭ সহায়তা টিমের সাথে যোগাযোগ করুন।
           </p>
         </div>
 
@@ -72,8 +72,8 @@ export default function ContactPage() {
           {/* Contact Details Card */}
           <div className="lg:col-span-5 bg-black text-white p-8 sm:p-10 rounded-3xl space-y-8 shadow-xl">
             <div>
-              <h3 className="text-xl font-black">Headquarters & Concierge</h3>
-              <p className="text-xs text-zinc-400 mt-1">Available 24 hours a day, 7 days a week.</p>
+              <h3 className="text-xl font-black">প্রধান কার্যালয় ও সহায়তা কেন্দ্র</h3>
+              <p className="text-xs text-zinc-400 mt-1">সপ্তাহে ৭ দিন, ২৪ ঘণ্টা খোলা।</p>
             </div>
 
             <div className="space-y-6 text-xs sm:text-sm">
@@ -82,9 +82,9 @@ export default function ContactPage() {
                   <Phone className="w-4 h-4 text-white" />
                 </div>
                 <div>
-                  <p className="font-bold text-white">Call Support</p>
-                  <p className="text-zinc-400 mt-0.5">+1 (800) 555-CARKETO</p>
-                  <p className="text-zinc-400">+1 (212) 555-0199</p>
+                  <p className="font-bold text-white">ফোন সাপোর্ট</p>
+                  <p className="text-zinc-400 mt-0.5">+880 1700-000000</p>
+                  <p className="text-zinc-400">+880 1800-000000</p>
                 </div>
               </div>
 
@@ -93,7 +93,7 @@ export default function ContactPage() {
                   <Mail className="w-4 h-4 text-white" />
                 </div>
                 <div>
-                  <p className="font-bold text-white">Direct Email</p>
+                  <p className="font-bold text-white">সরাসরি ইমেইল</p>
                   <p className="text-zinc-400 mt-0.5">concierge@carketo.com</p>
                   <p className="text-zinc-400">sales@carketo.com</p>
                 </div>
@@ -104,9 +104,9 @@ export default function ContactPage() {
                   <MapPin className="w-4 h-4 text-white" />
                 </div>
                 <div>
-                  <p className="font-bold text-white">Showroom & Executive Hub</p>
+                  <p className="font-bold text-white">শোরুম ও এক্সিকিউটিভ হাব</p>
                   <p className="text-zinc-400 mt-0.5">
-                    5th Avenue Executive Suite, Manhattan, NY 10022
+                    গুলশান এভিনিউ, ঢাকা-১২১২, বাংলাদেশ
                   </p>
                 </div>
               </div>
@@ -116,9 +116,9 @@ export default function ContactPage() {
           {/* Contact Message Form */}
           <div className="lg:col-span-7 bg-white p-8 sm:p-10 rounded-3xl border border-zinc-200 shadow-sm space-y-6">
             <div>
-              <h3 className="text-xl font-black text-black">Send Us a Message</h3>
+              <h3 className="text-xl font-black text-black">আমাদের বার্তা পাঠান</h3>
               <p className="text-xs text-zinc-500 mt-1">
-                Fill out the form below and an automotive specialist will respond promptly.
+                নিচের ফর্মটি পূরণ করুন, আমাদের একজন অটোমোটিভ বিশেষজ্ঞ দ্রুত আপনার সাথে যোগাযোগ করবেন।
               </p>
             </div>
 
@@ -134,27 +134,27 @@ export default function ContactPage() {
                 <div className="h-14 w-14 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto">
                   <CheckCircle2 className="w-8 h-8" />
                 </div>
-                <h4 className="text-lg font-black text-black">Thank You!</h4>
+                <h4 className="text-lg font-black text-black">ধন্যবাদ!</h4>
                 <p className="text-xs text-zinc-500 max-w-sm mx-auto">
-                  Your inquiry has been received. Our concierge team is reviewing your message and will reach out promptly.
+                  আপনার বার্তাটি আমরা পেয়েছি। আমাদের টিম আপনার বার্তা পর্যালোচনা করে দ্রুত যোগাযোগ করবে।
                 </p>
                 <Button variant="outline" size="sm" onClick={() => setSubmitted(false)}>
-                  Send Another Inquiry
+                  আরেকটি বার্তা পাঠান
                 </Button>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Input
-                    label="Your Name *"
+                    label="আপনার নাম *"
                     required
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    placeholder="John Doe"
+                    placeholder="আপনার পূর্ণ নাম"
                     disabled={isSubmitting}
                   />
                   <Input
-                    label="Email Address *"
+                    label="ইমেইল ঠিকানা *"
                     type="email"
                     required
                     value={email}
@@ -166,33 +166,33 @@ export default function ContactPage() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Input
-                    label="Phone Number"
+                    label="ফোন নম্বর"
                     type="tel"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    placeholder="+1 (555) 000-0000"
+                    placeholder="017XX-XXXXXX"
                     disabled={isSubmitting}
                   />
                   <Input
-                    label="Subject *"
+                    label="বিষয় *"
                     required
                     value={subject}
                     onChange={(e) => setSubject(e.target.value)}
-                    placeholder="e.g. VIP Airport Delivery Inquiry"
+                    placeholder="যেমন: গাড়ি ক্রয় বা ভাড়া সংক্রান্ত জিজ্ঞাসা"
                     disabled={isSubmitting}
                   />
                 </div>
 
                 <div className="space-y-1.5">
                   <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700">
-                    Message *
+                    বার্তা *
                   </label>
                   <textarea
                     rows={4}
                     required
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
-                    placeholder="How can we assist you with your rental or purchase today?"
+                    placeholder="আপনার গাড়ি ভাড়া বা ক্রয়ের বিষয়ে আমরা কীভাবে সাহায্য করতে পারি?"
                     disabled={isSubmitting}
                     className="w-full text-xs font-semibold p-3 rounded-xl border border-zinc-200 bg-white focus:outline-none focus:border-black disabled:bg-zinc-50 disabled:cursor-not-allowed"
                   />
@@ -207,7 +207,7 @@ export default function ContactPage() {
                   isLoading={isSubmitting}
                   rightIcon={!isSubmitting ? <Send className="w-4 h-4" /> : undefined}
                 >
-                  {isSubmitting ? 'Sending Inquiry...' : 'Submit Inquiry'}
+                  {isSubmitting ? 'বার্তা পাঠানো হচ্ছে...' : 'বার্তা পাঠান'}
                 </Button>
               </form>
             )}

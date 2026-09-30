@@ -48,14 +48,14 @@ export function FeaturedCarsSlider({ cars }: FeaturedCarsSliderProps) {
           <div className="space-y-2">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-400/10 border border-amber-400/30 text-amber-400 text-xs font-bold uppercase tracking-wider">
               <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-              <span>Exclusive Showcase</span>
+              <span>এক্সক্লুসিভ শোকেস</span>
             </div>
             <h2 className="text-3xl sm:text-4xl font-black text-white tracking-tight flex items-center gap-3">
-              <span>Featured Vehicles</span>
+              <span>ফিচার্ড গাড়িসমূহ</span>
               <Flame className="w-7 h-7 text-amber-500 hidden sm:inline" />
             </h2>
             <p className="text-zinc-400 text-xs sm:text-sm max-w-xl">
-              Handpicked premium vehicles with verified titles, luxury amenities, and top-tier owner ratings.
+              যাচাইকৃত কাগজপত্র, লাক্সারি সুবিধা এবং সেরা রেটিংপ্রাপ্ত বাছাইকৃত প্রিমিয়াম গাড়ি।
             </p>
           </div>
 
@@ -65,7 +65,7 @@ export function FeaturedCarsSlider({ cars }: FeaturedCarsSliderProps) {
               href="/cars"
               className="text-xs font-bold text-zinc-400 hover:text-white transition-colors flex items-center gap-1 mr-2"
             >
-              <span>View All Cars</span>
+              <span>সব গাড়ি দেখুন</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
 
