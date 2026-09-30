@@ -156,9 +156,9 @@ export function HomeHero({
           </div>
 
           {/* Bold Centered Headline */}
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[54px] xl:text-6xl font-black text-zinc-950 leading-[1.3] sm:leading-[1.35] lg:leading-[1.38] tracking-normal space-y-1 sm:space-y-2">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[54px] xl:text-6xl font-black text-zinc-950 leading-[1.38] sm:leading-[1.42] lg:leading-[1.45] tracking-normal space-y-2 sm:space-y-3">
             <span className="block">সঠিক গাড়িটি খুঁজে নিন।</span>
-            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-zinc-950 via-zinc-800 to-zinc-600 pb-1">
+            <span className="block text-zinc-800">
               সরাসরি ভাড়া নিন বা কিনুন।
             </span>
           </h1>
