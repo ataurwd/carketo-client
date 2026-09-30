@@ -39,7 +39,10 @@ import {
   MapPin,
   Car as CarIcon,
   ShoppingBag,
+  Flag,
+  Ban,
 } from 'lucide-react';
+import { showToast } from '@/lib/alert';
 
 /** Auto-sliding image carousel with touch/mouse swipe and arrow navigation */
 function ImageSlider({ images, title }: { images: string[]; title: string }) {
@@ -239,6 +242,11 @@ export default function CarDetailClient() {
   const [chatMessages, setChatMessages] = useState<IChatMessage[]>([]);
   const [isSendingChat, setIsSendingChat] = useState(false);
   const [isChatProfileSet, setIsChatProfileSet] = useState(false);
+  const [showChatReportPanel, setShowChatReportPanel] = useState(false);
+  const [chatReportReason, setChatReportReason] = useState('');
+  const [chatReportCategory, setChatReportCategory] = useState('প্রতারণা বা স্ক্যাম সন্দেহ');
+  const [chatReportAlsoBlock, setChatReportAlsoBlock] = useState(true);
+  const [isSubmittingChatReport, setIsSubmittingChatReport] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   const [clientSlug, setClientSlug] = useState<string>('');
@@ -497,7 +505,90 @@ export default function CarDetailClient() {
 
   const handleSendInquiry = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (activeThread?.isBlocked) {
+      showToast('এই কথোপকথনটি ব্লক করা রয়েছে।', 'error');
+      return;
+    }
     await sendChatMessageText(inquiryMessage);
+  };
+
+  const handleToggleBlockInCarModal = async () => {
+    if (!activeThread?._id) {
+      showToast('প্রথমে অন্তত একটি মেসেজ পাঠিয়ে চ্যাট শুরু করুন', 'info');
+      return;
+    }
+    try {
+      const nextBlock = !activeThread.isBlocked;
+      const updated = await inquiryService.toggleBlock(activeThread._id, {
+        isBlocked: nextBlock,
+        actorRole: 'buyer',
+        actorName: user?.name || inquiryName || 'ক্রেতা',
+      });
+      setActiveThread(updated);
+      showToast(
+        nextBlock ? 'চ্যাটটি সফলভাবে ব্লক করা হয়েছে' : 'চ্যাটটি আনব্লক করা হয়েছে',
+        'success'
+      );
+    } catch {
+      showToast('ব্লক স্ট্যাটাস পরিবর্তন করতে সমস্যা হয়েছে', 'error');
+    }
+  };
+
+  const handleSubmitChatReportInCarModal = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!chatReportReason.trim()) {
+      showToast('অনুগ্রহ করে রিপোর্টের কারণ লিখুন', 'error');
+      return;
+    }
+    setIsSubmittingChatReport(true);
+    try {
+      let threadId = activeThread?._id;
+      if (!threadId && car?._id) {
+        const effectiveName = (user?.name || inquiryName || 'ক্রেতা').trim();
+        const effectivePhone = ((user as any)?.phone || inquiryPhone || '01700000000').trim();
+        const created = await inquiryService.createInquiry({
+          carId: car._id,
+          carSnapshot: {
+            _id: car._id,
+            title: car.title,
+            slug: car.slug,
+            coverImage: car.coverImage,
+            brand: car.brand,
+            model: car.model,
+            listingType: car.listingType,
+            salePrice: car.salePrice || car.price,
+            rentalPrice: car.rentalPrice,
+            contactPhone: car.contactPhone,
+          },
+          senderName: effectiveName,
+          senderEmail: user?.email || 'guest@carketo.com',
+          senderPhone: effectivePhone,
+          message: `[রিপোর্ট ও অভিযোগ]: ${chatReportReason.trim()}`,
+        });
+        setActiveThread(created);
+        threadId = created._id;
+      }
+
+      if (threadId) {
+        const updated = await inquiryService.reportUser(threadId, {
+          category: chatReportCategory,
+          reason: chatReportReason.trim(),
+          alsoBlock: chatReportAlsoBlock,
+          reporterRole: 'buyer',
+          reporterName: (user?.name || inquiryName || 'ক্রেতা').trim(),
+          reporterPhone: ((user as any)?.phone || inquiryPhone || '01700000000').trim(),
+        });
+        setActiveThread(updated);
+      }
+
+      setShowChatReportPanel(false);
+      setChatReportReason('');
+      showToast('আপনার রিপোর্টটি সফলভাবে অ্যাডমিনের কাছে পাঠানো হয়েছে', 'success');
+    } catch {
+      showToast('রিপোর্ট জমা দিতে সমস্যা হয়েছে', 'error');
+    } finally {
+      setIsSubmittingChatReport(false);
+    }
   };
 
   const policyItems = [
@@ -1127,14 +1218,109 @@ export default function CarDetailClient() {
                 </div>
               </div>
 
-              <button
-                type="button"
-                onClick={() => setInquiryModalOpen(false)}
-                className="p-2 rounded-full bg-white/10 text-zinc-300 hover:text-white hover:bg-white/20 transition-colors shrink-0"
-              >
-                <X className="w-4 h-4" />
-              </button>
+              <div className="flex items-center gap-1.5 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setShowChatReportPanel((v) => !v)}
+                  className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 text-[11px] font-bold transition-colors cursor-pointer"
+                  title="রিপোর্ট বা ব্লক করুন"
+                >
+                  <Flag className="w-3.5 h-3.5" />
+                  <span>রিপোর্ট / ব্লক</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setInquiryModalOpen(false)}
+                  className="p-2 rounded-full bg-white/10 text-zinc-300 hover:text-white hover:bg-white/20 transition-colors shrink-0"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
             </div>
+
+            {/* Inline Report & Block Drawer inside Chat Modal */}
+            {showChatReportPanel && (
+              <form
+                onSubmit={handleSubmitChatReportInCarModal}
+                className="p-4 bg-rose-50 border-b border-rose-200 space-y-3"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-black text-rose-900 flex items-center gap-1.5">
+                    <ShieldAlert className="w-4 h-4 text-rose-600" />
+                    বিক্রেতা বা চ্যাট রিপোর্ট / ব্লক করুন
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setShowChatReportPanel(false)}
+                    className="text-[11px] font-bold text-rose-600 hover:underline"
+                  >
+                    বন্ধ করুন
+                  </button>
+                </div>
+
+                <div className="flex flex-wrap gap-1.5">
+                  {[
+                    'প্রতারণা বা স্ক্যাম সন্দেহ',
+                    'অশালীন ভাষা বা আচরণ',
+                    'ভুয়া তথ্য বা দাম',
+                    'স্প্যাম মেসেজ',
+                  ].map((cat) => (
+                    <button
+                      key={cat}
+                      type="button"
+                      onClick={() => setChatReportCategory(cat)}
+                      className={`px-2.5 py-1 rounded-lg text-[10px] font-bold border transition-all cursor-pointer ${
+                        chatReportCategory === cat
+                          ? 'bg-rose-600 text-white border-rose-600'
+                          : 'bg-white text-zinc-700 border-zinc-200'
+                      }`}
+                    >
+                      {cat}
+                    </button>
+                  ))}
+                </div>
+
+                <textarea
+                  rows={2}
+                  required
+                  value={chatReportReason}
+                  onChange={(e) => setChatReportReason(e.target.value)}
+                  placeholder="রিপোর্টের কারণ বিস্তারিত লিখুন..."
+                  className="w-full p-2.5 rounded-xl border border-rose-200 bg-white text-xs font-medium text-black focus:outline-none focus:border-rose-500"
+                />
+
+                <div className="flex items-center justify-between gap-2">
+                  <label className="flex items-center gap-1.5 text-[11px] font-bold text-rose-900 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={chatReportAlsoBlock}
+                      onChange={(e) => setChatReportAlsoBlock(e.target.checked)}
+                      className="accent-rose-600 rounded"
+                    />
+                    <span>চ্যাটটি ব্লকও করুন</span>
+                  </label>
+
+                  <div className="flex items-center gap-2">
+                    {activeThread?._id && (
+                      <button
+                        type="button"
+                        onClick={handleToggleBlockInCarModal}
+                        className="px-3 py-1.5 rounded-xl bg-zinc-900 text-white text-[11px] font-bold hover:bg-black cursor-pointer"
+                      >
+                        {activeThread.isBlocked ? 'আনব্লক করুন' : 'শুধু ব্লক করুন'}
+                      </button>
+                    )}
+                    <button
+                      type="submit"
+                      disabled={isSubmittingChatReport || !chatReportReason.trim()}
+                      className="px-3.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 disabled:opacity-50 text-white text-[11px] font-bold cursor-pointer"
+                    >
+                      {isSubmittingChatReport ? 'পাঠানো হচ্ছে...' : 'রিপোর্ট জমা দিন'}
+                    </button>
+                  </div>
+                </div>
+              </form>
+            )}
 
             {/* Step 1 for Guest: Quick Name & Phone input before entering chat */}
             {!user && !isChatProfileSet ? (

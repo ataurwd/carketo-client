@@ -193,7 +193,7 @@ export const adminService = {
     return res.data;
   },
 
-  // ===================== INQUIRIES & LEADS =====================
+  // ===================== INQUIRIES & LEADS & CHAT REPORTS =====================
   async getInquiriesAdmin(params?: any) {
     const res: any = await apiClient.get('/admin/inquiries', { params });
     return res.data || [];
@@ -201,6 +201,25 @@ export const adminService = {
 
   async deleteInquiryAdmin(inquiryId: string) {
     const res: any = await apiClient.delete(`/admin/inquiries/${inquiryId}`);
+    return res.data;
+  },
+
+  async getChatReports() {
+    const res: any = await apiClient.get('/admin/reports');
+    return res.data || [];
+  },
+
+  async updateChatReport(
+    inquiryId: string,
+    reportId: string,
+    data: { status?: string; isChatBlocked?: boolean }
+  ) {
+    const res: any = await apiClient.put(`/admin/reports/${inquiryId}/${reportId}`, data);
+    return res.data;
+  },
+
+  async deleteChatReport(inquiryId: string, reportId: string) {
+    const res: any = await apiClient.delete(`/admin/reports/${inquiryId}/${reportId}`);
     return res.data;
   },
 

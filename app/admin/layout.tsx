@@ -27,6 +27,7 @@ import {
   ChevronDown,
   PanelLeftClose,
   PanelLeftOpen,
+  ShieldAlert,
 } from 'lucide-react';
 
 interface NavSection {
@@ -57,6 +58,7 @@ const navSections: NavSection[] = [
     title: 'CRM & USERS',
     items: [
       { label: 'Car Inquiries', href: '/admin/inquiries', icon: MessageSquare, badgeKey: 'inquiries' },
+      { label: 'Chat & User Reports', href: '/admin/reports', icon: ShieldAlert, badgeKey: 'reports' },
       { label: 'Contact Messages', href: '/admin/contacts', icon: Mail, badgeKey: 'contacts' },
       { label: 'Users & RBAC', href: '/admin/users', icon: Users },
     ],

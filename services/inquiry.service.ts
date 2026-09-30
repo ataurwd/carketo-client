@@ -9,6 +9,22 @@ export interface IChatMessage {
   createdAt: string;
 }
 
+export interface IChatReport {
+  _id?: string;
+  reporterId?: string;
+  reporterRole: 'buyer' | 'seller';
+  reporterName: string;
+  reporterPhone?: string;
+  reportedUserId?: string;
+  reportedUserName: string;
+  reportedUserPhone?: string;
+  category?: string;
+  reason: string;
+  alsoBlocked: boolean;
+  status: 'pending' | 'reviewed' | 'resolved' | 'dismissed';
+  createdAt: string;
+}
+
 export interface IInquiry {
   _id: string;
   carId?: {
@@ -49,6 +65,12 @@ export interface IInquiry {
   message: string;
   messages?: IChatMessage[];
   status: 'new' | 'replied' | 'closed';
+  isBlocked?: boolean;
+  blockedByRole?: 'buyer' | 'seller';
+  blockedByName?: string;
+  blockedReason?: string;
+  blockedAt?: string;
+  reports?: IChatReport[];
   createdAt: string;
   updatedAt: string;
 }
@@ -110,6 +132,40 @@ export const inquiryService = {
     }
   ): Promise<IInquiry> {
     const res = await apiClient.post<IInquiry>(`/inquiries/${inquiryId}/messages`, data);
+    return res.data;
+  },
+
+  /**
+   * Block or unblock a conversation
+   */
+  async toggleBlock(
+    inquiryId: string,
+    data: {
+      isBlocked: boolean;
+      actorRole?: 'buyer' | 'seller';
+      actorName?: string;
+      reason?: string;
+    }
+  ): Promise<IInquiry> {
+    const res = await apiClient.put<IInquiry>(`/inquiries/${inquiryId}/block`, data);
+    return res.data;
+  },
+
+  /**
+   * Report a user in a conversation with reason and optional block
+   */
+  async reportUser(
+    inquiryId: string,
+    data: {
+      reason: string;
+      category?: string;
+      alsoBlock?: boolean;
+      reporterRole?: 'buyer' | 'seller';
+      reporterName?: string;
+      reporterPhone?: string;
+    }
+  ): Promise<IInquiry> {
+    const res = await apiClient.post<IInquiry>(`/inquiries/${inquiryId}/report`, data);
     return res.data;
   },
 
