@@ -121,13 +121,22 @@
 }
 
 /* Surface Backgrounds */
-.admin-light .bg-zinc-950 {
-  background-color: #f8fafc !important;
-}
+.admin-light .bg-zinc-950,
+.admin-light .bg-zinc-950\/95,
 .admin-light .bg-zinc-950\/90,
+.admin-light .bg-zinc-950\/85,
 .admin-light .bg-zinc-950\/80,
+.admin-light .bg-zinc-950\/75,
 .admin-light .bg-zinc-950\/70,
-.admin-light .bg-zinc-950\/40 {
+.admin-light .bg-zinc-950\/65,
+.admin-light .bg-zinc-950\/60,
+.admin-light .bg-zinc-950\/55,
+.admin-light .bg-zinc-950\/50,
+.admin-light .bg-zinc-950\/45,
+.admin-light .bg-zinc-950\/40,
+.admin-light .bg-zinc-950\/30,
+.admin-light .bg-zinc-950\/20,
+.admin-light .bg-zinc-950\/10 {
   background-color: #f8fafc !important;
 }
 
@@ -140,15 +149,20 @@
   background-color: #ffffff !important;
 }
 
-/* Sub-panels, Table Rows & Hover Backdrops */
+/* Sub-panels, Table Rows & Inset Cards */
+.admin-light .bg-zinc-900\/65,
 .admin-light .bg-zinc-900\/60,
+.admin-light .bg-zinc-900\/55,
 .admin-light .bg-zinc-900\/50,
+.admin-light .bg-zinc-900\/45,
 .admin-light .bg-zinc-900\/40,
-.admin-light .bg-zinc-900\/30 {
+.admin-light .bg-zinc-900\/30,
+.admin-light .bg-zinc-900\/20,
+.admin-light .bg-zinc-900\/10 {
   background-color: #f8fafc !important;
 }
 
-/* Secondary Buttons, Badges, Filter Bar */
+/* Secondary Buttons, Badges, Filter Bar (Only direct classes, never substring matches) */
 .admin-light .bg-zinc-800,
 .admin-light .bg-zinc-800\/95,
 .admin-light .bg-zinc-800\/90,
@@ -165,10 +179,38 @@
   background-color: #f8fafc !important;
 }
 
+/* Zinc-700 direct classes */
+.admin-light .bg-zinc-700,
+.admin-light .bg-zinc-700\/90,
+.admin-light .bg-zinc-700\/80,
+.admin-light .bg-zinc-700\/60,
+.admin-light .bg-zinc-700\/50 {
+  background-color: #e2e8f0 !important;
+}
+
+/* Progress Bar Tracks in Light Mode */
+.admin-light .rounded-full.bg-zinc-950,
+.admin-light .h-4.bg-zinc-950,
+.admin-light .h-2.bg-zinc-950 {
+  background-color: #e2e8f0 !important;
+  border-color: #cbd5e1 !important;
+}
+
+/* User Avatar Circles in Admin Light Mode */
+.admin-light .from-zinc-800.to-zinc-700 {
+  background-image: none !important;
+  background-color: #e2e8f0 !important;
+  color: #1e293b !important;
+  border-color: #cbd5e1 !important;
+}
+
 /* Borders & Dividers in Light Mode - Soft Slate, Never Harsh/Black */
 .admin-light .border-zinc-950,
+.admin-light .border-zinc-950\/80,
+.admin-light .border-zinc-950\/60,
 .admin-light .border-zinc-900,
 .admin-light .border-zinc-900\/80,
+.admin-light .border-zinc-900\/60,
 .admin-light .border-zinc-800,
 .admin-light .border-zinc-800\/90,
 .admin-light .border-zinc-800\/80,
@@ -208,18 +250,31 @@
   opacity: 0.65 !important;
 }
 
-/* Sidebar Navigation in Light Mode - Completely Clean Without Stray Borders */
-.admin-light aside nav a,
-.admin-light aside .group a,
-.admin-light aside a,
+/* Sidebar Navigation in Light Mode - Completely Clean, Flat & Transparent Inactive States */
+.admin-light aside nav a:not([class*="from-orange"]):not([class*="bg-orange"]),
+.admin-light aside .group a:not([class*="from-orange"]):not([class*="bg-orange"]),
+.admin-light aside a:not([class*="from-orange"]):not([class*="bg-orange"]),
 .admin-light aside button {
+  background-color: transparent !important;
+  background-image: none !important;
   border: none !important;
   border-color: transparent !important;
+  box-shadow: none !important;
 }
 
-.admin-light aside a:not([class*="from-orange"]):not([class*="bg-orange"]) {
-  border: none !important;
-  border-color: transparent !important;
+.admin-light aside a:not([class*="from-orange"]):not([class*="bg-orange"]):hover,
+.admin-light aside button:hover {
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
+}
+
+.admin-light aside a[class*="from-orange"],
+.admin-light aside a[class*="bg-orange"] {
+  color: #ffffff !important;
+}
+.admin-light aside a[class*="from-orange"] *,
+.admin-light aside a[class*="bg-orange"] * {
+  color: #ffffff !important;
 }
 
 /* Table Row Dividers & Divide Utilities in Light Mode */

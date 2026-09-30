@@ -66,6 +66,7 @@ export interface IInquiry {
   messages?: IChatMessage[];
   status: 'new' | 'replied' | 'closed';
   isBlocked?: boolean;
+  blockedByUserId?: string;
   blockedByRole?: 'buyer' | 'seller';
   blockedByName?: string;
   blockedReason?: string;

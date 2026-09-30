@@ -182,8 +182,11 @@ export default function UserInquiriesPage() {
         nextBlockState ? 'ইউজারকে ব্লক করা হয়েছে' : 'ইউজারকে আনব্লক করা হয়েছে',
         'success'
       );
-    } catch {
-      showToast('ব্লক স্ট্যাটাস পরিবর্তন করতে সমস্যা হয়েছে', 'error');
+    } catch (err: any) {
+      showToast(
+        err?.response?.data?.message || 'ব্লক স্ট্যাটাস পরিবর্তন করতে সমস্যা হয়েছে',
+        'error'
+      );
     }
   };
 
@@ -265,8 +268,8 @@ export default function UserInquiriesPage() {
   };
 
   return (
-    <div className="bg-zinc-100/70 py-3 sm:py-5 px-2 sm:px-6 lg:px-8">
-      <div className="max-w-6xl mx-auto">
+    <div className="bg-zinc-100/70 py-4 sm:py-6 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto">
         {/* Compact Top Bar */}
         <div className="flex items-center justify-between gap-3 mb-3 px-1">
           <div className="flex items-center gap-2.5">
@@ -285,7 +288,7 @@ export default function UserInquiriesPage() {
         </div>
 
         {/* CLEAN MESSENGER SPLIT BOX */}
-        <div className="bg-white rounded-3xl border border-zinc-200/90 shadow-md overflow-hidden grid grid-cols-1 lg:grid-cols-12 h-[calc(100vh-8.5rem)] min-h-[540px] max-h-[720px]">
+        <div className="bg-white rounded-2xl border border-zinc-200/90 shadow-md overflow-hidden grid grid-cols-1 lg:grid-cols-12 h-[540px]">
           {/* ================= LEFT PANE: SIMPLE USER LIST ================= */}
           <div
             className={`lg:col-span-4 border-r border-zinc-100 flex flex-col h-full bg-white ${
@@ -402,6 +405,15 @@ export default function UserInquiriesPage() {
             {activeChat ? (
               (() => {
                 const isSeller = checkIsSeller(activeChat);
+                const myRole: 'seller' | 'buyer' = isSeller ? 'seller' : 'buyer';
+                const didIBlock =
+                  Boolean(activeChat.isBlocked) &&
+                  ((activeChat.blockedByUserId &&
+                    currentUserId &&
+                    String(activeChat.blockedByUserId) === String(currentUserId)) ||
+                    activeChat.blockedByRole === myRole);
+                const amIBlockedByOther = Boolean(activeChat.isBlocked) && !didIBlock;
+
                 const counterpartName = isSeller
                   ? activeChat.senderName
                   : (typeof activeChat.sellerId === 'object' && activeChat.sellerId?.name) ||
@@ -469,29 +481,39 @@ export default function UserInquiriesPage() {
                               target="_blank"
                               rel="noopener noreferrer"
                               title="হোয়াটসঅ্যাপ"
-                              className="h-9 w-9 rounded-full bg-emerald-50 hover:bg-emerald-100 text-emerald-600 flex items-center justify-center transition-colors"
+                              className="h-9 w-9 rounded-full bg-[#25D366]/15 hover:bg-[#25D366]/25 text-[#128C7E] flex items-center justify-center transition-colors"
                             >
-                              <MessageCircle className="w-4 h-4" />
+                              <svg
+                                viewBox="0 0 24 24"
+                                fill="currentColor"
+                                className="w-4 h-4 text-[#25D366]"
+                                aria-hidden="true"
+                              >
+                                <path d="M12.031 2c-5.516 0-9.999 4.486-9.999 10.002 0 1.766.461 3.489 1.337 5.008L2 22l5.122-1.343c1.471.801 3.128 1.224 4.906 1.225h.004c5.515 0 9.998-4.486 9.998-10.002 0-2.672-1.04-5.185-2.929-7.074C17.213 3.041 14.702 2 12.031 2zm5.829 14.129c-.246.693-1.434 1.326-1.997 1.411-.513.077-1.182.109-1.908-.121-.44-.139-1.005-.326-1.727-.638-3.038-1.312-5.023-4.37-5.174-4.572-.152-.202-1.236-1.644-1.236-3.136 0-1.492.782-2.226 1.059-2.529.277-.303.605-.379.807-.379.202 0 .403.002.58.011.186.009.435-.071.681.52.252.606.857 2.096.933 2.248.076.151.126.328.025.53-.101.202-.151.328-.303.505-.151.177-.319.395-.454.53-.151.152-.309.316-.133.619.177.303.784 1.294 1.684 2.096 1.157 1.031 2.132 1.351 2.435 1.502.303.152.479.126.656-.076.177-.202.757-.884.959-1.187.202-.303.403-.252.681-.151.277.101 1.765.833 2.068.985.303.151.504.227.58.353.076.126.076.732-.17 1.425z" />
+                              </svg>
                             </a>
                           </>
                         )}
 
-                        <button
-                          type="button"
-                          onClick={handleToggleBlock}
-                          title={activeChat.isBlocked ? 'আনব্লক করুন' : 'ব্লক করুন'}
-                          className={`h-9 w-9 rounded-full flex items-center justify-center transition-colors cursor-pointer ${
-                            activeChat.isBlocked
-                              ? 'bg-amber-100 text-amber-700 hover:bg-amber-200'
-                              : 'bg-zinc-100 text-zinc-700 hover:bg-zinc-200'
-                          }`}
-                        >
-                          {activeChat.isBlocked ? (
-                            <Unlock className="w-4 h-4" />
-                          ) : (
-                            <Ban className="w-4 h-4" />
-                          )}
-                        </button>
+                        {/* Only show Block/Unblock button if I am NOT the one who got blocked */}
+                        {!amIBlockedByOther && (
+                          <button
+                            type="button"
+                            onClick={handleToggleBlock}
+                            title={didIBlock ? 'আনব্লক করুন' : 'ব্লক করুন'}
+                            className={`h-9 w-9 rounded-full flex items-center justify-center transition-colors cursor-pointer ${
+                              didIBlock
+                                ? 'bg-amber-100 text-amber-700 hover:bg-amber-200'
+                                : 'bg-zinc-100 text-zinc-700 hover:bg-zinc-200'
+                            }`}
+                          >
+                            {didIBlock ? (
+                              <Unlock className="w-4 h-4" />
+                            ) : (
+                              <Ban className="w-4 h-4" />
+                            )}
+                          </button>
+                        )}
 
                         <button
                           type="button"
@@ -546,14 +568,20 @@ export default function UserInquiriesPage() {
                     {/* Blocked Warning Banner */}
                     {activeChat.isBlocked && (
                       <div className="px-4 py-2 bg-rose-50 border-b border-rose-100 flex items-center justify-between gap-2 text-xs text-rose-700">
-                        <span className="font-bold">এই কথোপকথনটি ব্লক করা রয়েছে।</span>
-                        <button
-                          type="button"
-                          onClick={handleToggleBlock}
-                          className="px-2.5 py-1 rounded-lg bg-rose-600 text-white text-[11px] font-bold hover:bg-rose-700 cursor-pointer"
-                        >
-                          আনব্লক
-                        </button>
+                        <span className="font-bold">
+                          {didIBlock
+                            ? 'আপনি এই ইউজারকে ব্লক করেছেন।'
+                            : 'অপর পক্ষ এই কথোপকথনটি ব্লক করেছেন। আপনি আর মেসেজ পাঠাতে পারবেন না।'}
+                        </span>
+                        {didIBlock && (
+                          <button
+                            type="button"
+                            onClick={handleToggleBlock}
+                            className="px-2.5 py-1 rounded-lg bg-rose-600 text-white text-[11px] font-bold hover:bg-rose-700 cursor-pointer shrink-0"
+                          >
+                            আনব্লক করুন
+                          </button>
+                        )}
                       </div>
                     )}
 

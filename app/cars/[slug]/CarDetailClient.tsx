@@ -1301,15 +1301,16 @@ export default function CarDetailClient() {
                   </label>
 
                   <div className="flex items-center gap-2">
-                    {activeThread?._id && (
-                      <button
-                        type="button"
-                        onClick={handleToggleBlockInCarModal}
-                        className="px-3 py-1.5 rounded-xl bg-zinc-900 text-white text-[11px] font-bold hover:bg-black cursor-pointer"
-                      >
-                        {activeThread.isBlocked ? 'আনব্লক করুন' : 'শুধু ব্লক করুন'}
-                      </button>
-                    )}
+                    {activeThread?._id &&
+                      (!activeThread.isBlocked || activeThread.blockedByRole === 'buyer') && (
+                        <button
+                          type="button"
+                          onClick={handleToggleBlockInCarModal}
+                          className="px-3 py-1.5 rounded-xl bg-zinc-900 text-white text-[11px] font-bold hover:bg-black cursor-pointer"
+                        >
+                          {activeThread.isBlocked ? 'আনব্লক করুন' : 'শুধু ব্লক করুন'}
+                        </button>
+                      )}
                     <button
                       type="submit"
                       disabled={isSubmittingChatReport || !chatReportReason.trim()}
