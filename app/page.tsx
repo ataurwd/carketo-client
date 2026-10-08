@@ -10,6 +10,7 @@ import { carService } from '@/services/car.service';
 import { ICar } from '@/types/car.types';
 import { FALLBACK_20_CARS } from '@/lib/fallbackCars';
 import { FeaturedCarsSlider } from '@/components/home/FeaturedCarsSlider';
+import { PricingPlans } from '@/components/home/PricingPlans';
 import {
   ShieldCheck,
   Zap,
@@ -464,9 +465,9 @@ export default function HomePage() {
                     বিজনেস প্রোফাইল খুলুন
                   </Button>
                 </Link>
-                <Link href="/sell">
+                <Link href="#pricing-plans">
                   <Button variant="outline" size="md">
-                    আপনার গাড়ি তালিকাভুক্ত করুন
+                    প্ল্যান ও প্যাকেজ দেখুন
                   </Button>
                 </Link>
               </div>
@@ -475,6 +476,9 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* 5. MEMBERSHIP & PRICING PLANS SECTION (1 YEAR FREE, 3 YEARS, 5 YEARS) */}
+      <PricingPlans />
     </div>
   );
 }
