@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { carService } from '@/services/car.service';
@@ -322,6 +322,36 @@ export default function CarDetailClient() {
   const rawPhone = car?.contactPhone || '01712-345678';
   const maskedPhone = '017 ••••••••';
 
+  // Check if current user is the owner/creator of this car
+  const isOwner = useMemo(() => {
+    if (!user || !car) return false;
+    const userId = user.id || (user as any)._id;
+    if (!userId) return false;
+
+    const carProviderId =
+      typeof car.providerId === 'object' && car.providerId !== null
+        ? car.providerId._id || car.providerId.id
+        : car.providerId;
+
+    if (carProviderId && String(carProviderId) === String(userId)) {
+      return true;
+    }
+
+    if (car.provider?.id && String(car.provider.id) === String(userId)) {
+      return true;
+    }
+
+    if (user.phone && car.contactPhone) {
+      const cleanUserPhone = user.phone.replace(/\D/g, '');
+      const cleanCarPhone = car.contactPhone.replace(/\D/g, '');
+      if (cleanUserPhone && cleanUserPhone === cleanCarPhone) {
+        return true;
+      }
+    }
+
+    return false;
+  }, [user, car]);
+
   useEffect(() => {
     if (car?._id && user) {
       wishlistService
@@ -368,6 +398,7 @@ export default function CarDetailClient() {
   };
 
   const handleChatButtonClick = () => {
+    if (isOwner) return;
     if (!user) {
       setLoginPromptReason('chat');
       setLoginPromptOpen(true);
@@ -792,18 +823,30 @@ export default function CarDetailClient() {
                   </div>
                 )}
 
-                <Button
-                  variant="dark"
-                  size="md"
-                  onClick={handleChatButtonClick}
-                  className="w-full text-xs font-bold shadow-sm"
-                  leftIcon={<MessageCircle className="w-4 h-4" />}
-                >
-                  <span className="flex items-center gap-2">
-                    <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-                    <span>মালিকের সাথে লাইভ চ্যাট করুন</span>
-                  </span>
-                </Button>
+                {isOwner ? (
+                  <div className="p-3.5 rounded-2xl bg-zinc-100 border border-zinc-200 text-center space-y-1">
+                    <span className="inline-flex items-center gap-1.5 text-xs font-bold text-zinc-800">
+                      <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                      এটি আপনার নিজের গাড়ির বিজ্ঞাপন
+                    </span>
+                    <p className="text-[11px] text-zinc-500 leading-relaxed">
+                      অন্যান্য ক্রেতা ও গ্রাহকরা এই পেজ থেকে আপনাকে সরাসরি মেসেজ বা কল দিতে পারবেন।
+                    </p>
+                  </div>
+                ) : (
+                  <Button
+                    variant="dark"
+                    size="md"
+                    onClick={handleChatButtonClick}
+                    className="w-full text-xs font-bold shadow-sm"
+                    leftIcon={<MessageCircle className="w-4 h-4" />}
+                  >
+                    <span className="flex items-center gap-2">
+                      <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                      <span>মালিকের সাথে লাইভ চ্যাট করুন</span>
+                    </span>
+                  </Button>
+                )}
               </div>
 
               {/* Specs Table */}
@@ -1196,7 +1239,7 @@ export default function CarDetailClient() {
       )}
 
       {/* LIVE REAL-TIME CHAT WITH VEHICLE OWNER MODAL */}
-      {inquiryModalOpen && (
+      {inquiryModalOpen && !isOwner && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
           <div className="bg-white rounded-3xl max-w-lg w-full border border-zinc-200 shadow-2xl overflow-hidden flex flex-col max-h-[88vh]">
             {/* Chat Header */}

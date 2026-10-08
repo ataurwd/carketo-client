@@ -14,7 +14,35 @@ import {
   AlertCircle,
   Plus,
   Sparkles,
+  FileText,
+  X,
+  ShieldCheck,
+  Check,
+  ScrollText,
 } from 'lucide-react';
+
+const SELLER_TERMS_SECTIONS = [
+  {
+    title: '১. মালিকানা ও নথিপত্রের সত্যতা',
+    desc: 'বিজ্ঞাপনদাতা নিশ্চিত করছেন যে তিনি এই গাড়ির বৈধ মালিক অথবা মালিকের পক্ষ থেকে বিক্রয় বা ভাড়ার জন্য আইনসম্মত ক্ষমতা প্রাপ্ত। গাড়ির রেজিস্ট্রেশন সার্টিফিকেট, ট্যাক্স টোকেন, ফিটনেস সনদ এবং ব্লু-বুক/স্মার্টকার্ড সম্পূর্ণ বৈধ ও হালনাগাদ রয়েছে। কোনো চুরিকৃত বা আইনি জটিলতায় থাকা গাড়ি তালিকাভুক্ত করা সম্পূর্ণ নিষিদ্ধ।',
+  },
+  {
+    title: '২. নির্ভুল ও সঠিক তথ্য প্রদান',
+    desc: 'গাড়ির ছবি, মাইলেজ (প্রকৃত ওডোমিটার রিডিং), বর্তমান যান্ত্রিক অবস্থা, কোনো অ্যাক্সিডেন্ট হিস্ট্রি এবং বিক্রয় বা ভাড়ার মূল্য ১০০% সত্য ও নির্ভুল হতে হবে। কোনো বিভ্রান্তিকর বা ভুয়া তথ্য প্রদান করলে কারকেটো কর্তৃপক্ষ কোনো নোটিশ ছাড়াই বিজ্ঞাপন বাতিল ও অ্যাকাউন্ট স্থায়ীভাবে স্থগিত করার অধিকার সংরক্ষণ করে।',
+  },
+  {
+    title: '৩. সরাসরি গ্রাহক যোগাযোগ ও নিরাপত্তা',
+    desc: 'কারকেটো একটি নিরপেক্ষ লিস্টিং ও কানেক্টিং প্ল্যাটফর্ম। আগ্রহী ক্রেতা বা ভাড়াটিয়া সরাসরি আপনার সাথে যোগাযোগ করবেন। টেস্ট ড্রাইভ ও অর্থ লেনদেনের সময় দিনের আলোতে নিরাপদ ও উন্মুক্ত স্থানে সাক্ষাত করুন। গাড়ির কাগজপত্র ক্রেতার সাথে সরাসরি যাচাই করার দায়িত্ব উভয় পক্ষের।',
+  },
+  {
+    title: '৪. প্ল্যাটফর্ম ফি ও ০% ব্রোকার কমিশন',
+    desc: 'কারকেটো-তে সাধারণ গাড়ি বিক্রয় বিজ্ঞাপনের ক্ষেত্রে কোনো লুকানো ফি বা অতিরিক্ত ব্রোকার কমিশন কর্তন করা হয় না। গাড়ি বিক্রয় বা ভাড়ার সম্পূর্ণ অর্থ সরাসরি ক্রেতার কাছ থেকে বিক্রেতার কাছে যাবে।',
+  },
+  {
+    title: '৫. ইনভেন্টরি আপডেট ও বিজ্ঞাপন প্রত্যাহার',
+    desc: 'গাড়িটি সফলভাবে বিক্রি বা ভাড়া হয়ে গেলে বিক্রেতা তার ড্যাশবোর্ড থেকে তাৎক্ষণিকভাবে গাড়ির প্রাপ্যতা স্ট্যাটাস আপডেট অথবা বিজ্ঞাপনটি মুছে ফেলতে বাধ্য থাকবেন, যাতে অন্য ক্রেতারা অযথা যোগাযোগ না করেন।',
+  },
+];
 
 import { ListingTypeSelector } from '@/components/provider/cars/ListingTypeSelector';
 import { VehicleOverviewSection } from '@/components/provider/cars/VehicleOverviewSection';
@@ -80,6 +108,11 @@ export default function CreateCarPage() {
 
   // 6. Features & Amenities
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
+
+  // 7. Terms & Services Agreement
+  const [isTermsAccepted, setIsTermsAccepted] = useState(false);
+  const [isTermsModalOpen, setIsTermsModalOpen] = useState(false);
+  const [hasScrolledToEnd, setHasScrolledToEnd] = useState(false);
 
   // Status & Feedback
   const [isLoading, setIsLoading] = useState(false);
@@ -314,11 +347,30 @@ export default function CreateCarPage() {
     }
   };
 
+  const handleTermsScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
+    if (scrollTop + clientHeight >= scrollHeight - 30) {
+      setHasScrolledToEnd(true);
+    }
+  };
+
+  const handleAcceptTerms = () => {
+    setIsTermsAccepted(true);
+    setIsTermsModalOpen(false);
+    setError('');
+  };
+
   // Submit Handler on final step
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setSuccess('');
+
+    if (!isTermsAccepted) {
+      setError('বিজ্ঞাপন প্রকাশ করার আগে অনুগ্রহ করে সেবার শর্তাবলী পড়ে টিক দিন।');
+      setIsTermsModalOpen(true);
+      return;
+    }
 
     if (!validateStep1() || !validateStep2()) {
       setError('প্রকাশ করার আগে অনুগ্রহ করে সকল ত্রুটি সমাধান করুন।');
@@ -347,12 +399,11 @@ export default function CreateCarPage() {
         ? title.trim().split(' ').slice(1).join(' ')
         : title.trim() || 'Standard';
 
-    const carData = {
+    const coverImage = effectiveImages[0] || '';
+
+    const carData: any = {
       title,
       listingType,
-      rentalPrice: listingType === 'rent' ? Number(rentalPrice) : 0,
-      salePrice: listingType === 'sale' ? Number(salePrice) : 0,
-      price: listingType === 'sale' ? Number(salePrice) : Number(rentalPrice),
       contactPhone: contactPhone.trim(),
       expiresAt: expiresAt.toISOString(),
       location: 'Dhaka',
@@ -372,8 +423,17 @@ export default function CreateCarPage() {
       luggage: Number(luggage) || 2,
       features: listingType === 'sale' ? selectedAmenities : [],
       images: effectiveImages,
-      primaryImage: effectiveImages[0],
+      coverImage,
+      primaryImage: coverImage,
     };
+
+    if (listingType === 'rent') {
+      carData.rentalPrice = Number(rentalPrice);
+      carData.price = Number(rentalPrice);
+    } else {
+      carData.salePrice = Number(salePrice);
+      carData.price = Number(salePrice);
+    }
 
     try {
       await carService.createCar(carData);
@@ -522,7 +582,7 @@ export default function CreateCarPage() {
 
           {/* STEP 4: VEHICLE IMAGERY & FINAL PUBLISH */}
           {currentStep === 4 && (
-            <div className="animate-fade-in">
+            <div className="animate-fade-in space-y-6">
               <ImageDropzoneSection
                 uploadedPhotos={uploadedPhotos}
                 isDragging={isDragging}
@@ -533,6 +593,59 @@ export default function CreateCarPage() {
                 onFileChange={handleFileChange}
                 onRemovePhoto={handleRemovePhoto}
               />
+
+              {/* TERMS & SERVICES CHECKBOX CARD */}
+              <div
+                className={`p-5 rounded-3xl border transition-all ${
+                  isTermsAccepted
+                    ? 'bg-emerald-50/70 border-emerald-300 ring-2 ring-emerald-500/20'
+                    : 'bg-white border-zinc-200 hover:border-zinc-300 shadow-sm'
+                }`}
+              >
+                <div className="flex items-start gap-3.5">
+                  <div className="pt-0.5">
+                    <input
+                      type="checkbox"
+                      id="terms-checkbox"
+                      checked={isTermsAccepted}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setIsTermsModalOpen(true);
+                        } else {
+                          setIsTermsAccepted(false);
+                        }
+                      }}
+                      className="w-5 h-5 rounded-md border-zinc-300 text-black focus:ring-black cursor-pointer accent-black"
+                    />
+                  </div>
+                  <div className="flex-1 text-xs sm:text-sm">
+                    <label
+                      htmlFor="terms-checkbox"
+                      className="font-bold text-zinc-900 cursor-pointer select-none leading-relaxed block"
+                    >
+                      আমি কারকেটো-র{' '}
+                      <button
+                        type="button"
+                        onClick={() => setIsTermsModalOpen(true)}
+                        className="text-black underline underline-offset-4 font-black hover:text-emerald-700 transition-colors inline-flex items-center gap-1"
+                      >
+                        <ScrollText className="w-3.5 h-3.5 inline" />
+                        সেবার শর্তাবলী ও বিক্রেতা চুক্তি (Terms & Services)
+                      </button>{' '}
+                      পড়েছি এবং তা মেনে নিতে সম্মত আছি। <span className="text-rose-500">*</span>
+                    </label>
+                    <p className="text-[11px] text-zinc-500 mt-1">
+                      বিজ্ঞাপনটি প্রকাশ করতে শর্তাবলী পড়ে সম্মতি প্রদান করা আবশ্যক। শর্তাবলী দেখতে নীল লেখায় ক্লিক করুন।
+                    </p>
+                  </div>
+                  {isTermsAccepted && (
+                    <span className="shrink-0 inline-flex items-center gap-1 text-xs font-bold text-emerald-800 bg-emerald-100 px-3 py-1 rounded-full">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                      সম্মত
+                    </span>
+                  )}
+                </div>
+              </div>
             </div>
           )}
 
@@ -571,20 +684,122 @@ export default function CreateCarPage() {
                   পরবর্তী
                 </Button>
               ) : (
-                <Button
-                  type="submit"
-                  variant="dark"
-                  size="lg"
-                  isLoading={isLoading}
-                  leftIcon={<Plus className="w-4 h-4" />}
-                >
-                  গাড়ির বিজ্ঞাপন প্রকাশ করুন
-                </Button>
+                <div className="flex flex-col items-end">
+                  <Button
+                    type="submit"
+                    variant="dark"
+                    size="lg"
+                    isLoading={isLoading}
+                    disabled={!isTermsAccepted || isLoading}
+                    leftIcon={<Plus className="w-4 h-4" />}
+                  >
+                    গাড়ির বিজ্ঞাপন প্রকাশ করুন
+                  </Button>
+                  {!isTermsAccepted && (
+                    <p className="text-[11px] text-zinc-400 mt-1.5 flex items-center gap-1">
+                      <AlertCircle className="w-3.5 h-3.5 text-amber-500" />
+                      <span>বিজ্ঞাপন প্রকাশ করতে উপরে শর্তাবলীতে সম্মতি দিন</span>
+                    </p>
+                  )}
+                </div>
               )}
             </div>
           </div>
         </form>
       </div>
+
+      {/* TERMS & SERVICES POPUP MODAL */}
+      {isTermsModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white rounded-3xl max-w-xl w-full border border-zinc-200 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            {/* Modal Header */}
+            <div className="bg-zinc-950 text-white p-4 sm:p-5 flex items-center justify-between border-b border-zinc-800">
+              <div className="flex items-center gap-2.5">
+                <div className="h-9 w-9 rounded-xl bg-white/10 flex items-center justify-center text-white">
+                  <ScrollText className="w-5 h-5 text-emerald-400" />
+                </div>
+                <div>
+                  <h3 className="text-sm sm:text-base font-black text-white">
+                    সেবার শর্তাবলী ও বিক্রেতা চুক্তি
+                  </h3>
+                  <p className="text-[11px] text-zinc-400">
+                    কারকেটো প্ল্যাটফর্মে গাড়ি তালিকাভুক্তির নীতিমালা
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsTermsModalOpen(false)}
+                className="p-1.5 rounded-full bg-white/10 hover:bg-white/20 text-zinc-300 hover:text-white transition-colors cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Scrollable Terms Content */}
+            <div
+              onScroll={handleTermsScroll}
+              className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-4 text-xs sm:text-sm text-zinc-700 leading-relaxed bg-zinc-50"
+            >
+              <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs font-semibold flex items-start gap-2.5">
+                <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                <p>
+                  বিজ্ঞাপন প্রকাশের পূর্বে অনুগ্রহ করে নিচের ৫টি ধারা মনোযোগ দিয়ে পড়ুন এবং নিচে <strong>&ldquo;আমি সম্মত ও গ্রহণ করছি (Agree)&rdquo;</strong> বাটনে চাপুন।
+                </p>
+              </div>
+
+              {SELLER_TERMS_SECTIONS.map((section, idx) => (
+                <div
+                  key={idx}
+                  className="p-4 rounded-2xl bg-white border border-zinc-200/80 shadow-xs space-y-1.5"
+                >
+                  <h4 className="font-black text-black text-xs sm:text-sm flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <span>{section.title}</span>
+                  </h4>
+                  <p className="text-zinc-600 text-xs leading-relaxed pl-6">
+                    {section.desc}
+                  </p>
+                </div>
+              ))}
+
+              <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs font-semibold flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+                <span>সবগুলো শর্তাবলী পড়া সম্পন্ন হলে নিচে সম্মতি বাটনটিতে চাপুন।</span>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-4 sm:p-5 bg-white border-t border-zinc-200 flex flex-col sm:flex-row items-center justify-between gap-3">
+              <span className="text-[11px] font-semibold text-zinc-500 text-center sm:text-left">
+                সম্মতি প্রদান করলে স্বয়ংক্রিয়ভাবে চেকমার্ক যুক্ত হবে
+              </span>
+
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsTermsModalOpen(false)}
+                  className="flex-1 sm:flex-initial"
+                >
+                  বাতিল
+                </Button>
+                <Button
+                  type="button"
+                  variant="dark"
+                  size="sm"
+                  onClick={handleAcceptTerms}
+                  className="flex-1 sm:flex-initial font-black"
+                  leftIcon={<Check className="w-4 h-4 text-emerald-400" />}
+                >
+                  আমি সম্মত ও গ্রহণ করছি (Agree)
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
