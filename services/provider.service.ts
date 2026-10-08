@@ -61,4 +61,13 @@ export const providerService = {
     const res: any = await apiClient.get('/providers', { params: { page, limit } });
     return res.data;
   },
+
+  async getPublicProfile(id: string) {
+    try {
+      const res: any = await apiClient.get(`/providers/${id}`);
+      return res.data;
+    } catch {
+      return null;
+    }
+  },
 };

@@ -61,9 +61,8 @@ export const Pagination: React.FC<PaginationProps> = ({
 
   return (
     <div
-      className={`flex flex-col sm:flex-row items-center justify-between gap-4 py-4 px-2 ${
-        isDark ? 'border-t border-zinc-800/80 text-zinc-400' : 'border-t border-slate-200 text-slate-500'
-      } ${className}`}
+      className={`flex flex-col sm:flex-row items-center justify-between gap-4 py-4 px-2 ${isDark ? 'border-t border-zinc-800/80 text-zinc-400' : 'border-t border-slate-200 text-slate-500'
+        } ${className}`}
     >
       <p className="text-xs font-semibold order-2 sm:order-1">
         {isAdmin ? (
@@ -91,11 +90,10 @@ export const Pagination: React.FC<PaginationProps> = ({
             }
           }}
           disabled={currentPage <= 1}
-          className={`flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold border transition-all shadow-sm ${
-            isDark
+          className={`flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold border transition-all shadow-sm ${isDark
               ? 'bg-zinc-800/90 border-zinc-700/80 text-zinc-300 hover:bg-zinc-700 hover:text-white hover:border-zinc-600 disabled:opacity-30 disabled:pointer-events-none'
               : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100 hover:text-slate-900 hover:border-slate-300 disabled:bg-slate-100 disabled:text-slate-400 disabled:border-slate-200 disabled:pointer-events-none'
-          }`}
+            }`}
         >
           <ChevronLeft className="w-4 h-4" />
           <span className="hidden sm:inline">{isAdmin ? 'Previous' : 'পূর্ববর্তী'}</span>
@@ -123,13 +121,12 @@ export const Pagination: React.FC<PaginationProps> = ({
                 key={pageNumber}
                 type="button"
                 onClick={() => onPageChange(pageNumber)}
-                className={`h-8 w-8 rounded-xl text-xs font-black transition-all flex items-center justify-center ${
-                  isActive
+                className={`h-8 w-8 rounded-xl text-xs font-black transition-all flex items-center justify-center ${isActive
                     ? 'bg-gradient-to-r from-orange-600 to-orange-500 text-white shadow-md shadow-orange-600/30 scale-105 border border-orange-400/40'
                     : isDark
-                    ? 'bg-zinc-900 border border-zinc-800 text-zinc-400 hover:bg-zinc-800 hover:text-white hover:border-zinc-700 shadow-sm'
-                    : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 hover:text-slate-900 hover:border-slate-300 shadow-sm'
-                }`}
+                      ? 'bg-zinc-900 border border-zinc-800 text-zinc-400 hover:bg-zinc-800 hover:text-white hover:border-zinc-700 shadow-sm'
+                      : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 hover:text-slate-900 hover:border-slate-300 shadow-sm'
+                  }`}
               >
                 {pageNumber}
               </button>
@@ -146,11 +143,10 @@ export const Pagination: React.FC<PaginationProps> = ({
             }
           }}
           disabled={currentPage >= totalPages}
-          className={`flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold border transition-all shadow-sm ${
-            isDark
+          className={`flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold border transition-all shadow-sm ${isDark
               ? 'bg-zinc-800/90 border-zinc-700/80 text-zinc-300 hover:bg-zinc-700 hover:text-white hover:border-zinc-600 disabled:opacity-30 disabled:pointer-events-none'
               : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100 hover:text-slate-900 hover:border-slate-300 disabled:bg-slate-100 disabled:text-slate-400 disabled:border-slate-200 disabled:pointer-events-none'
-          }`}
+            }`}
         >
           <span className="hidden sm:inline">{isAdmin ? 'Next' : 'পরবর্তী'}</span>
           <ChevronRight className="w-4 h-4" />
