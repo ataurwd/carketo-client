@@ -234,6 +234,7 @@ export default function CarDetailClient() {
   const [isPhoneRevealed, setIsPhoneRevealed] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
   const [loginPromptOpen, setLoginPromptOpen] = useState(false);
+  const [loginPromptReason, setLoginPromptReason] = useState<'phone' | 'chat' | 'wishlist'>('phone');
   const [inquiryModalOpen, setInquiryModalOpen] = useState(false);
   const [inquiryName, setInquiryName] = useState('');
   const [inquiryPhone, setInquiryPhone] = useState('');
@@ -336,6 +337,7 @@ export default function CarDetailClient() {
 
   const handlePhoneClick = () => {
     if (!user) {
+      setLoginPromptReason('phone');
       setLoginPromptOpen(true);
       return;
     }
@@ -350,6 +352,7 @@ export default function CarDetailClient() {
 
   const handleToggleWishlist = async () => {
     if (!user) {
+      setLoginPromptReason('wishlist');
       setLoginPromptOpen(true);
       return;
     }
@@ -364,34 +367,30 @@ export default function CarDetailClient() {
     }
   };
 
-  // Load user / guest chat identity
+  const handleChatButtonClick = () => {
+    if (!user) {
+      setLoginPromptReason('chat');
+      setLoginPromptOpen(true);
+      return;
+    }
+    setInquiryModalOpen(true);
+  };
+
+  // Load user chat identity
   useEffect(() => {
     if (user) {
       setInquiryName(user.name || '');
       const uPhone = (user as any).phone || '';
       if (uPhone) setInquiryPhone(uPhone);
       setIsChatProfileSet(true);
-    } else if (typeof window !== 'undefined') {
-      try {
-        const saved = localStorage.getItem('karketo_guest_chat');
-        if (saved) {
-          const parsed = JSON.parse(saved);
-          if (parsed.name && parsed.phone) {
-            setInquiryName(parsed.name);
-            setInquiryPhone(parsed.phone);
-            setIsChatProfileSet(true);
-          }
-        }
-      } catch {
-        // ignore storage error
-      }
+    } else {
+      setIsChatProfileSet(false);
     }
   }, [user]);
 
   // Fetch & poll live chat thread when modal is open
   useEffect(() => {
-    if (!inquiryModalOpen || !car?._id) return;
-    if (!user && !isChatProfileSet) return;
+    if (!inquiryModalOpen || !car?._id || !user) return;
 
     let isMounted = true;
 
@@ -433,23 +432,18 @@ export default function CarDetailClient() {
     }
   }, [chatMessages.length, inquiryModalOpen]);
 
-  const handleStartGuestChat = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!inquiryName.trim() || !inquiryPhone.trim()) return;
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(
-        'karketo_guest_chat',
-        JSON.stringify({ name: inquiryName.trim(), phone: inquiryPhone.trim() })
-      );
-    }
-    setIsChatProfileSet(true);
-  };
-
   const sendChatMessageText = async (textToSend: string) => {
+    if (!user) {
+      setInquiryModalOpen(false);
+      setLoginPromptReason('chat');
+      setLoginPromptOpen(true);
+      return;
+    }
+
     const trimmed = textToSend.trim();
     if (!car?._id || !trimmed || isSendingChat) return;
 
-    const effectiveName = (user?.name || inquiryName || 'ক্রেতা').trim();
+    const effectiveName = (user.name || 'ক্রেতা').trim();
     const effectivePhone = ((user as any)?.phone || inquiryPhone || '01700000000').trim();
 
     const optimisticMsg: IChatMessage = {
@@ -505,6 +499,12 @@ export default function CarDetailClient() {
 
   const handleSendInquiry = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!user) {
+      setInquiryModalOpen(false);
+      setLoginPromptReason('chat');
+      setLoginPromptOpen(true);
+      return;
+    }
     if (activeThread?.isBlocked) {
       showToast('এই কথোপকথনটি ব্লক করা রয়েছে।', 'error');
       return;
@@ -795,7 +795,7 @@ export default function CarDetailClient() {
                 <Button
                   variant="dark"
                   size="md"
-                  onClick={() => setInquiryModalOpen(true)}
+                  onClick={handleChatButtonClick}
                   className="w-full text-xs font-bold shadow-sm"
                   leftIcon={<MessageCircle className="w-4 h-4" />}
                 >
@@ -1147,9 +1147,19 @@ export default function CarDetailClient() {
             </div>
 
             <div className="space-y-1.5">
-              <h3 className="text-lg font-black text-black">যোগাযোগের তথ্য দেখতে লগ ইন করুন</h3>
+              <h3 className="text-lg font-black text-black">
+                {loginPromptReason === 'chat'
+                  ? 'মালিকের সাথে লাইভ চ্যাট করতে লগ ইন করুন'
+                  : loginPromptReason === 'wishlist'
+                  ? 'গাড়িটি সেভ করতে লগ ইন করুন'
+                  : 'যোগাযোগের তথ্য দেখতে লগ ইন করুন'}
+              </h3>
               <p className="text-xs text-zinc-500">
-                গাড়ির মালিকদের স্প্যাম থেকে সুরক্ষিত রাখতে ফোন নম্বর দেখার জন্য অনুগ্রহ করে সাইন ইন বা রেজিস্টার করুন।
+                {loginPromptReason === 'chat'
+                  ? 'গাড়ির মালিকের সাথে রিয়েল-টাইম মেসেজিং করতে এবং আপনার কথোপকথন সুরক্ষিত রাখতে সাইন ইন বা রেজিস্টার করুন।'
+                  : loginPromptReason === 'wishlist'
+                  ? 'আপনার পছন্দের তালিকায় গাড়িটি যুক্ত রাখতে অনুগ্রহ করে সাইন ইন বা রেজিস্টার করুন।'
+                  : 'গাড়ির মালিকদের স্প্যাম থেকে সুরক্ষিত রাখতে ফোন নম্বর দেখার জন্য অনুগ্রহ করে সাইন ইন বা রেজিস্টার করুন।'}
               </p>
             </div>
 
@@ -1161,7 +1171,7 @@ export default function CarDetailClient() {
                 className="w-full font-bold shadow-md hover:bg-black"
                 rightIcon={<ArrowUpRight className="w-4 h-4" />}
               >
-                দেখতে লগ ইন করুন
+                {loginPromptReason === 'chat' ? 'চ্যাট করতে লগ ইন করুন' : 'লগ ইন করুন'}
               </Button>
 
               <Button
@@ -1323,45 +1333,40 @@ export default function CarDetailClient() {
               </form>
             )}
 
-            {/* Step 1 for Guest: Quick Name & Phone input before entering chat */}
-            {!user && !isChatProfileSet ? (
-              <form onSubmit={handleStartGuestChat} className="p-6 space-y-4">
-                <div className="p-4 rounded-2xl bg-zinc-50 border border-zinc-200 space-y-1">
-                  <h4 className="text-sm font-black text-black">
-                    গাড়ির মালিকের সাথে সরাসরি কথা বলুন
+            {/* Enforce Login: If user is not authenticated, show login CTA */}
+            {!user ? (
+              <div className="p-6 sm:p-8 text-center space-y-5">
+                <div className="h-14 w-14 rounded-2xl bg-zinc-100 text-black flex items-center justify-center mx-auto border border-zinc-200 shadow-sm">
+                  <Lock className="w-7 h-7" />
+                </div>
+                <div className="space-y-1.5">
+                  <h4 className="text-base font-black text-black">
+                    মালিকের সাথে লাইভ চ্যাট করতে লগ ইন করুন
                   </h4>
-                  <p className="text-xs text-zinc-500">
-                    লাইভ চ্যাট শুরু করতে অনুগ্রহ করে আপনার নাম ও মোবাইল নম্বর দিন।
+                  <p className="text-xs text-zinc-500 max-w-sm mx-auto">
+                    গাড়ির মালিকের সাথে সরাসরি কথা বলতে এবং আপনার মেসেজ সংরক্ষণ রাখতে অ্যাকাউন্টে সাইন ইন বা রেজিস্টার করুন।
                   </p>
                 </div>
-
-                <Input
-                  label="আপনার নাম *"
-                  required
-                  value={inquiryName}
-                  onChange={(e) => setInquiryName(e.target.value)}
-                  placeholder="যেমন: আতাউর রহমান"
-                />
-
-                <Input
-                  label="আপনার মোবাইল নম্বর *"
-                  type="tel"
-                  required
-                  value={inquiryPhone}
-                  onChange={(e) => setInquiryPhone(e.target.value)}
-                  placeholder="যেমন: 01712345678"
-                />
-
-                <Button
-                  type="submit"
-                  variant="dark"
-                  size="md"
-                  className="w-full font-bold shadow-md hover:bg-black"
-                  rightIcon={<MessageCircle className="w-4 h-4" />}
-                >
-                  লাইভ চ্যাট শুরু করুন
-                </Button>
-              </form>
+                <div className="space-y-2 pt-1 max-w-xs mx-auto">
+                  <Button
+                    variant="dark"
+                    size="md"
+                    onClick={() => router.push(`/login?redirect=/cars/${slug}`)}
+                    className="w-full font-bold shadow-md hover:bg-black"
+                    rightIcon={<ArrowUpRight className="w-4 h-4" />}
+                  >
+                    লগ ইন করুন
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="md"
+                    onClick={() => router.push(`/register?redirect=/cars/${slug}`)}
+                    className="w-full font-bold"
+                  >
+                    নতুন অ্যাকাউন্ট খুলুন
+                  </Button>
+                </div>
+              </div>
             ) : (
               <>
                 {/* Messages Area */}
