@@ -17,6 +17,8 @@ const uploadAxios = axios.create({
 });
 
 uploadAxios.interceptors.request.use((config) => {
+  config.headers['X-Client-App'] = 'carketo-web';
+  config.headers['X-Api-Key'] = process.env.NEXT_PUBLIC_CLIENT_API_KEY || 'carketo_sec_app_9a4f82e14cb701b2';
   if (typeof window !== 'undefined') {
     const token = localStorage.getItem('access_token');
     if (token) {

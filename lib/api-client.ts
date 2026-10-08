@@ -6,12 +6,16 @@ export const apiClient = axios.create({
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
+    'X-Client-App': 'carketo-web',
+    'X-Api-Key': process.env.NEXT_PUBLIC_CLIENT_API_KEY || 'carketo_sec_app_9a4f82e14cb701b2',
   },
   timeout: 10000,
 });
 
 apiClient.interceptors.request.use(
   (config) => {
+    config.headers['X-Client-App'] = 'carketo-web';
+    config.headers['X-Api-Key'] = process.env.NEXT_PUBLIC_CLIENT_API_KEY || 'carketo_sec_app_9a4f82e14cb701b2';
     // Check if token exists in localStorage (or rely on HttpOnly cookie)
     if (typeof window !== 'undefined') {
       const token = localStorage.getItem('access_token');

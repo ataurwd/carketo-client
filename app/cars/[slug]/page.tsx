@@ -24,7 +24,13 @@ export async function generateStaticParams() {
 
   for (const url of endpoints) {
     try {
-      const res = await fetch(url, { next: { revalidate: 60 } });
+      const res = await fetch(url, {
+        headers: {
+          'X-Client-App': 'carketo-web',
+          'X-Api-Key': process.env.NEXT_PUBLIC_CLIENT_API_KEY || 'carketo_sec_app_9a4f82e14cb701b2',
+        },
+        next: { revalidate: 60 },
+      });
       if (res.ok) {
         const json = await res.json();
         const list = Array.isArray(json?.data) ? json.data : (json?.data?.cars || []);
