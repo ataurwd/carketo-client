@@ -217,7 +217,6 @@ export default function AdminCarsPage() {
 
   // Modals state
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [editingCar, setEditingCar] = useState<ICar | null>(null);
   const [formData, setFormData] = useState<CarFormData>(defaultFormData);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -285,29 +284,6 @@ export default function AdminCarsPage() {
     setIsAddModalOpen(true);
   };
 
-  const openEditModal = (car: ICar) => {
-    setEditingCar(car);
-    setFormData({
-      title: car.title,
-      brand: car.brand,
-      model: car.model,
-      year: car.year,
-      listingType: car.listingType as any,
-      rentalPrice: car.rentalPrice,
-      salePrice: car.salePrice || car.price,
-      coverImage: car.coverImage || '',
-      location: car.location || '',
-      mileage: car.mileage || 0,
-      fuelType: car.fuelType || 'Petrol',
-      transmission: car.transmission || 'Automatic',
-      seats: car.seats || 5,
-      doors: car.doors || 4,
-      description: car.description || '',
-      isFeatured: !!car.isFeatured,
-      status: car.status as any,
-    });
-  };
-
   const handleSaveCar = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.title || !formData.brand || !formData.model) {
@@ -317,15 +293,9 @@ export default function AdminCarsPage() {
 
     setIsSubmitting(true);
     try {
-      if (editingCar) {
-        await adminService.updateCarAdmin(editingCar._id, formData);
-        showToast('Vehicle updated successfully', 'success');
-        setEditingCar(null);
-      } else {
-        await adminService.createCarAdmin(formData);
-        showToast('New vehicle listing added to cars', 'success');
-        setIsAddModalOpen(false);
-      }
+      await adminService.createCarAdmin(formData);
+      showToast('New vehicle listing added to cars', 'success');
+      setIsAddModalOpen(false);
       fetchCars();
     } catch {
       showToast('Failed to save vehicle details', 'error');
@@ -608,13 +578,13 @@ export default function AdminCarsPage() {
                     {/* Actions */}
                     <td className="py-4 px-4 text-right">
                       <div className="flex items-center justify-end gap-1.5">
-                        <button
-                          onClick={() => openEditModal(car)}
+                        <Link
+                          href={`/admin/cars/edit/${car._id}`}
                           className="p-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white transition-colors"
                           title="Edit Vehicle"
                         >
                           <Edit className="w-4 h-4" />
-                        </button>
+                        </Link>
 
                         <Link
                           href={`/cars/${car.slug || car._id}`}
@@ -656,8 +626,8 @@ export default function AdminCarsPage() {
         )}
       </div>
 
-      {/* ADD / EDIT CAR MODAL */}
-      {(isAddModalOpen || editingCar) && (
+      {/* ADD CAR MODAL */}
+      {isAddModalOpen && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
           <div className="bg-zinc-900 border border-zinc-800 rounded-3xl w-full max-w-2xl p-6 sm:p-8 space-y-6 shadow-2xl my-8">
             <div className="flex items-center justify-between border-b border-zinc-800 pb-4">
@@ -666,17 +636,12 @@ export default function AdminCarsPage() {
                   <Car className="w-5 h-5" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-black text-white">
-                    {editingCar ? 'Edit Vehicle Details' : 'Add New Vehicle to Inventory'}
-                  </h2>
+                  <h2 className="text-lg font-black text-white">Add New Vehicle to Inventory</h2>
                   <p className="text-xs text-zinc-400">Configure vehicle specifications, pricing, and media.</p>
                 </div>
               </div>
               <button
-                onClick={() => {
-                  setIsAddModalOpen(false);
-                  setEditingCar(null);
-                }}
+                onClick={() => setIsAddModalOpen(false)}
                 className="p-2 rounded-xl text-zinc-400 hover:text-white hover:bg-zinc-800"
               >
                 <X className="w-5 h-5" />
@@ -856,10 +821,7 @@ export default function AdminCarsPage() {
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => {
-                    setIsAddModalOpen(false);
-                    setEditingCar(null);
-                  }}
+                  onClick={() => setIsAddModalOpen(false)}
                   className="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border-zinc-700 rounded-xl text-xs font-bold"
                 >
                   Cancel
@@ -870,7 +832,7 @@ export default function AdminCarsPage() {
                   disabled={isSubmitting}
                   className="bg-orange-600 hover:bg-orange-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-orange-600/25"
                 >
-                  {isSubmitting ? 'Saving Vehicle...' : editingCar ? 'Save Changes' : 'Create Listing'}
+                  {isSubmitting ? 'Saving Vehicle...' : 'Create Listing'}
                 </Button>
               </div>
             </form>

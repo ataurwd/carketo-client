@@ -50,6 +50,23 @@ export const Navbar: React.FC = () => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [recentNotifications, setRecentNotifications] = useState<INotification[]>([]);
   const pathname = usePathname();
+
+  const isLinkActive = (href: string) => {
+    if (!pathname) return false;
+    const cleanPath = pathname.replace(/\/+$/, '') || '/';
+    const cleanHref = href.replace(/\/+$/, '') || '/';
+
+    if (cleanHref === '/') {
+      return cleanPath === '/';
+    }
+
+    if (cleanHref === '/sell') {
+      return cleanPath === '/sell' || cleanPath.startsWith('/sell/') || cleanPath.startsWith('/provider/cars');
+    }
+
+    return cleanPath === cleanHref || cleanPath.startsWith(`${cleanHref}/`);
+  };
+
   const { user, token, isAuthenticated, logout, setAuth } = useAuthStore();
 
   useEffect(() => {
@@ -145,7 +162,7 @@ export const Navbar: React.FC = () => {
         {/* Desktop Navigation Links (Visible on >= 1024px) */}
         <nav className="hidden lg:flex items-center gap-8">
           {NAV_LINKS.map((link) => {
-            const isActive = pathname === link.href;
+            const isActive = isLinkActive(link.href);
             return (
               <Link
                 key={link.label}
@@ -513,7 +530,7 @@ export const Navbar: React.FC = () => {
                 </span>
                 <div className="space-y-1">
                   {OFF_CANVAS_NAV.map((item) => {
-                    const isActive = pathname === item.href;
+                    const isActive = isLinkActive(item.href);
                     const IconComponent = item.icon;
                     return (
                       <Link

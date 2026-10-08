@@ -44,6 +44,7 @@ import {
   UserCheck,
   ExternalLink,
   ArrowRight,
+  Edit,
 } from 'lucide-react';
 import { showToast } from '@/lib/alert';
 
@@ -946,14 +947,21 @@ export default function CarDetailClient() {
                 )}
 
                 {isOwner ? (
-                  <div className="p-3.5 rounded-2xl bg-zinc-100 border border-zinc-200 text-center space-y-1">
+                  <div className="p-3.5 rounded-2xl bg-zinc-100 border border-zinc-200 text-center space-y-2">
                     <span className="inline-flex items-center gap-1.5 text-xs font-bold text-zinc-800">
                       <span className="h-2 w-2 rounded-full bg-emerald-500" />
                       এটি আপনার নিজের গাড়ির বিজ্ঞাপন
                     </span>
                     <p className="text-[11px] text-zinc-500 leading-relaxed">
-                      অন্যান্য ক্রেতা ও গ্রাহকরা এই পেজ থেকে আপনাকে সরাসরি মেসেজ বা কল দিতে পারবেন।
+                      বিজ্ঞাপনের তথ্য বা ছবি পরিবর্তন করতে নিচের বাটনে চাপ দিন।
                     </p>
+                    <Link
+                      href={`/provider/cars/edit/${car._id}`}
+                      className="inline-flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-xl bg-black text-white text-xs font-bold hover:bg-zinc-800 transition-colors shadow-sm"
+                    >
+                      <Edit className="w-3.5 h-3.5" />
+                      <span>গাড়ি সম্পাদনা করুন</span>
+                    </Link>
                   </div>
                 ) : (
                   <Button

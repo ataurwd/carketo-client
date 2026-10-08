@@ -15,26 +15,11 @@ import {
   ExternalLink,
   Car,
   Edit,
-  X,
-  CheckCircle2,
-  DollarSign,
-  Phone,
-  MapPin,
-  FileText,
 } from 'lucide-react';
 
 export default function ProviderCarsPage() {
   const [cars, setCars] = useState<ICar[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-
-  // Edit Modal State
-  const [editingCar, setEditingCar] = useState<ICar | null>(null);
-  const [editPrice, setEditPrice] = useState<number | ''>('');
-  const [editPhone, setEditPhone] = useState('');
-  const [editLocation, setEditLocation] = useState('');
-  const [editDescription, setEditDescription] = useState('');
-  const [isSaving, setIsSaving] = useState(false);
-  const [saveSuccess, setSaveSuccess] = useState(false);
 
   useEffect(() => {
     carService
@@ -44,70 +29,6 @@ export default function ProviderCarsPage() {
       })
       .finally(() => setIsLoading(false));
   }, []);
-
-  const openEditModal = (car: ICar) => {
-    setEditingCar(car);
-    setEditPrice(car.listingType === 'rent' ? car.rentalPrice || 0 : car.salePrice || car.price || 0);
-    setEditPhone(car.contactPhone || '');
-    setEditLocation(car.location || '');
-    setEditDescription(car.description || '');
-    setSaveSuccess(false);
-  };
-
-  const handleSaveEdit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editingCar) return;
-    setIsSaving(true);
-
-    try {
-      const updatePayload: any = {
-        contactPhone: editPhone,
-        location: editLocation,
-        description: editDescription,
-      };
-
-      if (editingCar.listingType === 'rent') {
-        updatePayload.rentalPrice = Number(editPrice);
-      } else {
-        updatePayload.salePrice = Number(editPrice);
-      }
-
-      await carService.updateCar(editingCar._id, updatePayload);
-
-      setCars(
-        cars.map((c) =>
-          c._id === editingCar._id
-            ? {
-                ...c,
-                ...updatePayload,
-              }
-            : c
-        )
-      );
-
-      setSaveSuccess(true);
-      setTimeout(() => {
-        setEditingCar(null);
-        setSaveSuccess(false);
-      }, 1000);
-    } catch {
-      // optimistic fallback
-      setCars(
-        cars.map((c) =>
-          c._id === editingCar._id
-            ? {
-                ...c,
-                contactPhone: editPhone,
-                location: editLocation,
-              }
-            : c
-        )
-      );
-      setEditingCar(null);
-    } finally {
-      setIsSaving(false);
-    }
-  };
 
   const handleStatusChange = async (carId: string, newStatus: string) => {
     try {
@@ -246,14 +167,13 @@ export default function ProviderCarsPage() {
                       </td>
 
                       <td className="py-4 px-6 text-right space-x-2">
-                        <button
-                          type="button"
-                          onClick={() => openEditModal(car)}
+                        <Link
+                          href={`/provider/cars/edit/${car._id}`}
                           className="inline-flex p-2 rounded-xl text-zinc-600 hover:text-black hover:bg-zinc-100 transition-colors"
-                          title="দ্রুত সম্পাদনা করুন"
+                          title="সম্পাদনা করুন"
                         >
                           <Edit className="w-4 h-4" />
-                        </button>
+                        </Link>
                         <Link
                           href={`/cars/${car.slug}`}
                           target="_blank"
@@ -289,109 +209,6 @@ export default function ProviderCarsPage() {
                 আপনার প্রথম গাড়ি যুক্ত করুন
               </Button>
             </Link>
-          </div>
-        )}
-
-        {/* Quick Edit Modal */}
-        {editingCar && (
-          <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className="bg-white max-w-lg w-full rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl border border-zinc-200 animate-in fade-in zoom-in duration-200">
-              <div className="flex items-center justify-between border-b border-zinc-100 pb-4">
-                <div>
-                  <h3 className="text-lg font-black text-black">গাড়ির বিজ্ঞাপন সম্পাদনা করুন</h3>
-                  <p className="text-xs text-zinc-400">{editingCar.title}</p>
-                </div>
-                <button
-                  onClick={() => setEditingCar(null)}
-                  className="p-2 rounded-full hover:bg-zinc-100 text-zinc-400 hover:text-black transition-colors"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-
-              {saveSuccess && (
-                <div className="p-3 rounded-2xl bg-emerald-50 text-emerald-800 text-xs font-bold flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                  <span>পরিবর্তনগুলো সফলভাবে সংরক্ষিত হয়েছে!</span>
-                </div>
-              )}
-
-              <form onSubmit={handleSaveEdit} className="space-y-4 text-xs font-semibold">
-                <div>
-                  <label className="block text-zinc-700 font-bold mb-1">
-                    {editingCar.listingType === 'rent' ? 'দৈনিক ভাড়ার হার (৳/দিন)' : 'মোট বিক্রয় মূল্য (৳)'}
-                  </label>
-                  <div className="relative">
-                    <span className="text-zinc-500 font-black absolute left-3 top-1/2 -translate-y-1/2 text-sm">৳</span>
-                    <input
-                      type="number"
-                      required
-                      value={editPrice}
-                      onChange={(e) => setEditPrice(Number(e.target.value))}
-                      className="w-full pl-9 pr-4 py-2.5 rounded-2xl border border-zinc-200 focus:outline-none focus:border-black font-bold text-black"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-zinc-700 font-bold mb-1">সরাসরি যোগাযোগের ফোন নম্বর</label>
-                  <div className="relative">
-                    <Phone className="w-4 h-4 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                    <input
-                      type="text"
-                      required
-                      value={editPhone}
-                      onChange={(e) => setEditPhone(e.target.value)}
-                      placeholder="01712-345678"
-                      className="w-full pl-9 pr-4 py-2.5 rounded-2xl border border-zinc-200 focus:outline-none focus:border-black font-semibold text-black"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-zinc-700 font-bold mb-1">লোকেশন / পিকআপ হাব</label>
-                  <div className="relative">
-                    <MapPin className="w-4 h-4 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                    <input
-                      type="text"
-                      required
-                      value={editLocation}
-                      onChange={(e) => setEditLocation(e.target.value)}
-                      className="w-full pl-9 pr-4 py-2.5 rounded-2xl border border-zinc-200 focus:outline-none focus:border-black font-semibold text-black"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-zinc-700 font-bold mb-1">গাড়ির বিবরণ</label>
-                  <textarea
-                    rows={3}
-                    value={editDescription}
-                    onChange={(e) => setEditDescription(e.target.value)}
-                    className="w-full p-3 rounded-2xl border border-zinc-200 focus:outline-none focus:border-black text-xs font-normal text-zinc-700 resize-none"
-                  />
-                </div>
-
-                <div className="flex items-center justify-end gap-3 pt-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setEditingCar(null)}
-                  >
-                    বাতিল করুন
-                  </Button>
-                  <Button
-                    type="submit"
-                    variant="dark"
-                    size="sm"
-                    disabled={isSaving}
-                  >
-                    {isSaving ? 'সংরক্ষিত হচ্ছে...' : 'পরিবর্তন সংরক্ষণ করুন'}
-                  </Button>
-                </div>
-              </form>
-            </div>
           </div>
         )}
       </div>
