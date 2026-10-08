@@ -132,16 +132,17 @@ export function HomeHero({
   };
 
   return (
-    <section className="relative bg-gradient-to-b from-zinc-50 via-white to-zinc-50 border-b border-zinc-200 overflow-hidden py-14 lg:py-20">
-      {/* Background cars watermark image with soft gradient overlay */}
-      <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden select-none opacity-20 lg:opacity-25">
+    <section className="relative bg-gradient-to-b from-sky-50/40 via-white/50 to-zinc-50 border-b border-zinc-200 overflow-hidden py-14 lg:py-20">
+      {/* Background 5-car fleet image with clear visibility */}
+      <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden select-none">
         <img
-          src="/hero-cars.png"
-          alt="Luxury Cars Backdrop"
-          className="w-full h-full object-cover object-bottom"
+          src="/images/hero-carketo-fleet.jpg"
+          alt="Carketo 5 Cars Fleet Lineup with Carketo Number Plates"
+          className="w-full h-full object-cover object-center opacity-85 sm:opacity-90 transition-opacity duration-500"
           loading="eager"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-zinc-50/90 via-white/80 to-zinc-50" />
+        {/* Balanced gradient overlay: lets the 5 cars and skyline remain vivid while keeping text crystal clear */}
+        <div className="absolute inset-0 bg-gradient-to-b from-white/75 via-white/35 to-white/85" />
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full space-y-8">
@@ -149,7 +150,7 @@ export function HomeHero({
         {/* 1. CENTERED HERO HEADLINE & BADGE */}
         <div className="max-w-3xl mx-auto text-center space-y-4">
           {/* Top Pill Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border border-zinc-200 text-zinc-900 text-[11px] sm:text-xs font-bold uppercase tracking-wider shadow-sm">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/95 border border-zinc-200 text-zinc-900 text-[11px] sm:text-xs font-bold uppercase tracking-wider shadow-sm">
             <span className="flex h-2 w-2 relative">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
               <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
@@ -166,7 +167,7 @@ export function HomeHero({
           </h1>
 
           {/* Centered Subtitle */}
-          <p className="text-sm sm:text-base text-zinc-600 font-medium leading-relaxed max-w-2xl mx-auto pt-1">
+          <p className="text-sm sm:text-base text-zinc-700 font-semibold leading-relaxed max-w-2xl mx-auto pt-1">
             স্বচ্ছ বাংলাদেশি টাকায় (৳) যাচাইকৃত গাড়ি খুঁজুন, সরাসরি মালিকের সাথে কথা বলুন — কোনো ব্রোকার কমিশন ছাড়াই।
           </p>
         </div>
