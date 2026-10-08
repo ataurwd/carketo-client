@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import {
   KeyRound,
@@ -122,6 +122,8 @@ export function HomeHero({
   activeFiltersCount,
   totalFilteredCount,
 }: HomeHeroProps) {
+  const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
+
   const handleTabChange = (newTab: 'sale' | 'rent') => {
     setDraftFilters((prev) => ({ ...prev, listingTab: newTab }));
     setTimeout(() => {
@@ -201,21 +203,22 @@ export function HomeHero({
         {/* 3. CENTERED COMPREHENSIVE FILTER CONSOLE (ALL FILTERS VISIBLE) */}
         <div className="max-w-6xl mx-auto bg-white/95 backdrop-blur-md p-5 sm:p-7 rounded-3xl border border-zinc-200 shadow-xl shadow-zinc-200/60 space-y-4">
           
-          {/* TOP BAR: Search Keyword & Sort */}
+          {/* TOP BAR: Search Keyword & Sort (Desktop) / Search + Filter Button (Mobile) */}
           <div className="flex flex-col lg:flex-row items-center gap-3">
-            {/* Search Input with Search Button */}
+            {/* Search Input with Search Button & Mobile Filter Button */}
             <div className="relative flex-1 w-full flex items-center gap-2">
               <div className="relative flex-1">
                 <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
                 <input
                   type="text"
-                  placeholder="নাম, ব্র্যান্ড, মডেল (যেমন: Premio, Civic, Prado) বা শহর দিয়ে খুঁজুন..."
+                  placeholder="নাম, ব্র্যান্ড, মডেল (যেমন: Premio, Civic, Prado) বা শহর..."
                   value={draftFilters.search}
                   onChange={(e) => setDraftFilters((prev) => ({ ...prev, search: e.target.value }))}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                       e.preventDefault();
                       onApply();
+                      setIsMobileFiltersOpen(false);
                     }
                   }}
                   className="w-full pl-10 pr-9 py-2.5 rounded-2xl border border-zinc-200 text-xs sm:text-sm font-semibold text-zinc-900 placeholder-zinc-400 focus:outline-none focus:border-black transition-colors"
@@ -235,18 +238,43 @@ export function HomeHero({
                   </button>
                 )}
               </div>
+
+              {/* Search Submit Button */}
               <button
                 type="button"
-                onClick={onApply}
-                className="px-5 py-2.5 rounded-2xl bg-zinc-950 text-white hover:bg-zinc-800 text-xs sm:text-sm font-bold transition-all shadow-sm flex items-center gap-1.5 shrink-0 active:scale-95"
+                onClick={() => {
+                  onApply();
+                  setIsMobileFiltersOpen(false);
+                }}
+                className="px-4 sm:px-5 py-2.5 rounded-2xl bg-zinc-950 text-white hover:bg-zinc-800 text-xs sm:text-sm font-bold transition-all shadow-sm flex items-center gap-1.5 shrink-0 active:scale-95"
               >
                 <Search className="w-3.5 h-3.5" />
                 <span>খুঁজুন</span>
               </button>
+
+              {/* MOBILE ONLY: All Filters Toggle Button */}
+              <button
+                type="button"
+                onClick={() => setIsMobileFiltersOpen((prev) => !prev)}
+                className={`lg:hidden px-3.5 py-2.5 rounded-2xl border text-xs font-bold transition-all shadow-sm flex items-center gap-1.5 shrink-0 active:scale-95 ${
+                  isMobileFiltersOpen || activeFiltersCount > 0
+                    ? 'bg-zinc-950 text-white border-zinc-900'
+                    : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-800 border-zinc-200'
+                }`}
+                title="সব ফিল্টার"
+              >
+                <SlidersHorizontal className="w-3.5 h-3.5" />
+                <span>{isMobileFiltersOpen ? 'ফিল্টার বন্ধ' : 'সব ফিল্টার'}</span>
+                {activeFiltersCount > 0 && (
+                  <span className="h-4 min-w-[16px] px-1 rounded-full bg-emerald-500 text-white text-[10px] font-black flex items-center justify-center">
+                    {activeFiltersCount}
+                  </span>
+                )}
+              </button>
             </div>
 
-            {/* Sort Selector */}
-            <div className="relative w-full lg:w-56 shrink-0 group">
+            {/* Desktop-only Sort Selector */}
+            <div className="hidden lg:block relative w-56 shrink-0 group">
               <select
                 value={draftFilters.sortBy}
                 onChange={(e) => {
@@ -266,6 +294,35 @@ export function HomeHero({
               <ChevronDown className="w-4 h-4 text-zinc-400 pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 transition-colors group-hover:text-black" />
             </div>
           </div>
+
+          {/* EXPANDABLE FILTER OPTIONS (Always visible on Desktop, collapsible on Mobile) */}
+          <div className={`${isMobileFiltersOpen ? 'block' : 'hidden lg:block'} space-y-4 pt-2 border-t border-zinc-100 lg:border-t-0 animate-fade-in`}>
+            
+            {/* Mobile-only Sort Selector */}
+            <div className="lg:hidden">
+              <label className="block text-zinc-500 font-bold mb-1 text-[11px] uppercase tracking-wider">
+                ফলাফল সাজান
+              </label>
+              <div className="relative group">
+                <select
+                  value={draftFilters.sortBy}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setDraftFilters((prev) => ({ ...prev, sortBy: val }));
+                    onApplyPreset({ sortBy: val });
+                  }}
+                  className="w-full pl-3 pr-8 py-2 rounded-xl border border-zinc-200 bg-white text-xs font-bold text-zinc-800 focus:outline-none focus:border-black hover:border-zinc-400 cursor-pointer shadow-xs appearance-none transition-colors"
+                >
+                  <option value="newest">সাজান: নতুন যুক্ত</option>
+                  <option value="price_asc">মূল্য: কম থেকে বেশি</option>
+                  <option value="price_desc">মূল্য: বেশি থেকে কম</option>
+                  <option value="year_desc">সাল: নতুন মডেল</option>
+                  <option value="year_asc">সাল: পুরাতন মডেল</option>
+                  <option value="mileage_asc">মাইলেজ: কম থেকে বেশি</option>
+                </select>
+                <ChevronDown className="w-3.5 h-3.5 text-zinc-400 pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 transition-colors group-hover:text-black" />
+              </div>
+            </div>
 
           {/* ALL FILTERS DIRECTLY VISIBLE - ROW 1: Brand, Model, Condition, Fuel Type, Price Range */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 pt-2 text-xs font-semibold">
@@ -591,7 +648,10 @@ export function HomeHero({
               )}
               <button
                 type="button"
-                onClick={onApply}
+                onClick={() => {
+                  onApply();
+                  setIsMobileFiltersOpen(false);
+                }}
                 className="flex items-center gap-2 px-6 py-2.5 rounded-2xl bg-zinc-950 text-white hover:bg-zinc-800 text-xs sm:text-sm font-bold transition-all shadow-md active:scale-95 w-full sm:w-auto justify-center"
               >
                 <SlidersHorizontal className="w-4 h-4" />
@@ -599,6 +659,7 @@ export function HomeHero({
               </button>
             </div>
           </div>
+        </div>
 
           {/* Active Filter Chips */}
           {activeFiltersCount > 0 && (
