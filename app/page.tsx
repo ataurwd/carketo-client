@@ -11,6 +11,7 @@ import { ICar } from '@/types/car.types';
 import { FALLBACK_20_CARS } from '@/lib/fallbackCars';
 import { FeaturedCarsSlider } from '@/components/home/FeaturedCarsSlider';
 import { PricingPlans } from '@/components/home/PricingPlans';
+import { Pagination } from '@/components/common/Pagination';
 import {
   ShieldCheck,
   Zap,
@@ -28,11 +29,13 @@ import {
 export default function HomePage() {
   const [cars, setCars] = useState<ICar[]>(FALLBACK_20_CARS);
   const [isLoadingCars, setIsLoadingCars] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const CARS_PER_PAGE = 12;
 
   // Staged / Draft filters in Hero
   const [draftFilters, setDraftFilters] = useState<HomeFilters>(DEFAULT_HOME_FILTERS);
 
-  // Applied filters that actually filter the 20 cars grid
+  // Applied filters that actually filter the cars grid
   const [appliedFilters, setAppliedFilters] = useState<HomeFilters>(DEFAULT_HOME_FILTERS);
 
   useEffect(() => {
@@ -87,6 +90,7 @@ export default function HomePage() {
 
   // Apply filters
   const handleApply = useCallback(() => {
+    setCurrentPage(1);
     setAppliedFilters({ ...draftFilters });
     // Smooth scroll down to showcase
     const el = document.getElementById('cars-showcase');
@@ -97,12 +101,14 @@ export default function HomePage() {
 
   // Reset all filters
   const handleResetAll = useCallback(() => {
+    setCurrentPage(1);
     setDraftFilters(DEFAULT_HOME_FILTERS);
     setAppliedFilters(DEFAULT_HOME_FILTERS);
   }, []);
 
   // Quick preset apply
   const handleApplyPreset = useCallback((presetUpdates: Partial<HomeFilters>) => {
+    setCurrentPage(1);
     setDraftFilters((prev) => {
       const updated = { ...prev, ...presetUpdates };
       setAppliedFilters(updated);
@@ -112,6 +118,7 @@ export default function HomePage() {
 
   // Remove individual filter chip
   const handleRemoveAppliedFilter = useCallback((key: string, defaultValue: string) => {
+    setCurrentPage(1);
     setDraftFilters((prev) => ({ ...prev, [key]: defaultValue }));
     setAppliedFilters((prev) => ({ ...prev, [key]: defaultValue }));
   }, []);
@@ -213,8 +220,14 @@ export default function HomePage() {
       result = result.filter((c) => (c.mileage || 0) <= maxM);
     }
 
-    // 13. Sorting
+    // 13. Sorting (Featured vehicles are prioritized first, followed by selected sort criteria)
     result.sort((a, b) => {
+      const featA = a.isFeatured ? 1 : 0;
+      const featB = b.isFeatured ? 1 : 0;
+      if (featA !== featB) {
+        return featB - featA; // Featured cars (1) always appear before non-featured (0)
+      }
+
       const priceA = a.listingType === 'rent' ? (a.rentalPrice || a.price || 0) : (a.salePrice || a.price || 0);
       const priceB = b.listingType === 'rent' ? (b.rentalPrice || b.price || 0) : (b.salePrice || b.price || 0);
 
@@ -235,13 +248,16 @@ export default function HomePage() {
       }
     });
 
-    // If browsing without extra narrow filters, ensure 20 cars are shown
-    if (activeFiltersCount === 0) {
-      return result.slice(0, 20);
-    }
-
     return result;
-  }, [cars, appliedFilters, activeFiltersCount]);
+  }, [cars, appliedFilters]);
+
+  // Total pages and sliced cars for current page
+  const totalPages = Math.ceil(displayCars.length / CARS_PER_PAGE) || 1;
+
+  const paginatedCars = useMemo(() => {
+    const start = (currentPage - 1) * CARS_PER_PAGE;
+    return displayCars.slice(start, start + CARS_PER_PAGE);
+  }, [displayCars, currentPage]);
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
@@ -287,11 +303,32 @@ export default function HomePage() {
                 <CarCardSkeleton key={i} />
               ))}
             </div>
-          ) : displayCars.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-              {displayCars.map((car) => (
-                <CarCard key={car._id} car={car} />
-              ))}
+          ) : paginatedCars.length > 0 ? (
+            <div className="space-y-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+                {paginatedCars.map((car) => (
+                  <CarCard key={car._id} car={car} />
+                ))}
+              </div>
+
+              {/* Daraz-Style Sliding Pagination */}
+              {totalPages > 1 && (
+                <div className="pt-4 border-t border-zinc-200">
+                  <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    totalItems={displayCars.length}
+                    limit={CARS_PER_PAGE}
+                    onPageChange={(newPage) => {
+                      setCurrentPage(newPage);
+                      const el = document.getElementById('cars-showcase');
+                      if (el) {
+                        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                      }
+                    }}
+                  />
+                </div>
+              )}
             </div>
           ) : (
             /* Empty State */

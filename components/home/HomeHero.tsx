@@ -146,7 +146,7 @@ export function HomeHero({
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full space-y-8">
-        
+
         {/* 1. CENTERED HERO HEADLINE & BADGE */}
         <div className="max-w-3xl mx-auto text-center space-y-4">
           {/* Top Pill Badge */}
@@ -177,11 +177,10 @@ export function HomeHero({
           <button
             type="button"
             onClick={() => handleTabChange('sale')}
-            className={`flex items-center gap-2 px-6 py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-all shadow-sm ${
-              draftFilters.listingTab === 'sale'
+            className={`flex items-center gap-2 px-6 py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-all shadow-sm ${draftFilters.listingTab === 'sale'
                 ? 'bg-zinc-950 text-white shadow-md scale-105'
                 : 'bg-white text-zinc-700 border border-zinc-200 hover:border-zinc-900'
-            }`}
+              }`}
           >
             <ShoppingBag className="w-4 h-4 text-emerald-400" />
             <span>গাড়ি কিনুন</span>
@@ -190,11 +189,10 @@ export function HomeHero({
           <button
             type="button"
             onClick={() => handleTabChange('rent')}
-            className={`flex items-center gap-2 px-6 py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-all shadow-sm ${
-              draftFilters.listingTab === 'rent'
+            className={`flex items-center gap-2 px-6 py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-all shadow-sm ${draftFilters.listingTab === 'rent'
                 ? 'bg-zinc-950 text-white shadow-md scale-105'
                 : 'bg-white text-zinc-700 border border-zinc-200 hover:border-zinc-900'
-            }`}
+              }`}
           >
             <KeyRound className="w-4 h-4 text-sky-400" />
             <span>গাড়ি ভাড়া নিন</span>
@@ -202,8 +200,8 @@ export function HomeHero({
         </div>
 
         {/* 3. CENTERED COMPREHENSIVE FILTER CONSOLE (ALL FILTERS VISIBLE) */}
-        <div className="max-w-6xl mx-auto bg-white/95 backdrop-blur-md p-5 sm:p-7 rounded-3xl border border-zinc-200 shadow-xl shadow-zinc-200/60 space-y-4">
-          
+        <div className="max-w-6xl mx-auto bg-white/75 sm:bg-white/70 backdrop-blur-xl p-5 sm:p-7 rounded-3xl border border-white/80 shadow-2xl shadow-zinc-950/10 space-y-4">
+
           {/* TOP BAR: Search Keyword & Sort (Desktop) / Search + Filter Button (Mobile) */}
           <div className="flex flex-col lg:flex-row items-center gap-3">
             {/* Search Input with Search Button & Mobile Filter Button */}
@@ -222,7 +220,7 @@ export function HomeHero({
                       setIsMobileFiltersOpen(false);
                     }
                   }}
-                  className="w-full pl-10 pr-9 py-2.5 rounded-2xl border border-zinc-200 text-xs sm:text-sm font-semibold text-zinc-900 placeholder-zinc-400 focus:outline-none focus:border-black transition-colors"
+                  className="w-full pl-10 pr-9 py-2.5 rounded-2xl border border-white/90 bg-white/85 backdrop-blur-md text-xs sm:text-sm font-semibold text-zinc-900 placeholder-zinc-400 focus:outline-none focus:bg-white focus:border-black transition-all shadow-xs"
                 />
                 {draftFilters.search && (
                   <button
@@ -257,11 +255,10 @@ export function HomeHero({
               <button
                 type="button"
                 onClick={() => setIsMobileFiltersOpen((prev) => !prev)}
-                className={`lg:hidden px-3.5 py-2.5 rounded-2xl border text-xs font-bold transition-all shadow-sm flex items-center gap-1.5 shrink-0 active:scale-95 ${
-                  isMobileFiltersOpen || activeFiltersCount > 0
+                className={`lg:hidden px-3.5 py-2.5 rounded-2xl border text-xs font-bold transition-all shadow-sm flex items-center gap-1.5 shrink-0 active:scale-95 ${isMobileFiltersOpen || activeFiltersCount > 0
                     ? 'bg-zinc-950 text-white border-zinc-900'
-                    : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-800 border-zinc-200'
-                }`}
+                    : 'bg-white/80 hover:bg-white text-zinc-800 border-white/80'
+                  }`}
                 title="সব ফিল্টার"
               >
                 <SlidersHorizontal className="w-3.5 h-3.5" />
@@ -283,7 +280,7 @@ export function HomeHero({
                   setDraftFilters((prev) => ({ ...prev, sortBy: val }));
                   onApplyPreset({ sortBy: val });
                 }}
-                className="w-full pl-4 pr-10 py-2.5 rounded-2xl border border-zinc-200 bg-white text-xs font-bold text-zinc-800 focus:outline-none focus:border-black hover:border-zinc-400 cursor-pointer shadow-sm appearance-none transition-colors"
+                className="w-full pl-4 pr-10 py-2.5 rounded-2xl border border-white/90 bg-white/85 backdrop-blur-md text-xs font-bold text-zinc-800 focus:outline-none focus:bg-white focus:border-black hover:border-zinc-400 cursor-pointer shadow-xs appearance-none transition-all"
               >
                 <option value="newest">সাজান: নতুন যুক্ত</option>
                 <option value="price_asc">মূল্য: কম থেকে বেশি</option>
@@ -298,10 +295,10 @@ export function HomeHero({
 
           {/* EXPANDABLE FILTER OPTIONS (Always visible on Desktop, collapsible on Mobile) */}
           <div className={`${isMobileFiltersOpen ? 'block' : 'hidden lg:block'} space-y-4 pt-2 border-t border-zinc-100 lg:border-t-0 animate-fade-in`}>
-            
+
             {/* Mobile-only Sort Selector */}
             <div className="lg:hidden">
-              <label className="block text-zinc-500 font-bold mb-1 text-[11px] uppercase tracking-wider">
+              <label className="block text-zinc-700 font-bold mb-1 text-[11px] uppercase tracking-wider">
                 ফলাফল সাজান
               </label>
               <div className="relative group">
@@ -312,7 +309,7 @@ export function HomeHero({
                     setDraftFilters((prev) => ({ ...prev, sortBy: val }));
                     onApplyPreset({ sortBy: val });
                   }}
-                  className="w-full pl-3 pr-8 py-2 rounded-xl border border-zinc-200 bg-white text-xs font-bold text-zinc-800 focus:outline-none focus:border-black hover:border-zinc-400 cursor-pointer shadow-xs appearance-none transition-colors"
+                  className="w-full pl-3 pr-8 py-2 rounded-xl border border-white/80 bg-white/85 backdrop-blur-md text-xs font-bold text-zinc-800 focus:outline-none focus:bg-white focus:border-black hover:border-zinc-400 cursor-pointer shadow-xs appearance-none transition-all"
                 >
                   <option value="newest">সাজান: নতুন যুক্ত</option>
                   <option value="price_asc">মূল্য: কম থেকে বেশি</option>
@@ -325,342 +322,342 @@ export function HomeHero({
               </div>
             </div>
 
-          {/* ALL FILTERS DIRECTLY VISIBLE - ROW 1: Brand, Model, Condition, Fuel Type, Price Range */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 pt-2 text-xs font-semibold">
-            {/* 1. Brand Selector */}
-            <div>
-              <label className="block text-zinc-500 font-bold mb-1 text-[11px] uppercase tracking-wider">
-                ব্র্যান্ড / মেক
-              </label>
-              <div className="relative group">
-                <select
-                  value={draftFilters.brand}
-                  onChange={(e) => setDraftFilters((prev) => ({ ...prev, brand: e.target.value }))}
-                  className="w-full pl-3 pr-8 py-2 rounded-xl border border-zinc-200 bg-white text-xs font-bold text-zinc-800 focus:outline-none focus:border-black hover:border-zinc-400 cursor-pointer shadow-xs appearance-none transition-colors"
-                >
-                  <option value="all">সব ব্র্যান্ড</option>
-                  {POPULAR_BRANDS.map((b) => (
-                    <option key={b} value={b}>
-                      {b}
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown className="w-3.5 h-3.5 text-zinc-400 pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 transition-colors group-hover:text-black" />
+            {/* ALL FILTERS DIRECTLY VISIBLE - ROW 1: Brand, Model, Condition, Fuel Type, Price Range */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 pt-2 text-xs font-semibold">
+              {/* 1. Brand Selector */}
+              <div>
+                <label className="block text-zinc-700 font-bold mb-1 text-[11px] uppercase tracking-wider">
+                  ব্র্যান্ড / মেক
+                </label>
+                <div className="relative group">
+                  <select
+                    value={draftFilters.brand}
+                    onChange={(e) => setDraftFilters((prev) => ({ ...prev, brand: e.target.value }))}
+                    className="w-full pl-3 pr-8 py-2 rounded-xl border border-white/80 bg-white/85 backdrop-blur-md text-xs font-bold text-zinc-800 focus:outline-none focus:bg-white focus:border-black hover:border-zinc-400 cursor-pointer shadow-xs appearance-none transition-all"
+                  >
+                    <option value="all">সব ব্র্যান্ড</option>
+                    {POPULAR_BRANDS.map((b) => (
+                      <option key={b} value={b}>
+                        {b}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="w-3.5 h-3.5 text-zinc-400 pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 transition-colors group-hover:text-black" />
+                </div>
               </div>
-            </div>
 
-            {/* 2. Model Input */}
-            <div>
-              <label className="block text-zinc-500 font-bold mb-1 text-[11px] uppercase tracking-wider">
-                মডেলের নাম
-              </label>
-              <input
-                type="text"
-                placeholder="যেমন: Premio, Civic..."
-                value={draftFilters.model}
-                onChange={(e) => setDraftFilters((prev) => ({ ...prev, model: e.target.value }))}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    onApply();
-                  }
-                }}
-                className="w-full px-3 py-2 rounded-xl border border-zinc-200 bg-white text-xs font-semibold text-zinc-800 focus:outline-none focus:border-black hover:border-zinc-400 shadow-xs transition-colors"
-              />
-            </div>
-
-            {/* 3. Condition */}
-            <div>
-              <label className="block text-zinc-500 font-bold mb-1 text-[11px] uppercase tracking-wider">
-                কন্ডিশন
-              </label>
-              <div className="relative group">
-                <select
-                  value={draftFilters.condition}
-                  onChange={(e) => setDraftFilters((prev) => ({ ...prev, condition: e.target.value }))}
-                  className="w-full pl-3 pr-8 py-2 rounded-xl border border-zinc-200 bg-white text-xs font-bold text-zinc-800 focus:outline-none focus:border-black hover:border-zinc-400 cursor-pointer shadow-xs appearance-none transition-colors"
-                >
-                  {CONDITIONS_LIST.map((c) => (
-                    <option key={c.value} value={c.value}>
-                      {c.label}
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown className="w-3.5 h-3.5 text-zinc-400 pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 transition-colors group-hover:text-black" />
-              </div>
-            </div>
-
-            {/* 4. Fuel Type */}
-            <div>
-              <label className="block text-zinc-500 font-bold mb-1 text-[11px] uppercase tracking-wider">
-                জ্বালানির ধরন
-              </label>
-              <div className="relative group">
-                <select
-                  value={draftFilters.fuelType}
-                  onChange={(e) => setDraftFilters((prev) => ({ ...prev, fuelType: e.target.value }))}
-                  className="w-full pl-3 pr-8 py-2 rounded-xl border border-zinc-200 bg-white text-xs font-bold text-zinc-800 focus:outline-none focus:border-black hover:border-zinc-400 cursor-pointer shadow-xs appearance-none transition-colors"
-                >
-                  {FUEL_TYPES_LIST.map((f) => (
-                    <option key={f.value} value={f.value}>
-                      {f.label}
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown className="w-3.5 h-3.5 text-zinc-400 pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 transition-colors group-hover:text-black" />
-              </div>
-            </div>
-
-            {/* 5. Price Range */}
-            <div>
-              <label className="block text-zinc-500 font-bold mb-1 text-[11px] uppercase tracking-wider">
-                মূল্য সীমা (৳)
-              </label>
-              <div className="flex items-center gap-1.5">
+              {/* 2. Model Input */}
+              <div>
+                <label className="block text-zinc-700 font-bold mb-1 text-[11px] uppercase tracking-wider">
+                  মডেলের নাম
+                </label>
                 <input
-                  type="number"
-                  placeholder="সর্বনিম্ন ৳"
-                  value={draftFilters.minPrice}
-                  onChange={(e) => setDraftFilters((prev) => ({ ...prev, minPrice: e.target.value }))}
+                  type="text"
+                  placeholder="যেমন: Premio, Civic..."
+                  value={draftFilters.model}
+                  onChange={(e) => setDraftFilters((prev) => ({ ...prev, model: e.target.value }))}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                       e.preventDefault();
                       onApply();
                     }
                   }}
-                  className="w-full px-2.5 py-2 rounded-xl border border-zinc-200 text-xs font-semibold text-zinc-800 focus:outline-none focus:border-black hover:border-zinc-400 shadow-xs transition-colors"
-                />
-                <span className="text-zinc-400 font-bold">-</span>
-                <input
-                  type="number"
-                  placeholder="সর্বোচ্চ ৳"
-                  value={draftFilters.maxPrice}
-                  onChange={(e) => setDraftFilters((prev) => ({ ...prev, maxPrice: e.target.value }))}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault();
-                      onApply();
-                    }
-                  }}
-                  className="w-full px-2.5 py-2 rounded-xl border border-zinc-200 text-xs font-semibold text-zinc-800 focus:outline-none focus:border-black hover:border-zinc-400 shadow-xs transition-colors"
+                  className="w-full px-3 py-2 rounded-xl border border-white/80 bg-white/85 backdrop-blur-md text-xs font-semibold text-zinc-800 focus:outline-none focus:bg-white focus:border-black hover:border-zinc-400 shadow-xs transition-all"
                 />
               </div>
-            </div>
-          </div>
 
-          {/* ALL FILTERS DIRECTLY VISIBLE - ROW 2: Year Range, Transmission, Body Class, Location, Max Mileage */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 text-xs font-semibold">
-            {/* 6. Manufacturing Year Range */}
-            <div>
-              <label className="block text-zinc-500 font-bold mb-1 text-[11px] uppercase tracking-wider flex items-center gap-1">
-                <Calendar className="w-3.5 h-3.5 text-zinc-700" />
-                <span>তৈরির সাল</span>
-              </label>
-              <div className="flex items-center gap-1.5">
-                <div className="relative flex-1 group">
+              {/* 3. Condition */}
+              <div>
+                <label className="block text-zinc-700 font-bold mb-1 text-[11px] uppercase tracking-wider">
+                  কন্ডিশন
+                </label>
+                <div className="relative group">
                   <select
-                    value={draftFilters.minYear}
-                    onChange={(e) => setDraftFilters((prev) => ({ ...prev, minYear: e.target.value }))}
-                    className="w-full pl-2.5 pr-7 py-2 rounded-xl border border-zinc-200 bg-white text-xs font-semibold text-zinc-800 focus:outline-none focus:border-black hover:border-zinc-400 cursor-pointer shadow-xs appearance-none transition-colors"
+                    value={draftFilters.condition}
+                    onChange={(e) => setDraftFilters((prev) => ({ ...prev, condition: e.target.value }))}
+                    className="w-full pl-3 pr-8 py-2 rounded-xl border border-white/80 bg-white/85 backdrop-blur-md text-xs font-bold text-zinc-800 focus:outline-none focus:bg-white focus:border-black hover:border-zinc-400 cursor-pointer shadow-xs appearance-none transition-all"
                   >
-                    <option value="">শুরুর সাল</option>
-                    {YEAR_OPTIONS.map((y) => (
-                      <option key={`min-${y}`} value={y}>
-                        {y}
+                    {CONDITIONS_LIST.map((c) => (
+                      <option key={c.value} value={c.value}>
+                        {c.label}
                       </option>
                     ))}
                   </select>
-                  <ChevronDown className="w-3.5 h-3.5 text-zinc-400 pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 transition-colors group-hover:text-black" />
+                  <ChevronDown className="w-3.5 h-3.5 text-zinc-400 pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 transition-colors group-hover:text-black" />
                 </div>
-                <span className="text-zinc-400 font-bold">-</span>
-                <div className="relative flex-1 group">
+              </div>
+
+              {/* 4. Fuel Type */}
+              <div>
+                <label className="block text-zinc-700 font-bold mb-1 text-[11px] uppercase tracking-wider">
+                  জ্বালানির ধরন
+                </label>
+                <div className="relative group">
                   <select
-                    value={draftFilters.maxYear}
-                    onChange={(e) => setDraftFilters((prev) => ({ ...prev, maxYear: e.target.value }))}
-                    className="w-full pl-2.5 pr-7 py-2 rounded-xl border border-zinc-200 bg-white text-xs font-semibold text-zinc-800 focus:outline-none focus:border-black hover:border-zinc-400 cursor-pointer shadow-xs appearance-none transition-colors"
+                    value={draftFilters.fuelType}
+                    onChange={(e) => setDraftFilters((prev) => ({ ...prev, fuelType: e.target.value }))}
+                    className="w-full pl-3 pr-8 py-2 rounded-xl border border-white/80 bg-white/85 backdrop-blur-md text-xs font-bold text-zinc-800 focus:outline-none focus:bg-white focus:border-black hover:border-zinc-400 cursor-pointer shadow-xs appearance-none transition-all"
                   >
-                    <option value="">শেষ সাল</option>
-                    {YEAR_OPTIONS.map((y) => (
-                      <option key={`max-${y}`} value={y}>
-                        {y}
+                    {FUEL_TYPES_LIST.map((f) => (
+                      <option key={f.value} value={f.value}>
+                        {f.label}
                       </option>
                     ))}
                   </select>
-                  <ChevronDown className="w-3.5 h-3.5 text-zinc-400 pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 transition-colors group-hover:text-black" />
+                  <ChevronDown className="w-3.5 h-3.5 text-zinc-400 pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 transition-colors group-hover:text-black" />
+                </div>
+              </div>
+
+              {/* 5. Price Range */}
+              <div>
+                <label className="block text-zinc-700 font-bold mb-1 text-[11px] uppercase tracking-wider">
+                  মূল্য সীমা (৳)
+                </label>
+                <div className="flex items-center gap-1.5">
+                  <input
+                    type="number"
+                    placeholder="সর্বনিম্ন ৳"
+                    value={draftFilters.minPrice}
+                    onChange={(e) => setDraftFilters((prev) => ({ ...prev, minPrice: e.target.value }))}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        onApply();
+                      }
+                    }}
+                    className="w-full px-2.5 py-2 rounded-xl border border-white/80 bg-white/85 backdrop-blur-md text-xs font-semibold text-zinc-800 focus:outline-none focus:bg-white focus:border-black hover:border-zinc-400 shadow-xs transition-all"
+                  />
+                  <span className="text-zinc-400 font-bold">-</span>
+                  <input
+                    type="number"
+                    placeholder="সর্বোচ্চ ৳"
+                    value={draftFilters.maxPrice}
+                    onChange={(e) => setDraftFilters((prev) => ({ ...prev, maxPrice: e.target.value }))}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        onApply();
+                      }
+                    }}
+                    className="w-full px-2.5 py-2 rounded-xl border border-white/80 bg-white/85 backdrop-blur-md text-xs font-semibold text-zinc-800 focus:outline-none focus:bg-white focus:border-black hover:border-zinc-400 shadow-xs transition-all"
+                  />
                 </div>
               </div>
             </div>
 
-            {/* 7. Transmission */}
-            <div>
-              <label className="block text-zinc-500 font-bold mb-1 text-[11px] uppercase tracking-wider flex items-center gap-1">
-                <Gauge className="w-3.5 h-3.5 text-zinc-700" />
-                <span>ট্রান্সমিশন</span>
-              </label>
-              <div className="relative group">
-                <select
-                  value={draftFilters.transmission}
-                  onChange={(e) => setDraftFilters((prev) => ({ ...prev, transmission: e.target.value }))}
-                  className="w-full pl-3 pr-8 py-2 rounded-xl border border-zinc-200 bg-white text-xs font-bold text-zinc-800 focus:outline-none focus:border-black hover:border-zinc-400 cursor-pointer shadow-xs appearance-none transition-colors"
-                >
-                  {TRANSMISSIONS_LIST.map((t) => (
-                    <option key={t.value} value={t.value}>
-                      {t.label}
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown className="w-3.5 h-3.5 text-zinc-400 pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 transition-colors group-hover:text-black" />
+            {/* ALL FILTERS DIRECTLY VISIBLE - ROW 2: Year Range, Transmission, Body Class, Location, Max Mileage */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 text-xs font-semibold">
+              {/* 6. Manufacturing Year Range */}
+              <div>
+                <label className="block text-zinc-700 font-bold mb-1 text-[11px] uppercase tracking-wider flex items-center gap-1">
+                  <Calendar className="w-3.5 h-3.5 text-zinc-700" />
+                  <span>তৈরির সাল</span>
+                </label>
+                <div className="flex items-center gap-1.5">
+                  <div className="relative flex-1 group">
+                    <select
+                      value={draftFilters.minYear}
+                      onChange={(e) => setDraftFilters((prev) => ({ ...prev, minYear: e.target.value }))}
+                      className="w-full pl-2.5 pr-7 py-2 rounded-xl border border-white/80 bg-white/85 backdrop-blur-md text-xs font-semibold text-zinc-800 focus:outline-none focus:bg-white focus:border-black hover:border-zinc-400 cursor-pointer shadow-xs appearance-none transition-all"
+                    >
+                      <option value="">শুরুর সাল</option>
+                      {YEAR_OPTIONS.map((y) => (
+                        <option key={`min-${y}`} value={y}>
+                          {y}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown className="w-3.5 h-3.5 text-zinc-400 pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 transition-colors group-hover:text-black" />
+                  </div>
+                  <span className="text-zinc-400 font-bold">-</span>
+                  <div className="relative flex-1 group">
+                    <select
+                      value={draftFilters.maxYear}
+                      onChange={(e) => setDraftFilters((prev) => ({ ...prev, maxYear: e.target.value }))}
+                      className="w-full pl-2.5 pr-7 py-2 rounded-xl border border-white/80 bg-white/85 backdrop-blur-md text-xs font-semibold text-zinc-800 focus:outline-none focus:bg-white focus:border-black hover:border-zinc-400 cursor-pointer shadow-xs appearance-none transition-all"
+                    >
+                      <option value="">শেষ সাল</option>
+                      {YEAR_OPTIONS.map((y) => (
+                        <option key={`max-${y}`} value={y}>
+                          {y}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown className="w-3.5 h-3.5 text-zinc-400 pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 transition-colors group-hover:text-black" />
+                  </div>
+                </div>
+              </div>
+
+              {/* 7. Transmission */}
+              <div>
+                <label className="block text-zinc-700 font-bold mb-1 text-[11px] uppercase tracking-wider flex items-center gap-1">
+                  <Gauge className="w-3.5 h-3.5 text-zinc-700" />
+                  <span>ট্রান্সমিশন</span>
+                </label>
+                <div className="relative group">
+                  <select
+                    value={draftFilters.transmission}
+                    onChange={(e) => setDraftFilters((prev) => ({ ...prev, transmission: e.target.value }))}
+                    className="w-full pl-3 pr-8 py-2 rounded-xl border border-white/80 bg-white/85 backdrop-blur-md text-xs font-bold text-zinc-800 focus:outline-none focus:bg-white focus:border-black hover:border-zinc-400 cursor-pointer shadow-xs appearance-none transition-all"
+                  >
+                    {TRANSMISSIONS_LIST.map((t) => (
+                      <option key={t.value} value={t.value}>
+                        {t.label}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="w-3.5 h-3.5 text-zinc-400 pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 transition-colors group-hover:text-black" />
+                </div>
+              </div>
+
+              {/* 8. Body Type */}
+              <div>
+                <label className="block text-zinc-700 font-bold mb-1 text-[11px] uppercase tracking-wider">
+                  বডি টাইপ
+                </label>
+                <div className="relative group">
+                  <select
+                    value={draftFilters.bodyType}
+                    onChange={(e) => setDraftFilters((prev) => ({ ...prev, bodyType: e.target.value }))}
+                    className="w-full pl-3 pr-8 py-2 rounded-xl border border-white/80 bg-white/85 backdrop-blur-md text-xs font-bold text-zinc-800 focus:outline-none focus:bg-white focus:border-black hover:border-zinc-400 cursor-pointer shadow-xs appearance-none transition-all"
+                  >
+                    <option value="all">সব বডি টাইপ</option>
+                    {BODY_TYPES.map((bt) => (
+                      <option key={bt} value={bt}>
+                        {bt}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="w-3.5 h-3.5 text-zinc-400 pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 transition-colors group-hover:text-black" />
+                </div>
+              </div>
+
+              {/* 9. Location / Division */}
+              <div>
+                <label className="block text-zinc-700 font-bold mb-1 text-[11px] uppercase tracking-wider flex items-center gap-1">
+                  <MapPin className="w-3.5 h-3.5 text-zinc-700" />
+                  <span>অবস্থান / শহর</span>
+                </label>
+                <div className="relative group">
+                  <select
+                    value={draftFilters.location}
+                    onChange={(e) => setDraftFilters((prev) => ({ ...prev, location: e.target.value }))}
+                    className="w-full pl-3 pr-8 py-2 rounded-xl border border-white/80 bg-white/85 backdrop-blur-md text-xs font-bold text-zinc-800 focus:outline-none focus:bg-white focus:border-black hover:border-zinc-400 cursor-pointer shadow-xs appearance-none transition-all"
+                  >
+                    {LOCATIONS_LIST.map((loc) => (
+                      <option key={loc} value={loc === 'All Locations' ? 'all' : loc}>
+                        {loc === 'All Locations' ? 'সব অবস্থান' : loc}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="w-3.5 h-3.5 text-zinc-400 pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 transition-colors group-hover:text-black" />
+                </div>
+              </div>
+
+              {/* 10. Max Mileage Range */}
+              <div>
+                <label className="block text-zinc-700 font-bold mb-1 text-[11px] uppercase tracking-wider">
+                  সর্বোচ্চ মাইলেজ
+                </label>
+                <div className="relative group">
+                  <select
+                    value={draftFilters.maxMileage}
+                    onChange={(e) => setDraftFilters((prev) => ({ ...prev, maxMileage: e.target.value }))}
+                    className="w-full pl-3 pr-8 py-2 rounded-xl border border-white/80 bg-white/85 backdrop-blur-md text-xs font-bold text-zinc-800 focus:outline-none focus:bg-white focus:border-black hover:border-zinc-400 cursor-pointer shadow-xs appearance-none transition-all"
+                  >
+                    <option value="">যেকোনো মাইলেজ</option>
+                    <option value="20000">২০,০০০ কি.মি. এর নিচে</option>
+                    <option value="50000">৫০,০০০ কি.মি. এর নিচে</option>
+                    <option value="80000">৮০,০০০ কি.মি. এর নিচে</option>
+                    <option value="120000">১,২০,০০০ কি.মি. এর নিচে</option>
+                  </select>
+                  <ChevronDown className="w-3.5 h-3.5 text-zinc-400 pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 transition-colors group-hover:text-black" />
+                </div>
               </div>
             </div>
 
-            {/* 8. Body Type */}
-            <div>
-              <label className="block text-zinc-500 font-bold mb-1 text-[11px] uppercase tracking-wider">
-                বডি টাইপ
-              </label>
-              <div className="relative group">
-                <select
-                  value={draftFilters.bodyType}
-                  onChange={(e) => setDraftFilters((prev) => ({ ...prev, bodyType: e.target.value }))}
-                  className="w-full pl-3 pr-8 py-2 rounded-xl border border-zinc-200 bg-white text-xs font-bold text-zinc-800 focus:outline-none focus:border-black hover:border-zinc-400 cursor-pointer shadow-xs appearance-none transition-colors"
-                >
-                  <option value="all">সব বডি টাইপ</option>
-                  {BODY_TYPES.map((bt) => (
-                    <option key={bt} value={bt}>
-                      {bt}
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown className="w-3.5 h-3.5 text-zinc-400 pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 transition-colors group-hover:text-black" />
-              </div>
-            </div>
-
-            {/* 9. Location / Division */}
-            <div>
-              <label className="block text-zinc-500 font-bold mb-1 text-[11px] uppercase tracking-wider flex items-center gap-1">
-                <MapPin className="w-3.5 h-3.5 text-zinc-700" />
-                <span>অবস্থান / শহর</span>
-              </label>
-              <div className="relative group">
-                <select
-                  value={draftFilters.location}
-                  onChange={(e) => setDraftFilters((prev) => ({ ...prev, location: e.target.value }))}
-                  className="w-full pl-3 pr-8 py-2 rounded-xl border border-zinc-200 bg-white text-xs font-bold text-zinc-800 focus:outline-none focus:border-black hover:border-zinc-400 cursor-pointer shadow-xs appearance-none transition-colors"
-                >
-                  {LOCATIONS_LIST.map((loc) => (
-                    <option key={loc} value={loc === 'All Locations' ? 'all' : loc}>
-                      {loc === 'All Locations' ? 'সব অবস্থান' : loc}
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown className="w-3.5 h-3.5 text-zinc-400 pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 transition-colors group-hover:text-black" />
-              </div>
-            </div>
-
-            {/* 10. Max Mileage Range */}
-            <div>
-              <label className="block text-zinc-500 font-bold mb-1 text-[11px] uppercase tracking-wider">
-                সর্বোচ্চ মাইলেজ
-              </label>
-              <div className="relative group">
-                <select
-                  value={draftFilters.maxMileage}
-                  onChange={(e) => setDraftFilters((prev) => ({ ...prev, maxMileage: e.target.value }))}
-                  className="w-full pl-3 pr-8 py-2 rounded-xl border border-zinc-200 bg-white text-xs font-bold text-zinc-800 focus:outline-none focus:border-black hover:border-zinc-400 cursor-pointer shadow-xs appearance-none transition-colors"
-                >
-                  <option value="">যেকোনো মাইলেজ</option>
-                  <option value="20000">২০,০০০ কি.মি. এর নিচে</option>
-                  <option value="50000">৫০,০০০ কি.মি. এর নিচে</option>
-                  <option value="80000">৮০,০০০ কি.মি. এর নিচে</option>
-                  <option value="120000">১,২০,০০০ কি.মি. এর নিচে</option>
-                </select>
-                <ChevronDown className="w-3.5 h-3.5 text-zinc-400 pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 transition-colors group-hover:text-black" />
-              </div>
-            </div>
-          </div>
-
-          {/* Quick Presets Row */}
-          <div className="pt-2 border-t border-zinc-100 flex flex-wrap items-center gap-2 text-xs">
-            <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-1">
-              <Tag className="w-3.5 h-3.5" />
-              দ্রুত ফিল্টার:
-            </span>
-            <button
-              type="button"
-              onClick={() => onApplyPreset({ minPrice: '', maxPrice: '2000000' })}
-              className="px-3 py-1 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-800 font-bold text-[11px] transition-colors"
-            >
-              ৳২০ লাখের নিচে
-            </button>
-            <button
-              type="button"
-              onClick={() => onApplyPreset({ minPrice: '2000000', maxPrice: '4000000' })}
-              className="px-3 py-1 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-800 font-bold text-[11px] transition-colors"
-            >
-              ৳২০ লাখ - ৳৪০ লাখ
-            </button>
-            <button
-              type="button"
-              onClick={() => onApplyPreset({ minPrice: '4000000', maxPrice: '8000000' })}
-              className="px-3 py-1 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-800 font-bold text-[11px] transition-colors"
-            >
-              ৳৪০ লাখ - ৳৮০ লাখ
-            </button>
-            <button
-              type="button"
-              onClick={() => onApplyPreset({ minPrice: '8000000', maxPrice: '' })}
-              className="px-3 py-1 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-800 font-bold text-[11px] transition-colors"
-            >
-              ৳৮০ লাখ+ লাক্সারি
-            </button>
-            <button
-              type="button"
-              onClick={() => onApplyPreset({ fuelType: 'hybrid' })}
-              className="px-3 py-1 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-800 font-bold text-[11px] transition-colors"
-            >
-              হাইব্রিড গাড়ি
-            </button>
-            <button
-              type="button"
-              onClick={() => onApplyPreset({ minYear: '2021' })}
-              className="px-3 py-1 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-800 font-bold text-[11px] transition-colors"
-            >
-              ২০২১ ও নতুন
-            </button>
-          </div>
-
-          {/* Action Row: Reset, Pending Alert, and Apply Filters */}
-          <div className="pt-2 border-t border-zinc-100 flex flex-col sm:flex-row items-center justify-between gap-3">
-            <button
-              type="button"
-              onClick={onResetAll}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-zinc-500 hover:text-black hover:bg-zinc-100 transition-colors w-full sm:w-auto justify-center"
-            >
-              <RotateCcw className="w-3.5 h-3.5" />
-              <span>সব ফিল্টার রিসেট করুন</span>
-            </button>
-
-            <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
-              {hasPendingChanges && (
-                <span className="text-[11px] font-semibold text-amber-700 bg-amber-50 border border-amber-200 px-3 py-1 rounded-full flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-                  ফিল্টার নির্বাচিত — প্রয়োগ করুন ক্লিক করুন
-                </span>
-              )}
+            {/* Quick Presets Row */}
+            <div className="pt-2 border-t border-zinc-200/60 flex flex-wrap items-center gap-2 text-xs">
+              <span className="text-[11px] font-bold text-zinc-500 uppercase tracking-wider flex items-center gap-1">
+                <Tag className="w-3.5 h-3.5" />
+                দ্রুত ফিল্টার:
+              </span>
               <button
                 type="button"
-                onClick={() => {
-                  onApply();
-                  setIsMobileFiltersOpen(false);
-                }}
-                className="flex items-center gap-2 px-6 py-2.5 rounded-2xl bg-zinc-950 text-white hover:bg-zinc-800 text-xs sm:text-sm font-bold transition-all shadow-md active:scale-95 w-full sm:w-auto justify-center"
+                onClick={() => onApplyPreset({ minPrice: '', maxPrice: '2000000' })}
+                className="px-3 py-1 rounded-full bg-white/70 hover:bg-white text-zinc-800 border border-white/80 font-bold text-[11px] transition-all shadow-2xs"
               >
-                <SlidersHorizontal className="w-4 h-4" />
-                <span>ফিল্টার প্রয়োগ করুন</span>
+                ৳২০ লাখের নিচে
+              </button>
+              <button
+                type="button"
+                onClick={() => onApplyPreset({ minPrice: '2000000', maxPrice: '4000000' })}
+                className="px-3 py-1 rounded-full bg-white/70 hover:bg-white text-zinc-800 border border-white/80 font-bold text-[11px] transition-all shadow-2xs"
+              >
+                ৳২০ লাখ - ৳৪০ লাখ
+              </button>
+              <button
+                type="button"
+                onClick={() => onApplyPreset({ minPrice: '4000000', maxPrice: '8000000' })}
+                className="px-3 py-1 rounded-full bg-white/70 hover:bg-white text-zinc-800 border border-white/80 font-bold text-[11px] transition-all shadow-2xs"
+              >
+                ৳৪০ লাখ - ৳৮০ লাখ
+              </button>
+              <button
+                type="button"
+                onClick={() => onApplyPreset({ minPrice: '8000000', maxPrice: '' })}
+                className="px-3 py-1 rounded-full bg-white/70 hover:bg-white text-zinc-800 border border-white/80 font-bold text-[11px] transition-all shadow-2xs"
+              >
+                ৳৮০ লাখ+ লাক্সারি
+              </button>
+              <button
+                type="button"
+                onClick={() => onApplyPreset({ fuelType: 'hybrid' })}
+                className="px-3 py-1 rounded-full bg-white/70 hover:bg-white text-zinc-800 border border-white/80 font-bold text-[11px] transition-all shadow-2xs"
+              >
+                হাইব্রিড গাড়ি
+              </button>
+              <button
+                type="button"
+                onClick={() => onApplyPreset({ minYear: '2021' })}
+                className="px-3 py-1 rounded-full bg-white/70 hover:bg-white text-zinc-800 border border-white/80 font-bold text-[11px] transition-all shadow-2xs"
+              >
+                ২০২১ ও নতুন
               </button>
             </div>
+
+            {/* Action Row: Reset, Pending Alert, and Apply Filters */}
+            <div className="pt-2 border-t border-zinc-200/60 flex flex-col sm:flex-row items-center justify-between gap-3">
+              <button
+                type="button"
+                onClick={onResetAll}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-zinc-600 hover:text-black hover:bg-white/60 transition-colors w-full sm:w-auto justify-center"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span>সব ফিল্টার রিসেট করুন</span>
+              </button>
+
+              <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
+                {hasPendingChanges && (
+                  <span className="text-[11px] font-semibold text-amber-700 bg-amber-50 border border-amber-200 px-3 py-1 rounded-full flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                    ফিল্টার নির্বাচিত — প্রয়োগ করুন ক্লিক করুন
+                  </span>
+                )}
+                <button
+                  type="button"
+                  onClick={() => {
+                    onApply();
+                    setIsMobileFiltersOpen(false);
+                  }}
+                  className="flex items-center gap-2 px-6 py-2.5 rounded-2xl bg-zinc-950 text-white hover:bg-zinc-800 text-xs sm:text-sm font-bold transition-all shadow-md active:scale-95 w-full sm:w-auto justify-center"
+                >
+                  <SlidersHorizontal className="w-4 h-4" />
+                  <span>ফিল্টার প্রয়োগ করুন</span>
+                </button>
+              </div>
+            </div>
           </div>
-        </div>
 
           {/* Active Filter Chips */}
           {activeFiltersCount > 0 && (

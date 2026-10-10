@@ -27,18 +27,34 @@ export const CarCard: React.FC<CarCardProps> = ({ car }) => {
     : formatPrice(car.salePrice || car.price || 45000);
 
   return (
-    <div className="group rounded-3xl border border-zinc-200 bg-white p-4 shadow-card hover:shadow-card-hover hover:border-black transition-all duration-300 flex flex-col justify-between relative">
+    <div
+      className={`group rounded-3xl p-4 transition-all duration-300 flex flex-col justify-between relative bg-white ${
+        car.isFeatured
+          ? 'border-2 border-amber-400 shadow-[0_4px_25px_-5px_rgba(245,158,11,0.18)] hover:border-amber-500 hover:shadow-[0_8px_30px_-5px_rgba(245,158,11,0.28)]'
+          : 'border border-zinc-200 shadow-card hover:shadow-card-hover hover:border-black'
+      }`}
+    >
       <div>
         {/* Card Header & Badge */}
-        <div className="flex items-center justify-between gap-2 mb-3">
-          <Badge
-            variant={isRental ? 'dark' : 'slate'}
-            size="sm"
-            className="uppercase tracking-wider font-bold"
-          >
-            {isRental ? 'ভাড়ার জন্য' : 'বিক্রয়ের জন্য'}
-          </Badge>
-          <span className="text-xs font-black text-zinc-900 bg-zinc-100 px-2.5 py-0.5 rounded-full border border-zinc-200">
+        <div className="flex items-center justify-between gap-1.5 mb-3">
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <Badge
+              variant={isRental ? 'dark' : 'slate'}
+              size="sm"
+              className="uppercase tracking-wider font-bold"
+            >
+              {isRental ? 'ভাড়ার জন্য' : 'বিক্রয়ের জন্য'}
+            </Badge>
+
+            {car.isFeatured && (
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 text-black text-[10px] font-black uppercase tracking-wider shadow-sm">
+                <Sparkles className="w-2.5 h-2.5 fill-black text-black" />
+                <span>ফিচার্ড</span>
+              </span>
+            )}
+          </div>
+
+          <span className="text-xs font-black text-zinc-900 bg-zinc-100 px-2.5 py-0.5 rounded-full border border-zinc-200 truncate max-w-[120px] sm:max-w-[140px]">
             {car.brand} {car.model}
           </span>
         </div>
