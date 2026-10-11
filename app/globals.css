@@ -394,6 +394,21 @@
   color: #ffffff !important;
 }
 
+/* Explicit badge contrast override inside active orange elements */
+.admin-light .bg-orange-600 .bg-white,
+.admin-light .bg-orange-500 .bg-white,
+.admin-light .bg-gradient-to-r.from-orange-600 .bg-white,
+.admin-light .bg-gradient-to-br.from-orange-600 .bg-white,
+.admin-light .bg-gradient-to-tr.from-orange-600 .bg-white,
+.admin-light aside [class*="from-orange"] .bg-white,
+.admin-light aside [class*="from-orange"] span.bg-white,
+aside a[class*="from-orange"] span.bg-white,
+aside a[class*="from-orange"] .bg-white {
+  color: #ea580c !important;
+  background-color: #ffffff !important;
+}
+
+
 /* Top Banner Gradient in Light Mode */
 .admin-light .from-zinc-900 {
   --tw-gradient-from: #ffffff !important;
@@ -517,5 +532,19 @@
   background-color: #09090b;
   color: #ffffff;
 }
+
+@keyframes activityProgress {
+  0% {
+    width: 100%;
+  }
+  100% {
+    width: 0%;
+  }
+}
+
+.animate-activity-progress {
+  animation: activityProgress 5.5s linear forwards;
+}
+
 
 

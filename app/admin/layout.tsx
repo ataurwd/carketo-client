@@ -140,18 +140,24 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   // Fetch telemetry badge counters
   useEffect(() => {
     if (isAuthenticated && user?.role === 'admin') {
-      adminService
-        .getStats()
-        .then((res) => {
-          if (res?.metrics) {
-            setCounts({
-              inquiries: res.metrics.totalInquiries || 0,
-            });
-          }
-        })
-        .catch(() => {});
+      const loadStats = () => {
+        adminService
+          .getStats()
+          .then((res) => {
+            if (res?.metrics) {
+              setCounts({
+                inquiries: res.metrics.totalInquiries || 0,
+              });
+            }
+          })
+          .catch(() => {});
+      };
+
+      loadStats();
+      const interval = setInterval(loadStats, 6000);
+      return () => clearInterval(interval);
     }
-  }, [isAuthenticated, user]);
+  }, [isAuthenticated, user, pathname]);
 
   // Close mobile sidebar on route change
   useEffect(() => {
@@ -330,7 +336,9 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
 
                               {/* Notification badge dot in collapsed icon */}
                               {count !== undefined && count > 0 && (
-                                <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-orange-500 ring-2 ring-zinc-900 shadow-sm" />
+                                <span className={`absolute top-1.5 right-1.5 w-2 h-2 rounded-full shadow-sm ${
+                                  isActive ? 'bg-white ring-2 ring-orange-600' : 'bg-orange-500 ring-2 ring-zinc-900'
+                                }`} />
                               )}
                             </Link>
                           ) : (
@@ -356,11 +364,14 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
 
                               {count !== undefined && count > 0 && (
                                 <span
-                                  className={`px-1.5 py-0.5 rounded-full text-[10px] font-black shrink-0 ${
+                                  className={`min-w-[18px] h-[18px] px-1.5 rounded-full text-[10px] font-black shrink-0 flex items-center justify-center transition-colors ${
                                     isActive
-                                      ? 'bg-white text-orange-600'
+                                      ? 'bg-white text-orange-600 shadow-xs'
+                                      : isLight
+                                      ? 'bg-orange-100 text-orange-600 border border-orange-200'
                                       : 'bg-orange-500/20 text-orange-400 border border-orange-500/30'
                                   }`}
+                                  style={isActive ? { color: '#ea580c' } : undefined}
                                 >
                                   {count}
                                 </span>
