@@ -2,6 +2,8 @@ import React from 'react';
 import { Metadata } from 'next';
 import { CarEditForm } from '@/components/common/CarEditForm';
 
+export const dynamicParams = true;
+
 export function generateStaticParams() {
   return [{ id: 'default' }];
 }

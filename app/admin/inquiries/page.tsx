@@ -36,6 +36,20 @@ export default function AdminInquiriesPage() {
   const [replyText, setReplyText] = useState('');
   const [isSending, setIsSending] = useState(false);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = (smooth = false) => {
+    if (messagesContainerRef.current) {
+      if (smooth) {
+        messagesContainerRef.current.scrollTo({
+          top: messagesContainerRef.current.scrollHeight,
+          behavior: 'smooth',
+        });
+      } else {
+        messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+      }
+    }
+  };
 
   const fetchInquiries = async () => {
     try {
@@ -62,9 +76,9 @@ export default function AdminInquiriesPage() {
   const activeChat = inquiries.find((i) => i._id === activeChatId) || null;
 
   useEffect(() => {
-    if (messagesContainerRef.current) {
-      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
-    }
+    scrollToBottom(false);
+    const timeout = setTimeout(() => scrollToBottom(false), 80);
+    return () => clearTimeout(timeout);
   }, [activeChat?._id, activeChat?.messages?.length]);
 
   const handleSendReply = async (e: React.FormEvent) => {
@@ -104,6 +118,7 @@ export default function AdminInquiriesPage() {
     );
     setReplyText('');
     setIsSending(true);
+    setTimeout(() => scrollToBottom(true), 40);
 
     try {
       const updated = await inquiryService.sendMessage(activeChat._id, {
@@ -112,6 +127,7 @@ export default function AdminInquiriesPage() {
         senderRole: 'seller',
       });
       setInquiries((prev) => prev.map((inq) => (inq._id === updated._id ? updated : inq)));
+      setTimeout(() => scrollToBottom(true), 60);
     } catch {
       showToast('Failed to send message', 'error');
     } finally {
@@ -234,19 +250,19 @@ export default function AdminInquiriesPage() {
           backgroundColor: isLight ? '#ffffff' : '#18181b',
           borderColor: isLight ? '#e2e8f0' : '#27272a',
         }}
-        className="rounded-2xl border shadow-sm overflow-hidden grid grid-cols-1 lg:grid-cols-12 h-[480px]"
+        className="rounded-2xl border shadow-sm overflow-hidden flex flex-col lg:grid lg:grid-cols-12 h-[600px] lg:h-[calc(100vh-210px)] min-h-[500px] max-h-[820px]"
       >
         {/* ================= LEFT PANE: USER LIST ================= */}
         <div
           style={{ borderColor: isLight ? '#f1f5f9' : '#27272a' }}
-          className={`lg:col-span-4 border-r flex flex-col h-full ${
+          className={`lg:col-span-4 border-r flex flex-col h-full min-h-0 overflow-hidden ${
             mobileShowChat ? 'hidden lg:flex' : 'flex'
           }`}
         >
           {/* Search Bar */}
           <div
             style={{ borderColor: isLight ? '#f1f5f9' : '#27272a' }}
-            className="p-3 border-b"
+            className="p-3 border-b shrink-0"
           >
             <div className="relative">
               <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -266,7 +282,7 @@ export default function AdminInquiriesPage() {
           </div>
 
           {/* Conversation List */}
-          <div className="flex-1 overflow-y-auto p-2 space-y-1">
+          <div className="flex-1 min-h-0 overflow-y-auto p-2 space-y-1 chat-scrollbar">
             {isLoading ? (
               <div className="p-8 text-center text-xs font-bold text-slate-400">
                 <div className="h-6 w-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
@@ -364,7 +380,7 @@ export default function AdminInquiriesPage() {
 
         {/* ================= RIGHT PANE: COMPACT CONVERSATION ================= */}
         <div
-          className={`lg:col-span-8 flex flex-col h-full ${
+          className={`lg:col-span-8 flex flex-col h-full min-h-0 overflow-hidden ${
             mobileShowChat ? 'flex' : 'hidden lg:flex'
           }`}
         >
@@ -374,11 +390,11 @@ export default function AdminInquiriesPage() {
               const cleanPhone = activeChat.senderPhone?.replace(/[^0-9]/g, '');
 
               return (
-                <>
+                <div className="flex flex-col h-full min-h-0">
                   {/* Top Chat Header */}
                   <div
                     style={{ borderColor: isLight ? '#f1f5f9' : '#27272a' }}
-                    className="px-4 py-2.5 border-b flex items-center justify-between gap-3"
+                    className="px-4 py-2.5 border-b flex items-center justify-between gap-3 shrink-0"
                   >
                     <div className="flex items-center gap-2.5 min-w-0">
                       <button
@@ -505,7 +521,7 @@ export default function AdminInquiriesPage() {
                         backgroundColor: isLight ? '#f8fafc' : '#09090b',
                         borderColor: isLight ? '#f1f5f9' : '#27272a',
                       }}
-                      className="px-4 py-1.5 border-b flex items-center justify-between gap-3"
+                      className="px-4 py-1.5 border-b flex items-center justify-between gap-3 shrink-0"
                     >
                       <div className="flex items-center gap-2 min-w-0">
                         {carInfo.coverImage && (
@@ -540,7 +556,7 @@ export default function AdminInquiriesPage() {
                   <div
                     ref={messagesContainerRef}
                     style={{ backgroundColor: isLight ? '#ffffff' : '#18181b' }}
-                    className="flex-1 overflow-y-auto p-3.5 sm:p-4 space-y-2.5"
+                    className="flex-1 min-h-0 overflow-y-auto p-3.5 sm:p-4 space-y-2.5 chat-scrollbar"
                   >
                     {(activeChat.messages && activeChat.messages.length > 0
                       ? activeChat.messages
@@ -602,6 +618,7 @@ export default function AdminInquiriesPage() {
                         </div>
                       );
                     })}
+                    <div ref={messagesEndRef} />
                   </div>
 
                   {/* Compact Reply Input Bar */}
@@ -611,7 +628,7 @@ export default function AdminInquiriesPage() {
                       backgroundColor: isLight ? '#ffffff' : '#18181b',
                       borderColor: isLight ? '#f1f5f9' : '#27272a',
                     }}
-                    className="p-2.5 border-t flex items-center gap-2"
+                    className="p-2.5 border-t flex items-center gap-2 shrink-0"
                   >
                     <input
                       type="text"
@@ -639,11 +656,11 @@ export default function AdminInquiriesPage() {
                       <Send className="w-3.5 h-3.5" />
                     </button>
                   </form>
-                </>
+                </div>
               );
             })()
           ) : (
-            <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
+            <div className="flex-1 min-h-0 flex flex-col items-center justify-center p-8 text-center">
               <MessageSquare className="w-8 h-8 text-slate-300 mb-2" />
               <p className="text-xs font-bold text-slate-400">
                 Select a conversation on the left to view messages

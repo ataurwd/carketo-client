@@ -76,6 +76,49 @@
   background: #94a3b8;
 }
 
+/* Dedicated Chat Messenger Scrollbar */
+.chat-scrollbar {
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+  scroll-behavior: smooth;
+}
+
+.chat-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chat-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.chat-scrollbar::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+
+.chat-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.dark .chat-scrollbar,
+[data-theme='dark'] .chat-scrollbar,
+.admin-root:not(.light) .chat-scrollbar {
+  scrollbar-color: #52525b transparent;
+}
+
+.dark .chat-scrollbar::-webkit-scrollbar-thumb,
+[data-theme='dark'] .chat-scrollbar::-webkit-scrollbar-thumb,
+.admin-root:not(.light) .chat-scrollbar::-webkit-scrollbar-thumb {
+  background: #52525b;
+}
+
+.dark .chat-scrollbar::-webkit-scrollbar-thumb:hover,
+[data-theme='dark'] .chat-scrollbar::-webkit-scrollbar-thumb:hover,
+.admin-root:not(.light) .chat-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #71717a;
+}
+
 /* Glassmorphism helpers */
 .glass {
   background: rgba(255, 255, 255, 0.75);

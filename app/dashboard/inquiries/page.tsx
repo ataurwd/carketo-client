@@ -42,6 +42,20 @@ export default function UserInquiriesPage() {
   const [replyText, setReplyText] = useState('');
   const [isSendingReply, setIsSendingReply] = useState(false);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = (smooth = false) => {
+    if (messagesContainerRef.current) {
+      if (smooth) {
+        messagesContainerRef.current.scrollTo({
+          top: messagesContainerRef.current.scrollHeight,
+          behavior: 'smooth',
+        });
+      } else {
+        messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+      }
+    }
+  };
 
   // Report & Block Modal State
   const [showReportModal, setShowReportModal] = useState(false);
@@ -86,9 +100,9 @@ export default function UserInquiriesPage() {
 
   // Scroll message container to bottom when active conversation or message count changes
   useEffect(() => {
-    if (messagesContainerRef.current) {
-      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
-    }
+    scrollToBottom(false);
+    const timeout = setTimeout(() => scrollToBottom(false), 80);
+    return () => clearTimeout(timeout);
   }, [activeChat?._id, activeChat?.messages?.length]);
 
   const handleSelectConversation = (inq: IInquiry) => {
@@ -137,6 +151,7 @@ export default function UserInquiriesPage() {
     );
     setReplyText('');
     setIsSendingReply(true);
+    setTimeout(() => scrollToBottom(true), 40);
 
     try {
       const updated = await inquiryService.sendMessage(activeChat._id, {
@@ -145,6 +160,7 @@ export default function UserInquiriesPage() {
         senderRole: myRole,
       });
       setInquiries((prev) => prev.map((inq) => (inq._id === updated._id ? updated : inq)));
+      setTimeout(() => scrollToBottom(true), 60);
     } catch (err: any) {
       showToast(err?.response?.data?.message || 'মেসেজ পাঠাতে সমস্যা হয়েছে', 'error');
     } finally {
@@ -288,15 +304,15 @@ export default function UserInquiriesPage() {
         </div>
 
         {/* CLEAN MESSENGER SPLIT BOX */}
-        <div className="bg-white rounded-2xl border border-zinc-200/90 shadow-md overflow-hidden grid grid-cols-1 lg:grid-cols-12 h-[540px]">
+        <div className="bg-white rounded-2xl border border-zinc-200/90 shadow-md overflow-hidden flex flex-col lg:grid lg:grid-cols-12 h-[600px] lg:h-[calc(100vh-210px)] min-h-[500px] max-h-[820px]">
           {/* ================= LEFT PANE: SIMPLE USER LIST ================= */}
           <div
-            className={`lg:col-span-4 border-r border-zinc-100 flex flex-col h-full bg-white ${
+            className={`lg:col-span-4 border-r border-zinc-100 flex flex-col h-full min-h-0 overflow-hidden bg-white ${
               mobileShowChat ? 'hidden lg:flex' : 'flex'
             }`}
           >
             {/* Simple Search Bar */}
-            <div className="p-3.5 border-b border-zinc-100">
+            <div className="p-3.5 border-b border-zinc-100 shrink-0">
               <div className="relative">
                 <Search className="w-4 h-4 text-zinc-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
@@ -310,7 +326,7 @@ export default function UserInquiriesPage() {
             </div>
 
             {/* Clean User List */}
-            <div className="flex-1 overflow-y-auto p-2 space-y-1">
+            <div className="flex-1 min-h-0 overflow-y-auto p-2 space-y-1 chat-scrollbar">
               {isLoading ? (
                 <div className="p-10 text-center space-y-2">
                   <div className="h-7 w-7 border-3 border-black border-t-transparent rounded-full animate-spin mx-auto" />
@@ -398,7 +414,7 @@ export default function UserInquiriesPage() {
 
           {/* ================= RIGHT PANE: CLEAN CONVERSATION ================= */}
           <div
-            className={`lg:col-span-8 flex flex-col h-full bg-white ${
+            className={`lg:col-span-8 flex flex-col h-full min-h-0 overflow-hidden bg-white ${
               mobileShowChat ? 'flex' : 'hidden lg:flex'
             }`}
           >
@@ -424,9 +440,9 @@ export default function UserInquiriesPage() {
                   : carInfo?.contactPhone || activeChat.senderPhone;
 
                 return (
-                  <>
+                  <div className="flex flex-col h-full min-h-0 bg-white">
                     {/* 1. Minimal Messenger Header with Icon-Only Action Buttons */}
-                    <div className="px-4 py-3 bg-white border-b border-zinc-100 flex items-center justify-between gap-3">
+                    <div className="px-4 py-3 bg-white border-b border-zinc-100 flex items-center justify-between gap-3 shrink-0">
                       <div className="flex items-center gap-3 min-w-0">
                         <button
                           type="button"
@@ -537,7 +553,7 @@ export default function UserInquiriesPage() {
 
                     {/* 2. Slim Car Context Strip */}
                     {carInfo && (
-                      <div className="px-4 py-2 bg-zinc-50 border-b border-zinc-100 flex items-center justify-between gap-3">
+                      <div className="px-4 py-2 bg-zinc-50 border-b border-zinc-100 flex items-center justify-between gap-3 shrink-0">
                         <div className="flex items-center gap-2.5 min-w-0">
                           {carInfo.coverImage && (
                             <img
@@ -567,7 +583,7 @@ export default function UserInquiriesPage() {
 
                     {/* Blocked Warning Banner */}
                     {activeChat.isBlocked && (
-                      <div className="px-4 py-2 bg-rose-50 border-b border-rose-100 flex items-center justify-between gap-2 text-xs text-rose-700">
+                      <div className="px-4 py-2 bg-rose-50 border-b border-rose-100 flex items-center justify-between gap-2 text-xs text-rose-700 shrink-0">
                         <span className="font-bold">
                           {didIBlock
                             ? 'আপনি এই ইউজারকে ব্লক করেছেন।'
@@ -588,7 +604,7 @@ export default function UserInquiriesPage() {
                     {/* 3. Clean Messenger Bubbles Stream */}
                     <div
                       ref={messagesContainerRef}
-                      className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3 bg-white"
+                      className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-5 space-y-3 bg-white chat-scrollbar"
                     >
                       {(activeChat.messages && activeChat.messages.length > 0
                         ? activeChat.messages
@@ -642,12 +658,13 @@ export default function UserInquiriesPage() {
                           </div>
                         );
                       })}
+                      <div ref={messagesEndRef} />
                     </div>
 
                     {/* 4. Clean Messenger Input Bar */}
                     <form
                       onSubmit={handleSendReply}
-                      className="p-3 bg-white border-t border-zinc-100 flex items-center gap-2"
+                      className="p-3 bg-white border-t border-zinc-100 flex items-center gap-2 shrink-0"
                     >
                       <input
                         type="text"
@@ -670,11 +687,11 @@ export default function UserInquiriesPage() {
                         <Send className="w-4 h-4" />
                       </button>
                     </form>
-                  </>
+                  </div>
                 );
               })()
             ) : (
-              <div className="flex-1 flex flex-col items-center justify-center p-10 text-center">
+              <div className="flex-1 min-h-0 flex flex-col items-center justify-center p-10 text-center">
                 <MessageSquare className="w-10 h-10 text-zinc-300 mb-2" />
                 <p className="text-sm font-bold text-zinc-500">
                   বাম পাশ থেকে একজন ইউজার নির্বাচন করুন
